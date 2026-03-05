@@ -257,9 +257,9 @@ OscarPoolVibes has comprehensive documentation (CLAUDE.md, SCHEMA.md, USE_CASES.
 | #3 | Project scaffolding & core config | 1 | 1 | DONE |
 | #4 | Prisma schema updates & Neon adapter | 1 | 1 | DONE |
 | #5 | Design system foundation (shadcn/ui, fonts, theme) | 1 | 1 | DONE |
-| #6 | Seed script with 2025 ceremony data | 1 | 2 | |
-| #7 | Auth.js v5 with Google OAuth + email magic link | 2 | 2 | |
-| #8 | Auth UI, layout, header with design system | 2 | 2 | |
+| #6 | Seed script with 2025 ceremony data | 1 | 2 | DONE |
+| #7 | Auth.js v5 with Google OAuth + email magic link | 2 | 2 | DONE |
+| #8 | Auth UI, layout, header with design system | 2 | 2 | DONE |
 | #9 | Pool CRUD database helpers | 3 | 3 | |
 | #10 | Pool pages (list, create, detail) | 3 | 3 | |
 | #11 | Invite system (open + invite-only flows) | 3 | 3 | |
@@ -270,7 +270,7 @@ OscarPoolVibes has comprehensive documentation (CLAUDE.md, SCHEMA.md, USE_CASES.
 | #16 | Scoring engine (pure functions + unit tests) | 5 | 5 | |
 | #17 | Leaderboard UI with per-category breakdown | 5 | 5 | |
 | #18 | Winner reveal animation (reduced-motion safe) | 5 | 5 | |
-| #19 | Migrate existing Phase 6 code to Auth.js v5 | 6 | 6 | |
+| #19 | Migrate existing Phase 6 code to Auth.js v5 | 6 | 6 | DONE (early, in Wave 2) |
 | #20 | Permissions management UI | 6a | 6 | |
 | #21 | Results entry UI | 6b | 7 | |
 | #22 | Result conflict resolution UI + polling | 6b | 7 | |
