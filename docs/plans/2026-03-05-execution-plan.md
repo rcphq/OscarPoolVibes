@@ -260,10 +260,10 @@ OscarPoolVibes has comprehensive documentation (CLAUDE.md, SCHEMA.md, USE_CASES.
 | #6 | Seed script with 2025 ceremony data | 1 | 2 | DONE |
 | #7 | Auth.js v5 with Google OAuth + email magic link | 2 | 2 | DONE |
 | #8 | Auth UI, layout, header with design system | 2 | 2 | DONE |
-| #9 | Pool CRUD database helpers | 3 | 3 | |
-| #10 | Pool pages (list, create, detail) | 3 | 3 | |
-| #11 | Invite system (open + invite-only flows) | 3 | 3 | |
-| #12 | Pool settings & access control | 3 | 3 | |
+| #9 | Pool CRUD database helpers | 3 | 3 | DONE |
+| #10 | Pool pages (list, create, detail) | 3 | 3 | DONE |
+| #11 | Invite system (open + invite-only flows) | 3 | 3 | DONE |
+| #12 | Pool settings & access control | 3 | 3 | DONE |
 | #13 | Prediction types, validation, server actions | 4 | 4 | |
 | #14 | Prediction form UI | 4 | 4 | |
 | #15 | Prediction summary & visibility rules | 4 | 4 | |
