@@ -93,7 +93,7 @@ export default async function PoolDetailPage({
             {/* Action Buttons */}
             <nav className="flex flex-wrap gap-2" aria-label="Pool actions">
               <Button asChild>
-                <Link href={`/pools/${pool.id}/predictions`}>
+                <Link href={`/pools/${pool.id}/predict`}>
                   <Trophy className="size-4" />
                   Make Predictions
                 </Link>
