@@ -78,6 +78,8 @@ A regular participant in a specific pool. Can make predictions and view results.
 | M-6 | View score breakdown | See per-category detail: which picks were correct, points earned | `/pools/[id]/leaderboard` (expanded view) |
 | M-7 | View other members' picks | After predictions lock, see what everyone else picked | `/pools/[id]/leaderboard` |
 
+> **Visibility rule**: Other members' picks are hidden until `predictionsLocked = true`. This prevents copying. After lock, all picks become visible to all pool members. This is enforced at the API/server-action level — the predictions query filters based on lock status.
+
 **Scoring rules**:
 - First-choice correct: full `pointValue` for the category
 - Runner-up correct (first-choice wrong): `pointValue * runnerUpMultiplier` (default 0.5)
@@ -159,9 +161,13 @@ The pool creator. Has full control over pool settings, membership, and permissio
 
 | # | Use Case | Description | Route |
 |---|----------|-------------|-------|
-| A-11 | Lock predictions | Set `predictionsLocked = true` to freeze all picks (typically before ceremony starts) | `/admin` |
-| A-12 | Unlock predictions | Re-open predictions (e.g., ceremony postponed) | `/admin` |
+| A-11 | Lock predictions | Set `predictionsLocked = true` to freeze all picks (typically before ceremony starts) | `/admin` (ceremony-scoped action, applied to the active ceremony year) |
+| A-12 | Unlock predictions | Re-open predictions (e.g., ceremony postponed) | `/admin` (ceremony-scoped action, applied to the active ceremony year) |
 | A-13 | Set results | Set/update winners for each category (same as Results Manager) | `/results/[ceremonyYearId]` |
+
+> **Scope note**: `predictionsLocked` is a field on `CeremonyYear`, making it **ceremony-wide** (affects all pools for that ceremony). Any Pool Admin can lock predictions, but the lock applies globally. This is intentional — Oscar predictions should lock at the same time for everyone to prevent information leakage.
+
+**Decision**: Any Pool Admin can lock predictions for the entire ceremony. This is acceptable because: (1) pool admins are trusted users who created pools, (2) the unlock action is also available so mistakes can be reversed, and (3) adding a separate "Site Admin" role adds complexity not justified for a friend-group app. If abuse becomes an issue, restrict to a site-admin role later.
 
 **Constraints**:
 - Cannot switch access type from open → invite-only (would lock out people who already joined via link)
@@ -169,31 +175,79 @@ The pool creator. Has full control over pool settings, membership, and permissio
 
 ---
 
+## 6. Pool Lifecycle Actions
+
+These actions apply across roles and handle pool membership changes and cleanup.
+
+### 6a. Member Self-Service
+
+| # | Use Case | Description | Route |
+|---|----------|-------------|-------|
+| L-1 | Leave a pool | Member voluntarily exits a pool. Predictions are retained for historical leaderboard accuracy but marked as "left." | `/pools/[id]` (leave action) |
+| L-2 | View pool history | After leaving, a user can still view the pool's final leaderboard (read-only) if they were a member when the ceremony completed | `/pools/[id]/leaderboard` |
+
+**Constraints**:
+- Pool Admin cannot leave their own pool (must transfer admin first or delete the pool)
+- Leaving does not delete predictions — leaderboard history is preserved
+- A user who left can rejoin if the pool is still open or they receive a new invite
+
+### 6b. Admin Pool Management
+
+| # | Use Case | Description | Route |
+|---|----------|-------------|-------|
+| L-3 | Remove a member | Admin kicks a member from the pool. Member's predictions are retained for leaderboard history. | `/pools/[id]/members` (remove action) |
+| L-4 | Transfer admin role | Admin transfers the ADMIN role to another member, demoting themselves to MEMBER | `/pools/[id]/settings` |
+| L-5 | Archive a pool | Admin archives a pool. The pool is hidden from all listings and no new joins or predictions are allowed. All data (predictions, invites, memberships, scores) is preserved for historical reference. | `/pools/[id]/settings` (archive action) |
+
+**Constraints**:
+- Remove member: cannot remove yourself (use "leave" instead)
+- Transfer admin: the target must be an existing pool member
+- Archive pool: requires typing the pool name to confirm. Sets `Pool.archivedAt` timestamp. Archived pools are excluded from default queries but remain accessible for historical leaderboard viewing.
+
+### 6c. Account Management
+
+| # | Use Case | Description | Route |
+|---|----------|-------------|-------|
+| L-6 | Delete account | User permanently deletes their account and all associated data (predictions, memberships, created pools). Requires confirmation. | `/profile/delete` |
+| L-7 | Export my data | User downloads all their data (profile, predictions, pool memberships, scores) as JSON | `/profile/export` |
+
+**Constraints**:
+- Account deletion cascades to all pool memberships and predictions
+- If the user is the sole Admin of a pool, they must transfer admin or delete the pool first
+- Data export follows GDPR Article 20 (right to data portability)
+
+**Decision**: Pool deletion uses **soft delete** (archived). An `archivedAt` timestamp field on `Pool` marks deletion. Archived pools are excluded from default queries but remain accessible for historical leaderboard viewing. This preserves data integrity for completed ceremonies while giving admins a "delete" action.
+
+---
+
 ## Permission Matrix
 
-Summary of what each role can do:
+Summary of what each role can do. ✓ = allowed, — = not allowed.
 
 | Action | Visitor | User | Member | Results Mgr | Admin |
-|--------|---------|------|--------|-------------|-------|
-| Sign in / sign up | x | — | — | — | — |
-| Create pool | | x | x | x | x |
-| Join pool | | x | x | x | x |
-| View pool list | | x | x | x | x |
-| View categories & nominees | | | x | x | x |
-| Make/edit predictions | | | x | x | x |
-| View leaderboard | | | x | x | x |
-| View score breakdown | | | x | x | x |
-| View results | | | x | x | x |
-| Share pool link | | | x | x | x |
-| Set category winners | | | | x | x |
-| Update category winners | | | | x | x |
-| Handle result conflicts | | | | x | x |
-| View result audit trail | | | | x | x |
-| Edit pool settings | | | | | x |
-| Invite users (invite-only) | | | | | x |
-| Manage invites | | | | | x |
-| Grant/revoke Results Mgr | | | | | x |
-| Lock/unlock predictions | | | | | x |
+|--------|:-------:|:----:|:------:|:-----------:|:-----:|
+| View landing page | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Sign in / sign up | ✓ | — | — | — | — |
+| Create pool | — | ✓ | ✓ | ✓ | ✓ |
+| Join pool | — | ✓ | ✓ | ✓ | ✓ |
+| View pool list | — | ✓ | ✓ | ✓ | ✓ |
+| View categories & nominees | — | — | ✓ | ✓ | ✓ |
+| Make/edit predictions | — | — | ✓ | ✓ | ✓ |
+| View leaderboard | — | — | ✓ | ✓ | ✓ |
+| View score breakdown | — | — | ✓ | ✓ | ✓ |
+| View results | — | — | ✓ | ✓ | ✓ |
+| Share pool link | — | — | ✓ | ✓ | ✓ |
+| Set category winners | — | — | — | ✓ | ✓ |
+| Update category winners | — | — | — | ✓ | ✓ |
+| Handle result conflicts | — | — | — | ✓ | ✓ |
+| View result audit trail | — | — | — | ✓ | ✓ |
+| Edit pool settings | — | — | — | — | ✓ |
+| Invite users (invite-only) | — | — | — | — | ✓ |
+| Manage invites | — | — | — | — | ✓ |
+| Grant/revoke Results Mgr | — | — | — | — | ✓ |
+| Lock/unlock predictions | — | — | — | — | ✓ |
+| Remove pool members | — | — | — | — | ✓ |
+| Delete pool | — | — | — | — | ✓ |
 
 ---
 
@@ -208,30 +262,96 @@ Summary of what each role can do:
 ### Ceremony Lifecycle
 
 ```
-1. SETUP        → Ceremony year created, categories & nominees populated
-2. PREDICTIONS  → Users join pools and make their picks
-3. LOCKED       → predictionsLocked = true; no more edits
-4. LIVE         → Winners announced; Results Managers / Admins enter results
-5. COMPLETE     → All categories have winners; leaderboard is final
+SETUP → PREDICTIONS_OPEN → LOCKED → LIVE → COMPLETE
+  │           │                │        │        │
+  │  Categories &       Users join    Predictions  Winners    All categories
+  │  nominees           pools &      frozen     announced   have winners;
+  │  populated          make picks              & entered   leaderboard final
 ```
 
-### Free Tier Limits (from Monetization Strategy)
-- 3 pools per ceremony year
-- 25 members per pool
-- Standard scoring only
-- Basic leaderboard
+See `docs/SCHEMA.md` (Ceremony Lifecycle State) for how these states map to database fields.
 
-### Pro Tier Unlocks
-- Unlimited pools
-- Advanced analytics (pick distribution, head-to-head)
-- Custom pool branding
-- Historical stats
-- Export results
-- Custom scoring rules
+### Tier Limits
 
-### Commissioner Tier Unlocks
-- 100+ member pools
-- Commissioner dashboard
-- Embeddable leaderboard widget
-- Per-category lock/unlock
-- Multi-year archive
+Pool creation limits, member caps, and feature gates are defined in [MONETIZATION.md](MONETIZATION.md). Key free-tier constraints:
+
+- **3 pools** per ceremony year per user
+- **10 members** per pool
+- Standard scoring rules only
+- Basic leaderboard (no analytics)
+
+See [MONETIZATION.md](MONETIZATION.md) for Pro and Commissioner tier unlocks.
+
+### Notification Strategy
+
+Notifications are critical for an event-driven app with a single peak night. Priority notifications for MVP (Phase 7):
+
+| Event | Channel | Priority |
+|-------|---------|----------|
+| Pool invite received | Email | MVP |
+| Predictions lock in 1 hour | Email + in-app | MVP |
+| Winner announced (per category) | In-app toast | MVP |
+| New member joined your pool | In-app | MVP |
+| All results in — final leaderboard | Email + in-app | MVP |
+
+Post-MVP notifications (Phase 8): push notifications, real-time WebSocket updates, social sharing prompts.
+
+### Rate Limiting & Abuse Prevention
+
+- **Join endpoint**: Rate-limit to prevent brute-force pool code guessing (e.g., 10 attempts per minute per IP)
+- **Results API**: Rate-limit to prevent spam during ceremony (e.g., 30 requests per minute per user)
+- **Invite sending**: Rate-limit to prevent email abuse (e.g., 50 invites per hour per user)
+- **Open pool codes**: 8-character nanoid (alphanumeric) provides ~2.8 trillion combinations — brute-force infeasible, but rate limiting adds defense in depth
+- Pool admins can regenerate invite codes if a code is leaked
+
+**Decision**: Invite codes rotate only on admin request (simpler). Admins can regenerate a pool's invite code from pool settings if a code is leaked. No automatic rotation — it adds complexity and breaks shared links unexpectedly.
+
+---
+
+## Error Scenarios
+
+User-facing error states that must be handled gracefully. Each scenario needs a specific UI treatment and error message.
+
+### Authentication Errors
+
+| Scenario | Trigger | Expected Behavior |
+|----------|---------|-------------------|
+| OAuth failure | Google sign-in cancelled or fails | Show error message with retry option; offer magic-link fallback |
+| Magic-link expired | User clicks email link after expiration | Show "Link expired" message with option to request a new one |
+| Session expired | User's session times out mid-action | Redirect to sign-in, preserve the intended destination URL |
+
+### Pool Errors
+
+| Scenario | Trigger | Expected Behavior |
+|----------|---------|-------------------|
+| Pool full | User tries to join a pool at `maxMembers` cap | Show "Pool is full" message; suggest creating their own pool |
+| Duplicate join | User tries to join a pool they're already in | Show "You're already a member" with link to the pool |
+| Invite expired | User clicks an invite link past `expiresAt` | Show "Invite expired" with option to request a new one from the pool admin |
+| Invite email mismatch | User signs in with different email than the invite | Show "This invite was sent to [email]. Please sign in with that account." |
+| Invalid invite code | User enters a non-existent pool code | Show "Pool not found" message |
+| Pool not found | User navigates to a deleted or non-existent pool | 404 page with link back to pool listing |
+
+### Prediction Errors
+
+| Scenario | Trigger | Expected Behavior |
+|----------|---------|-------------------|
+| Predictions locked | User tries to submit/edit after lock | Show "Predictions are locked" banner; form is read-only |
+| Same nominee for both picks | User selects same nominee as first choice and runner-up | Client-side validation prevents submission; server-side rejects if bypassed |
+| Invalid nominee | Nominee doesn't belong to the category (data integrity issue) | Server rejects with 400; log as potential bug |
+
+### Results Errors
+
+| Scenario | Trigger | Expected Behavior |
+|----------|---------|-------------------|
+| Version conflict | Two users set different winners simultaneously | Show conflict dialog: "User X set [nominee] as winner at [time]. Override or accept?" |
+| Permission denied | Non-authorized user tries to set results | 403 response; UI hides results-entry controls for unauthorized users |
+| Invalid winner | Winner nominee doesn't belong to the category | Server rejects with 400 |
+
+### General Errors
+
+| Scenario | Trigger | Expected Behavior |
+|----------|---------|-------------------|
+| Network error | Lost connection during save | Show toast: "Save failed. Retrying..." with automatic retry |
+| Server error | Unhandled exception | Show error boundary (`error.tsx`) with "Something went wrong" and retry option |
+| Rate limited | Too many requests from one client | Show "Please slow down" message; implement exponential backoff |
+| Not found | Any invalid URL | Custom 404 page with navigation back to home |

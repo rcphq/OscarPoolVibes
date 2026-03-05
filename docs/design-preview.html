@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OscarPoolVibes — Design Preview</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold-primary: #C9A84C;
+    --gold-light: #E8D48B;
+    --gold-dark: #B8942E;
+    --gold-decorative: #D4AF37;
+    --navy: #0C1445;
+    --navy-light: #1B2050;
+    --bg-primary: #0F0F0F;
+    --bg-surface: #1A1A1A;
+    --bg-elevated: #242424;
+    --text-primary: #F5F0E8;
+    --text-secondary: #B0A899;
+    --text-tertiary: #7A7268;
+    --border-subtle: #3A3A3A;
+    --border-accent: rgba(212,175,55,0.3);
+    --success: #7BC67E;
+    --error: #EF9A9A;
+    --warning: #FFD54F;
+  }
+
+  [data-theme="light"] {
+    --bg-primary: #FAFAF7;
+    --bg-surface: #F5F2ED;
+    --bg-elevated: #FFFFFF;
+    --navy: #E8EAF6;
+    --navy-light: #D1D5EB;
+    --text-primary: #1C1917;
+    --text-secondary: #57524B;
+    --text-tertiary: #78726A;
+    --gold-primary: #8B7021;
+    --gold-decorative: #C9A84C;
+    --border-subtle: #D5D0C8;
+    --border-accent: rgba(139,112,33,0.3);
+    --success: #2E7D32;
+    --error: #C62828;
+    --warning: #E65100;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  .theme-toggle {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-primary);
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    z-index: 100;
+    transition: all 0.2s;
+  }
+  .theme-toggle:hover { border-color: var(--gold-primary); color: var(--gold-primary); }
+
+  /* Layout */
+  .container { max-width: 1100px; margin: 0 auto; padding: 48px 24px; }
+  .section { margin-bottom: 64px; }
+
+  /* Typography */
+  h1, h2, h3 { font-family: 'Playfair Display', Georgia, serif; font-weight: 700; }
+  h1 { font-size: 48px; line-height: 1.1; letter-spacing: -0.02em; }
+  h2 { font-size: 28px; line-height: 1.2; margin-bottom: 24px; }
+  h3 { font-size: 20px; line-height: 1.3; margin-bottom: 12px; font-weight: 600; }
+
+  .gold-text { color: var(--gold-primary); }
+  .secondary-text { color: var(--text-secondary); }
+  .tertiary-text { color: var(--text-tertiary); }
+
+  /* Hero */
+  .hero {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--bg-primary) 100%);
+    border-radius: 16px;
+    padding: 64px 48px;
+    margin-bottom: 64px;
+    border: 1px solid var(--border-accent);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(ellipse at 30% 50%, rgba(201,168,76,0.06) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .hero h1 { margin-bottom: 16px; position: relative; }
+  .hero p { font-size: 18px; color: var(--text-secondary); max-width: 500px; position: relative; }
+
+  /* Cards */
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+
+  .card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 24px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .card:hover {
+    border-color: var(--border-accent);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.3), 0 0 12px rgba(201,168,76,0.05);
+  }
+  .card-label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--gold-primary);
+    margin-bottom: 8px;
+  }
+  .card h3 { margin-bottom: 4px; }
+  .card p { color: var(--text-secondary); font-size: 14px; }
+
+  /* Winner card */
+  .card-winner {
+    border-color: var(--gold-decorative);
+    background: linear-gradient(135deg, var(--bg-surface) 0%, rgba(201,168,76,0.05) 100%);
+  }
+  .winner-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--gold-primary);
+    color: #1A1A1A;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 100px;
+    margin-top: 12px;
+  }
+
+  /* Buttons */
+  .btn-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+  .btn-primary {
+    background: var(--gold-primary);
+    color: #1A1A1A;
+  }
+  .btn-primary:hover { background: var(--gold-light); }
+
+  .btn-secondary {
+    background: transparent;
+    border: 1px solid var(--gold-decorative);
+    color: var(--gold-primary);
+  }
+  .btn-secondary:hover { background: rgba(201,168,76,0.1); }
+
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border-subtle);
+    color: var(--text-primary);
+  }
+  .btn-ghost:hover { border-color: var(--text-secondary); }
+
+  /* Leaderboard */
+  .leaderboard {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .leaderboard-header {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border-accent);
+  }
+  .leaderboard-row {
+    display: flex;
+    align-items: center;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border-subtle);
+    transition: background 0.15s;
+  }
+  .leaderboard-row:last-child { border-bottom: none; }
+  .leaderboard-row:hover { background: var(--bg-elevated); }
+  .leaderboard-row.you { background: rgba(201,168,76,0.05); }
+
+  .rank {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 20px;
+    width: 48px;
+    color: var(--text-tertiary);
+  }
+  .rank-gold { color: var(--gold-primary); }
+
+  .member-info { flex: 1; }
+  .member-name { font-weight: 500; }
+  .member-correct { font-size: 13px; color: var(--text-secondary); }
+
+  .score {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 24px;
+    color: var(--gold-primary);
+  }
+
+  /* Category prediction */
+  .prediction-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+  .prediction-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .points-badge {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gold-primary);
+    background: rgba(201,168,76,0.1);
+    padding: 4px 10px;
+    border-radius: 100px;
+  }
+  .nominee-list { display: flex; flex-direction: column; gap: 8px; }
+  .nominee {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    background: var(--bg-elevated);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .nominee:hover { border-color: var(--border-accent); }
+  .nominee.selected {
+    border-color: var(--gold-primary);
+    background: rgba(201,168,76,0.08);
+  }
+  .nominee-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    border: 2px solid var(--text-tertiary);
+    flex-shrink: 0;
+  }
+  .nominee.selected .nominee-dot {
+    background: var(--gold-primary);
+    border-color: var(--gold-primary);
+  }
+  .nominee-name { font-size: 14px; }
+  .nominee-subtitle { font-size: 13px; color: var(--text-secondary); }
+  .pick-label {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--gold-primary);
+  }
+
+  /* Results state */
+  .nominee.correct {
+    border-color: var(--success);
+    background: rgba(123,198,126,0.08);
+  }
+  .nominee.correct .nominee-dot { background: var(--success); border-color: var(--success); }
+  .nominee.incorrect {
+    opacity: 0.5;
+  }
+
+  /* Status indicators */
+  .status-row { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 16px; }
+  .status-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .status-success { background: rgba(123,198,126,0.12); color: var(--success); }
+  .status-error { background: rgba(239,154,154,0.12); color: var(--error); }
+  .status-warning { background: rgba(255,213,79,0.12); color: var(--warning); }
+  .status-gold { background: rgba(201,168,76,0.12); color: var(--gold-primary); }
+
+  /* Color palette display */
+  .palette { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  .swatch {
+    width: 64px;
+    height: 64px;
+    border-radius: 8px;
+    display: flex;
+    align-items: flex-end;
+    padding: 4px;
+    font-size: 10px;
+    font-family: 'Inter', monospace;
+    color: var(--text-primary);
+    border: 1px solid var(--border-subtle);
+  }
+
+  /* Nav */
+  .nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 0;
+    margin-bottom: 32px;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .nav-brand {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 700;
+  }
+  .nav-links { display: flex; gap: 24px; }
+  .nav-link {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.15s;
+  }
+  .nav-link:hover { color: var(--gold-primary); }
+  .nav-link.active { color: var(--gold-primary); }
+  .avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--navy);
+    border: 1px solid var(--border-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gold-primary);
+  }
+
+  /* Form inputs */
+  .input-group { margin-bottom: 16px; }
+  .input-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+  }
+  .input {
+    width: 100%;
+    padding: 10px 14px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .input:focus { border-color: var(--gold-primary); }
+  .input::placeholder { color: var(--text-tertiary); }
+
+  /* Divider */
+  .divider {
+    height: 1px;
+    background: var(--border-subtle);
+    margin: 48px 0;
+  }
+
+  /* Responsive */
+  @media (max-width: 640px) {
+    h1 { font-size: 32px; }
+    .hero { padding: 40px 24px; }
+    .card-grid { grid-template-columns: 1fr; }
+    .nav-links { gap: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<button class="theme-toggle" onclick="toggleTheme()">Toggle Light/Dark</button>
+
+<div class="container">
+
+  <!-- Nav -->
+  <nav class="nav">
+    <div class="nav-brand"><span class="gold-text">Oscar</span>PoolVibes</div>
+    <div class="nav-links">
+      <a href="#" class="nav-link active">My Pools</a>
+      <a href="#" class="nav-link">Predictions</a>
+      <a href="#" class="nav-link">Leaderboard</a>
+    </div>
+    <div class="avatar">RC</div>
+  </nav>
+
+  <!-- Hero -->
+  <div class="hero">
+    <h1>98th Academy <span class="gold-text">Awards</span></h1>
+    <p>Make your predictions, compete with friends, and see who knows the Oscars best.</p>
+    <div class="btn-row">
+      <button class="btn btn-primary">Create a Pool</button>
+      <button class="btn btn-secondary">Join with Code</button>
+    </div>
+  </div>
+
+  <!-- Pool Cards -->
+  <div class="section">
+    <h2>Your Pools</h2>
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-label">Invite Only</div>
+        <h3>The Film Buffs</h3>
+        <p>12 members &middot; 8 predictions in</p>
+        <div class="btn-row">
+          <button class="btn btn-primary" style="font-size:13px; padding:8px 16px;">View Pool</button>
+          <button class="btn btn-ghost" style="font-size:13px; padding:8px 16px;">Share Invite</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-label">Open Pool</div>
+        <h3>Work Friends Oscar Night</h3>
+        <p>6 members &middot; Predictions open</p>
+        <div class="btn-row">
+          <button class="btn btn-primary" style="font-size:13px; padding:8px 16px;">View Pool</button>
+          <button class="btn btn-ghost" style="font-size:13px; padding:8px 16px;">Share Link</button>
+        </div>
+      </div>
+      <div class="card card-winner">
+        <div class="card-label">Completed</div>
+        <h3>Family Oscars 2025</h3>
+        <p>8 members &middot; All results in</p>
+        <div class="winner-badge">&#9733; You placed 2nd</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Prediction Form -->
+  <div class="section">
+    <h2>Make Your Picks</h2>
+    <div class="prediction-card">
+      <div class="prediction-card-header">
+        <h3 style="margin-bottom:0">Best Picture</h3>
+        <span class="points-badge">25 pts</span>
+      </div>
+      <p class="secondary-text" style="font-size:13px; margin-bottom:12px;">Pick your winner and runner-up</p>
+      <div class="nominee-list">
+        <div class="nominee selected">
+          <div class="nominee-dot"></div>
+          <div>
+            <div class="nominee-name">The Brutalist</div>
+            <div class="nominee-subtitle">Dir. Brady Corbet</div>
+          </div>
+          <span class="pick-label">1st Choice</span>
+        </div>
+        <div class="nominee selected" style="--gold-primary: #B0A899; border-color: var(--text-secondary); background: rgba(176,168,153,0.06);">
+          <div class="nominee-dot" style="background: var(--text-secondary); border-color: var(--text-secondary);"></div>
+          <div>
+            <div class="nominee-name">Anora</div>
+            <div class="nominee-subtitle">Dir. Sean Baker</div>
+          </div>
+          <span class="pick-label" style="color: var(--text-secondary);">Runner-up</span>
+        </div>
+        <div class="nominee">
+          <div class="nominee-dot"></div>
+          <div>
+            <div class="nominee-name">Conclave</div>
+            <div class="nominee-subtitle">Dir. Edward Berger</div>
+          </div>
+        </div>
+        <div class="nominee">
+          <div class="nominee-dot"></div>
+          <div>
+            <div class="nominee-name">Emilia P&eacute;rez</div>
+            <div class="nominee-subtitle">Dir. Jacques Audiard</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results state example -->
+    <div class="prediction-card" style="border-color: var(--border-accent);">
+      <div class="prediction-card-header">
+        <h3 style="margin-bottom:0">Best Director</h3>
+        <span class="points-badge">20 pts</span>
+      </div>
+      <p class="secondary-text" style="font-size:13px; margin-bottom:4px;">Winner announced — you scored!</p>
+      <div class="status-row" style="margin-bottom:12px;">
+        <span class="status-chip status-success">&#10003; +20 points (1st choice correct)</span>
+      </div>
+      <div class="nominee-list">
+        <div class="nominee correct">
+          <div class="nominee-dot"></div>
+          <div>
+            <div class="nominee-name">Brady Corbet</div>
+            <div class="nominee-subtitle">The Brutalist</div>
+          </div>
+          <span class="pick-label" style="color: var(--success);">&#9733; Winner &middot; Your 1st</span>
+        </div>
+        <div class="nominee incorrect">
+          <div class="nominee-dot"></div>
+          <div>
+            <div class="nominee-name">Sean Baker</div>
+            <div class="nominee-subtitle">Anora</div>
+          </div>
+          <span class="pick-label" style="color: var(--text-tertiary);">Your Runner-up</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Leaderboard -->
+  <div class="section">
+    <h2>Leaderboard</h2>
+    <div class="leaderboard">
+      <div class="leaderboard-header">
+        <h3 style="margin-bottom:0; color: var(--text-primary);">The Film Buffs</h3>
+        <p style="font-size:13px; color: var(--text-secondary); margin-top:4px;">8 of 23 categories decided</p>
+      </div>
+      <div class="leaderboard-row">
+        <div class="rank rank-gold">1</div>
+        <div class="member-info">
+          <div class="member-name">Sarah K.</div>
+          <div class="member-correct">6 correct picks</div>
+        </div>
+        <div class="score">142</div>
+      </div>
+      <div class="leaderboard-row you">
+        <div class="rank rank-gold">2</div>
+        <div class="member-info">
+          <div class="member-name">You</div>
+          <div class="member-correct">5 correct picks &middot; 1 runner-up</div>
+        </div>
+        <div class="score">128</div>
+      </div>
+      <div class="leaderboard-row">
+        <div class="rank">3</div>
+        <div class="member-info">
+          <div class="member-name">Mike R.</div>
+          <div class="member-correct">5 correct picks</div>
+        </div>
+        <div class="score">115</div>
+      </div>
+      <div class="leaderboard-row">
+        <div class="rank">4</div>
+        <div class="member-info">
+          <div class="member-name">Jen T.</div>
+          <div class="member-correct">4 correct picks</div>
+        </div>
+        <div class="score">98</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Form Example -->
+  <div class="section">
+    <h2>Create a Pool</h2>
+    <div class="card" style="max-width: 480px;">
+      <div class="input-group">
+        <label class="input-label">Pool Name</label>
+        <input class="input" type="text" placeholder="e.g., The Film Buffs">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Ceremony Year</label>
+        <input class="input" type="text" value="98th Academy Awards (2026)" readonly style="color: var(--text-secondary);">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Access Type</label>
+        <div style="display:flex; gap:8px; margin-top:4px;">
+          <button class="btn btn-primary" style="font-size:13px; padding:8px 16px;">Invite Only</button>
+          <button class="btn btn-ghost" style="font-size:13px; padding:8px 16px;">Open</button>
+        </div>
+      </div>
+      <div class="btn-row" style="margin-top:24px;">
+        <button class="btn btn-primary">Create Pool</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Status chips -->
+  <div class="section">
+    <h2>Status Indicators</h2>
+    <div class="status-row">
+      <span class="status-chip status-success">&#10003; Correct Pick</span>
+      <span class="status-chip status-error">&#10007; Incorrect</span>
+      <span class="status-chip status-warning">&#9888; Predictions lock in 2h</span>
+      <span class="status-chip status-gold">&#9733; Winner</span>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Color Palette Reference -->
+  <div class="section">
+    <h2>Color Palette</h2>
+
+    <h3>Gold Scale</h3>
+    <div class="palette">
+      <div class="swatch" style="background:#C9A84C; color:#1A1A1A;">#C9A84C</div>
+      <div class="swatch" style="background:#E8D48B; color:#1A1A1A;">#E8D48B</div>
+      <div class="swatch" style="background:#D4AF37; color:#1A1A1A;">#D4AF37</div>
+      <div class="swatch" style="background:#B8942E; color:#1A1A1A;">#B8942E</div>
+      <div class="swatch" style="background:#8B7021; color:#F5F0E8;">#8B7021</div>
+    </div>
+
+    <h3 style="margin-top:24px;">Navy</h3>
+    <div class="palette">
+      <div class="swatch" style="background:#0C1445;">#0C1445</div>
+      <div class="swatch" style="background:#1B2050;">#1B2050</div>
+    </div>
+
+    <h3 style="margin-top:24px;">Dark Surfaces</h3>
+    <div class="palette">
+      <div class="swatch" style="background:#0F0F0F;">#0F0F0F</div>
+      <div class="swatch" style="background:#1A1A1A;">#1A1A1A</div>
+      <div class="swatch" style="background:#242424;">#242424</div>
+      <div class="swatch" style="background:#2E2E2E;">#2E2E2E</div>
+      <div class="swatch" style="background:#3A3A3A;">#3A3A3A</div>
+    </div>
+
+    <h3 style="margin-top:24px;">Text</h3>
+    <div class="palette">
+      <div class="swatch" style="background:#F5F0E8; color:#1A1A1A;">#F5F0E8</div>
+      <div class="swatch" style="background:#B0A899; color:#1A1A1A;">#B0A899</div>
+      <div class="swatch" style="background:#7A7268; color:#F5F0E8;">#7A7268</div>
+    </div>
+
+    <h3 style="margin-top:24px;">Semantic</h3>
+    <div class="palette">
+      <div class="swatch" style="background:#7BC67E; color:#1A1A1A;">#7BC67E</div>
+      <div class="swatch" style="background:#EF9A9A; color:#1A1A1A;">#EF9A9A</div>
+      <div class="swatch" style="background:#FFD54F; color:#1A1A1A;">#FFD54F</div>
+      <div class="swatch" style="background:#90CAF9; color:#1A1A1A;">#90CAF9</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function toggleTheme() {
+  const html = document.documentElement;
+  html.dataset.theme = html.dataset.theme === 'dark' ? 'light' : 'dark';
+}
+</script>
+
+</body>
+</html>

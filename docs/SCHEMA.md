@@ -4,6 +4,8 @@ This document describes the data model for OscarPoolVibes. The source of truth i
 
 ## Entity Relationship Diagram (text)
 
+**Legend**: `1──*` = one-to-many, `*──1` = many-to-one, `0..1` = optional (zero or one), `*──*` implicit via join table.
+
 ```
 User 1──* PoolMember *──1 Pool
 User 1──* Pool (createdBy)
@@ -37,6 +39,8 @@ Authenticated users. Managed by NextAuth.js (Account/Session tables omitted here
 | image | String? | Avatar URL |
 | createdAt | DateTime | |
 | updatedAt | DateTime | |
+
+> **Note**: NextAuth.js also generates `Account`, `Session`, and `VerificationToken` models (omitted here). The `VerificationToken` model supports email magic-link authentication.
 
 ### CeremonyYear
 
@@ -84,7 +88,7 @@ A nominated movie/person within a category. Stores enough info for display.
 | name | String | Name of the nominee (movie title or person name) |
 | subtitle | String? | Additional context (e.g., movie name for actor categories) |
 | imageUrl | String? | Poster or headshot |
-| isWinner | Boolean | Denormalized flag, set when winners are revealed |
+| isWinner | Boolean | Denormalized flag, set when winners are revealed. The **source of truth** for a category's winner is `Category.winnerId` (and `CategoryResult`). `isWinner` is a denormalized copy for query convenience (e.g., highlighting winners in nominee lists without joining to Category). Both fields are updated atomically in the `setResult()` transaction. |
 | createdAt | DateTime | |
 
 **Unique constraint**: `(categoryId, name)`
@@ -102,12 +106,15 @@ A group of friends competing together. Each pool is scoped to a single ceremony 
 | accessType | Enum (OPEN, INVITE_ONLY) | Default: INVITE_ONLY. OPEN = anyone with the link can join. INVITE_ONLY = must be explicitly invited. |
 | maxMembers | Int? | Optional cap on pool size (null = unlimited) |
 | createdById | String | FK → User (pool creator / admin of this pool) |
+| archivedAt | DateTime? | Soft delete timestamp. When set, pool is hidden from listings but data is preserved for historical reference. |
 | createdAt | DateTime | |
 | updatedAt | DateTime | |
 
 **Unique constraint**: `inviteCode`
 
 **Design note**: A user can create multiple pools (e.g., one for coworkers, one for family) and join pools created by others. The `accessType` field controls whether the pool is open (link-shareable) or invite-only (requires an explicit invite from the pool creator).
+
+**Soft delete**: Pools are never hard-deleted. Setting `archivedAt` hides the pool from all listings and prevents new joins or predictions. All historical data (members, predictions, scores) is preserved. Only the pool ADMIN can archive a pool. All queries that list pools must filter `WHERE archivedAt IS NULL`.
 
 ### PoolInvite
 
@@ -141,8 +148,11 @@ Join table: which users are in which pools. A user can be a member of many pools
 | userId | String | FK → User |
 | role | Enum (MEMBER, ADMIN, RESULTS_MANAGER) | Default: MEMBER. ADMIN = pool creator. RESULTS_MANAGER = can set ceremony winners. |
 | joinedAt | DateTime | |
+| leftAt | DateTime? | When set, member has left the pool. Predictions are preserved for historical leaderboard accuracy. |
 
 **Unique constraint**: `(poolId, userId)`
+
+**Soft leave**: Members are never hard-deleted from pools. Setting `leftAt` hides them from active member lists while preserving their predictions and scores on the leaderboard (marked as "left"). A member who left can rejoin by clearing `leftAt` (if pool is open or they receive a new invite).
 
 ### Prediction
 
@@ -161,6 +171,13 @@ A user's picks for a single category within a pool. Each user gets one first-cho
 **Unique constraint**: `(poolMemberId, categoryId)` — one prediction per member per category
 
 **Validation**: `firstChoiceId != runnerUpId` (enforced in application logic)
+
+**Cross-entity validation** (enforced in application logic):
+- `firstChoiceId` must reference a Nominee where `nominee.categoryId == prediction.categoryId`
+- `runnerUpId` must reference a Nominee where `nominee.categoryId == prediction.categoryId`
+- These constraints cannot be expressed as foreign keys because Prisma doesn't support composite FK conditions. Enforce in the prediction-save server action.
+
+See `CLAUDE.md` Business Rules section for the full list of application-level constraints.
 
 ### CategoryResult
 
@@ -181,6 +198,10 @@ Tracks who set the winner for each category, with optimistic concurrency control
 **Design note**: The `version` field enables optimistic concurrency control. When updating a result, the client sends the `version` it last saw. If the server's version differs, it means someone else updated the result in the meantime, and a conflict error is returned with details about who changed it and what they set. This prevents two authorized users from unknowingly overwriting each other's result entries.
 
 **Permission model**: Users with `ADMIN` or `RESULTS_MANAGER` role in *any* pool for the ceremony can set results. Pool creators (ADMIN) can grant/revoke the `RESULTS_MANAGER` role to other pool members.
+
+**Cross-entity validation** (enforced in application logic):
+- `winnerId` must reference a Nominee where `nominee.categoryId == categoryResult.categoryId`
+- This is validated in `src/lib/results/set-result.ts` before the database write.
 
 ## Scoring Algorithm
 
@@ -208,6 +229,47 @@ Leaderboard = all pool members sorted by total score descending.
 - `PoolInvite(poolId, email)` — unique composite, one invite per email per pool
 - `Prediction(poolMemberId, categoryId)` — unique composite for upsert logic
 - `Category(ceremonyYearId, displayOrder)` — for ordered category listing
+
+**Note on redundant indexes**: Unique constraints implicitly create indexes in PostgreSQL. The following explicit `@@index` entries in the Prisma schema are redundant and can be removed:
+- `CategoryResult @@index([categoryId])` — already covered by `@unique` on `categoryId`
+- `PoolInvite @@index([token])` — already covered by `@unique` on `token`
+
+## Ceremony Lifecycle State
+
+The `CeremonyYear` model uses two boolean flags (`isActive`, `predictionsLocked`) to represent lifecycle state. The effective state can be derived:
+
+| State | `isActive` | `predictionsLocked` | All results set? | Description |
+|-------|-----------|---------------------|-------------------|-------------|
+| **SETUP** | `false` | `false` | No | Categories &amp; nominees being populated |
+| **PREDICTIONS_OPEN** | `true` | `false` | No | Users joining pools and making picks |
+| **LOCKED** | `true` | `true` | No | Predictions frozen, ceremony starting |
+| **LIVE** | `true` | `true` | Partial | Winners being announced and entered |
+| **COMPLETE** | `true` | `true` | Yes | All categories have winners, leaderboard final |
+
+**Future consideration**: A `status` enum (SETUP | PREDICTIONS_OPEN | LOCKED | LIVE | COMPLETE) could replace the boolean-derived state. This would be more explicit and prevent invalid state combinations (e.g., `isActive=false` + `predictionsLocked=true`). For now, the boolean approach is simpler and sufficient. Track as a GitHub Issue with label `tech-debt` if the boolean approach causes bugs.
+
+**Completion detection**: The app determines a ceremony is COMPLETE by comparing `COUNT(CategoryResult WHERE ceremonyYear = X)` against `COUNT(Category WHERE ceremonyYear = X)`. When they match, all categories have winners.
+
+## Application-Level Constraints Summary
+
+These constraints cannot be expressed in the Prisma schema and must be enforced in server actions / API routes:
+
+| Constraint | Scope | Enforcement Location |
+|-----------|-------|---------------------|
+| `firstChoiceId != runnerUpId` | Prediction | Prediction save server action |
+| Nominee belongs to prediction's category | Prediction | Prediction save server action |
+| Winner belongs to result's category | CategoryResult | `src/lib/results/set-result.ts` |
+| Pool access: INVITE_ONLY → OPEN only | Pool | Pool settings server action |
+| No predictions when `predictionsLocked = true` | Prediction | Prediction save server action |
+| Results permission: ADMIN or RESULTS_MANAGER in any ceremony pool | CategoryResult | `src/lib/results/permissions.ts` |
+| Invite token + email match for INVITE_ONLY pools | PoolInvite | Join pool server action |
+| Max members cap (`Pool.maxMembers`) | PoolMember | Join pool server action |
+| Archived pools excluded from listings (`archivedAt IS NULL`) | Pool | All pool listing queries |
+| Only ADMIN can archive a pool | Pool | Pool archive server action |
+| Left members excluded from active lists (`leftAt IS NULL`) | PoolMember | All member listing queries |
+| Predictions hidden until `predictionsLocked = true` | Prediction | Prediction listing queries — other members' picks invisible before lock |
+| Sole admin must transfer role before deleting account | User | Account deletion server action |
+| Max members enforced atomically (serialized transaction) | PoolMember | Join pool server action |
 
 ## Migration Notes
 

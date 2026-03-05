@@ -2,19 +2,26 @@
 
 Phased delivery plan for OscarPoolVibes. Each phase is a working, deployable increment.
 
+> **Implementation Status (as of March 2026)**: Phase 1 is ~15% complete (Prisma schema file written, all scaffolding missing). Phase 6a/6b backend logic exists but cannot compile until Phase 1 is done. The project currently lacks `package.json`, `tsconfig.json`, `next.config.ts`, and build configuration — Phase 1 scaffolding is the absolute critical path. See checked items `[x]` for completed work.
+
 ---
 
 ## Phase 1: Project Scaffolding & Database
 
 **Goal**: Bootable Next.js app with database connected and schema migrated.
 
-- [ ] Initialize Next.js 14 project with TypeScript, Tailwind, ESLint
+- [ ] Initialize Next.js 15 project with TypeScript, Tailwind, ESLint
 - [ ] Configure Prisma with Neon PostgreSQL
-- [ ] Write `prisma/schema.prisma` with all models (User, CeremonyYear, Category, Nominee, Pool, PoolMember, Prediction)
+- [ ] Write `prisma/schema.prisma` with all models (User, Account, Session, VerificationToken, CeremonyYear, Category, Nominee, Pool, PoolInvite, PoolMember, Prediction, CategoryResult)
 - [ ] Run initial migration
 - [ ] Create singleton Prisma client (`src/lib/db/client.ts`)
-- [ ] Create seed script with 2024/2025 ceremony data (real categories & nominees)
+- [ ] Create seed script with 2025/2026 ceremony data (real categories & nominees)
 - [ ] Verify deployment to Vercel connects to Neon
+- [ ] Create `.env.example` with all required environment variables
+- [ ] Set up Vitest and React Testing Library configuration
+- [ ] Create `tsconfig.json`, `next.config.ts`, and ESLint configuration
+
+> See `docs/SCHEMA.md` for the full schema design and rationale.
 
 **Deliverable**: `npm run dev` shows a Next.js welcome page; `npx prisma studio` shows seeded data.
 
@@ -32,6 +39,10 @@ Phased delivery plan for OscarPoolVibes. Each phase is a working, deployable inc
 - [ ] Add session provider to root layout
 - [ ] Create auth middleware to protect routes
 - [ ] Add user avatar/name display in header
+- [ ] Set up Resend for transactional emails (magic-link + pool invites)
+- [ ] Configure `RESEND_API_KEY` and `EMAIL_FROM` environment variables
+
+> See `docs/ARCHITECTURE.md` ADR-4 for auth strategy rationale.
 
 **Deliverable**: Users can log in via Google SSO (or email link) and see their name/avatar in the header.
 
@@ -51,12 +62,14 @@ Phased delivery plan for OscarPoolVibes. Each phase is a working, deployable inc
   - [ ] Send invites by entering email addresses
   - [ ] View pending/accepted/declined invite statuses
   - [ ] Resend or revoke pending invites
-- [ ] Generate shareable invite links (`/pools/join?token=<unique-token>`)
-  - [ ] Open pool links go straight to join confirmation
-  - [ ] Invite-only links validate the token and email match
+- [ ] Generate shareable invite links:
+  - Open pools: `/pools/join?code=ABC123` → immediate join after login
+  - Invite-only pools: `/pools/join?token=<unique-token>` → validates invite + email match
 - [ ] Build pool detail page (`src/app/pools/[id]/page.tsx`) — members list, pool settings, link to predictions
 - [ ] Add copy-to-clipboard for invite link/code
 - [ ] Pool creator can edit pool settings (name, access type) after creation
+
+> See `docs/USE_CASES.md` sections 2–3 and 5b for acceptance criteria.
 
 **Deliverable**: Users can create multiple pools, choose open or invite-only access, send invite links, and friends can join via link or code.
 
@@ -72,6 +85,10 @@ Phased delivery plan for OscarPoolVibes. Each phase is a working, deployable inc
 - [ ] Show prediction summary page — all picks at a glance
 - [ ] Respect `predictionsLocked` flag — disable form when locked
 - [ ] Allow editing predictions until lock
+- [ ] Validate nominee belongs to the correct category (server-side)
+- [ ] Write unit tests for all prediction validation rules
+
+> See `docs/USE_CASES.md` section 3a for acceptance criteria.
 
 **Deliverable**: Users fill out their Oscar ballot within a pool. Picks persist across sessions.
 
@@ -87,6 +104,10 @@ Phased delivery plan for OscarPoolVibes. Each phase is a working, deployable inc
 - [ ] Show per-category breakdown (which picks were correct)
 - [ ] Highlight correct first-choice (full points) and correct runner-up (partial points)
 - [ ] Sort members by total score descending, handle ties
+- [ ] Write tests for permission matrix — every role × action combination
+- [ ] Test tie-breaking logic in leaderboard sorting
+
+> See `docs/USE_CASES.md` sections 3b and permission matrix for acceptance criteria.
 
 **Deliverable**: After winners are entered, the leaderboard shows everyone's score and rank.
 
@@ -97,6 +118,8 @@ Phased delivery plan for OscarPoolVibes. Each phase is a working, deployable inc
 **Goal**: Authorized users can manually set ceremony results with conflict prevention. Results are global per ceremony.
 
 ### 6a: Results Permission System
+> **Status**: Backend complete (API + logic). UI pending.
+
 - [x] Add `RESULTS_MANAGER` role to `PoolMemberRole` enum
 - [x] Implement permission check: ADMIN or RESULTS_MANAGER in any pool for the ceremony
 - [x] API to grant/revoke `RESULTS_MANAGER` role (`POST /api/pools/[poolId]/permissions`)
@@ -104,6 +127,8 @@ Phased delivery plan for OscarPoolVibes. Each phase is a working, deployable inc
 - [ ] Build UI for pool admins to manage who can set results
 
 ### 6b: Setting Results with Conflict Prevention
+> **Status**: Backend complete (API + conflict detection). UI pending.
+
 - [x] `CategoryResult` model with `version` field for optimistic concurrency control
 - [x] `setResult()` function: validates permission, checks nominee, detects version conflicts
 - [x] API route `POST /api/results` — set winner with `expectedVersion` for conflict safety
@@ -117,24 +142,98 @@ Phased delivery plan for OscarPoolVibes. Each phase is a working, deployable inc
 - [ ] Build admin page for managing ceremony years (`src/app/admin/page.tsx`)
 - [ ] Add UI to lock/unlock predictions
 - [ ] Add UI to create/edit categories and nominees (for future years)
+- [ ] Write integration tests for all results management flows
+- [ ] Write integration tests for permission grant/revoke
+- [ ] Test optimistic concurrency conflict scenarios
 
-**Deliverable**: Authorized users can enter winners during the ceremony with conflict detection; leaderboard updates on refresh.
+> See `docs/USE_CASES.md` sections 4–5 for acceptance criteria.
+
+**Deliverable**: Backend APIs for results management and permissions are implemented with conflict detection. UI for results entry, conflict resolution, and admin management is pending.
 
 ---
 
-## Phase 7: Polish & UX
+## Phase 7: Accessibility, SEO, and Polish
 
-**Goal**: Make the app feel good to use.
+**Goal**: Production-quality user experience meeting WCAG 2.1 AA, optimized for search engines and AI crawlers.
 
+### 7a: Accessibility (WCAG 2.1 AA)
+- [ ] Audit all pages with axe-core and fix violations
+- [ ] Implement keyboard navigation for all interactive elements
+- [ ] Add ARIA labels and roles where semantic HTML is insufficient
+- [ ] Ensure color contrast meets AA standards (4.5:1 text, 3:1 UI)
+- [ ] Implement focus management for modals and dynamic content
+- [ ] Test with screen readers (VoiceOver, NVDA)
+- [ ] Ensure touch targets are ≥ 44×44px on mobile
+- [ ] Set up Lighthouse CI accessibility checks (target: ≥ 95)
+
+### 7b: SEO & LLM/AI-Bot Optimization
+- [ ] Add unique `<title>` and `<meta description>` to every page via Next.js `metadata` API
+- [ ] Implement Open Graph and Twitter Card meta tags (especially for pool invite links)
+- [ ] Add JSON-LD structured data (WebApplication, Organization) to key pages
+- [ ] Generate `sitemap.xml` via Next.js `sitemap.ts`
+- [ ] Create `robots.txt` with appropriate directives (`noindex` on user-specific pages)
+- [ ] Create `/llms.txt` manifest for AI crawler discoverability
+- [ ] Implement clean URL slugs for pools (e.g., `/pools/oscar-2026-film-buffs`)
+- [ ] Verify Core Web Vitals targets (LCP < 2.5s, INP < 200ms, CLS < 0.1)
+
+### 7c: UX Polish
 - [ ] Add loading states (Suspense boundaries, skeleton loaders)
-- [ ] Add error boundaries (`error.tsx` files)
-- [ ] Mobile-responsive design pass
-- [ ] Add og:image and meta tags for sharing pool invite links
-- [ ] Add toast notifications for actions (saved, joined, etc.)
+- [ ] Add error boundaries (`error.tsx` files) for every route segment
+- [ ] Mobile-responsive design pass (mobile-first — this is the primary platform)
+- [ ] Add toast notifications for actions (saved, joined, error, etc.)
 - [ ] Light/dark theme support
-- [ ] Favicon and branding
+- [ ] Favicon and branding assets
+- [ ] Add `og:image` generation for pool invite link previews
 
-**Deliverable**: A polished, shareable app ready for Oscar night.
+> See `docs/ARCHITECTURE.md` ADR-10 (accessibility), ADR-11 (SEO) for rationale.
+
+**Deliverable**: A polished, accessible, SEO-optimized app ready for Oscar night.
+
+---
+
+## Phase 7.5: Comprehensive Testing
+
+**Goal**: Full test coverage across all layers before launch.
+
+### Unit Tests
+- [ ] Scoring logic: 100% branch coverage (all point combinations, ties, edge cases)
+- [ ] Permission checks: every role × action from the permission matrix
+- [ ] Validation helpers: nominee-category consistency, first choice ≠ runner-up
+- [ ] Invite token generation and validation logic
+
+### Integration Tests
+- [ ] All API routes: happy path, validation errors, auth failures, edge cases
+- [ ] Server actions: prediction save, pool create/join, results set
+- [ ] Database queries: scoring queries, leaderboard aggregation, invite lookup
+- [ ] Optimistic concurrency: conflict detection and resolution for results
+
+### Component Tests
+- [ ] Prediction form: selection, validation, lock state, error display
+- [ ] Leaderboard table: sorting, score display, correct/incorrect highlighting
+- [ ] Pool management: create, join, invite, settings forms
+- [ ] Auth flows: sign-in, sign-out, session display
+
+### E2E Tests (Playwright)
+- [ ] Full user journey: visitor → sign up → create pool → invite friend → predict → view leaderboard
+- [ ] Invite flows: open pool join, invite-only token flow, expired invite
+- [ ] Results entry: set winners, handle conflicts, verify leaderboard updates
+- [ ] Error scenarios: pool full, predictions locked, invalid invite, auth failure
+- [ ] Multi-pool: user in multiple pools with different picks
+
+### Accessibility Tests
+- [ ] axe-core audit on every page (zero violations)
+- [ ] Lighthouse CI accessibility ≥ 95
+- [ ] Keyboard-only navigation test for all flows
+- [ ] Screen reader walkthrough of key journeys
+
+### Performance Tests
+- [ ] Core Web Vitals within targets on mobile 3G
+- [ ] Leaderboard rendering with 100+ member pool (Commissioner tier)
+- [ ] Concurrent results entry under load
+
+> See `docs/TESTING.md` for the full testing strategy and tooling.
+
+**Deliverable**: All tests passing, CI pipeline green, coverage targets met.
 
 ---
 
@@ -176,5 +275,12 @@ These are not required for launch but are natural extensions:
 1. All listed tasks completed
 2. Tests pass (`npm run test`)
 3. Lint clean (`npm run lint`)
-4. Builds without errors (`npm run build`)
-5. Deployed to Vercel preview and manually verified
+4. Accessibility audit clean (`npm run test:a11y`) — Phase 7+ only
+5. Builds without errors (`npm run build`)
+6. Deployed to Vercel preview and manually verified
+7. Cross-referenced USE_CASES.md acceptance criteria verified
+8. All bugs/issues discovered during the phase tracked as GitHub Issues
+9. Phase-related GitHub Issues closed with linked PRs
+
+> Applies to MVP phases (1–7.5). Phase 8 items are backlog/stretch.
+> See `CLAUDE.md` (GitHub Issues Workflow) for issue creation and labeling conventions.

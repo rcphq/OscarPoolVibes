@@ -2,6 +2,8 @@
 
 Comparison of database options for OscarPoolVibes, a Next.js app on Vercel free tier.
 
+> **Decision**: Neon PostgreSQL was selected. See [ARCHITECTURE.md](ARCHITECTURE.md) ADR-2 for the decision rationale.
+
 ---
 
 ## Comparison Matrix
@@ -15,7 +17,7 @@ Comparison of database options for OscarPoolVibes, a Next.js app on Vercel free 
 | **Vercel Postgres** | 0.5 GB | Yes | Yes | Yes | Yes | Zero-config Vercel setup |
 | **MongoDB Atlas** | 512 MB | Partial | No | Yes* | No | Document-oriented data |
 | **Firebase/Firestore** | 1 GB | Yes | No | No | No | Mobile-first, realtime apps |
-| **CockroachDB** | 10 GB | Yes | Compat | Yes | Yes | Multi-region distributed SQL |
+| **CockroachDB** | 10 GB (credit-based) | Yes | Compat | Yes | Yes | Multi-region distributed SQL |
 | **Cloudflare D1** | 5 GB | Workers only | No (SQLite) | Adapter | Yes | Cloudflare Workers apps |
 
 *\* = with caveats or reduced feature set*
@@ -54,7 +56,7 @@ Comparison of database options for OscarPoolVibes, a Next.js app on Vercel free 
 | **Serverless?** | Yes — Vitess-based, HTTP-friendly, excellent cold-start behavior. |
 | **ORM support** | Prisma (with `relationMode = "prisma"` — no DB-level foreign keys). Drizzle native support. |
 | **Pros** | Best-in-class branching and schema migration workflow. Non-blocking schema changes. Very fast. |
-| **Cons** | No free tier — disqualifying for free-tier constraint. MySQL, not Postgres. No foreign key enforcement at DB level. Community trust issues after removing free tier. |
+| **Cons** | No free tier — disqualifying for free-tier constraint. MySQL, not Postgres. No foreign key enforcement at DB level. No free tier since April 2024. Verify current pricing at planetscale.com before evaluating. |
 | **When to pick** | If you have budget and want the best migration workflow. Not for hobby/free-tier projects. |
 
 ### 4. Turso (libSQL / SQLite at the Edge)
@@ -98,7 +100,7 @@ Comparison of database options for OscarPoolVibes, a Next.js app on Vercel free 
 | **Serverless?** | Yes — fully managed, no connection pooling needed. |
 | **ORM support** | **No Prisma or Drizzle support.** Firebase has its own SDK only. |
 | **Pros** | No cold-start DB issues. Realtime listeners built in. Auth, hosting, storage all integrated. Daily quotas generous for small apps. |
-| **Cons** | **NoSQL document model** — same relational mismatch as MongoDB. No SQL, no joins. Vendor lock-in to Google. Querying across collections requires denormalization. Pricing can spike with read-heavy patterns. Storage changes in 2026 require Blaze plan. |
+| **Cons** | **NoSQL document model** — same relational mismatch as MongoDB. No SQL, no joins. Vendor lock-in to Google. Querying across collections requires denormalization. Pricing can spike with read-heavy patterns. Firebase's free Spark plan has reduced quotas as of 2025; larger apps require the pay-as-you-go Blaze plan. Verify current limits at firebase.google.com/pricing. |
 | **When to pick** | Mobile-first or real-time collaborative apps. **Not ideal** for this relational use case. |
 
 ### 8. CockroachDB Serverless
@@ -111,6 +113,8 @@ Comparison of database options for OscarPoolVibes, a Next.js app on Vercel free 
 | **Pros** | 10 GB free storage — most generous SQL option. Distributed SQL with strong consistency. Automatic scaling. |
 | **Cons** | Request Unit pricing is opaque and hard to predict. Higher latency than Neon (distributed consensus overhead). Background operations consume RUs. Smaller community. |
 | **When to pick** | When you need distributed SQL or multi-region. Overkill for a small social app but the generous free tier makes it viable for experimentation. |
+
+**Note**: This is a credit-based model ($15/month free credit), not a truly $0 tier. Verify current terms at cockroachlabs.com — pricing has changed multiple times.
 
 ### 9. Cloudflare D1
 
@@ -142,3 +146,5 @@ Comparison of database options for OscarPoolVibes, a Next.js app on Vercel free 
 **Best alternative**: **Turso** — 10x more free storage, edge reads, but requires Drizzle instead of Prisma and accepts SQLite limitations.
 
 **If you want batteries-included**: **Supabase** — replaces NextAuth and adds realtime, but $25/month Pro plan and 7-day idle pausing on free tier.
+
+> For the full decision rationale and trade-off analysis, see [ARCHITECTURE.md](ARCHITECTURE.md) ADR-2.

@@ -6,19 +6,22 @@ This document records key architectural choices for OscarPoolVibes and the reaso
 
 ## ADR-1: Next.js App Router on Vercel Free Tier
 
-**Decision**: Use Next.js 14 with the App Router, deployed to Vercel's free tier.
+**Decision**: Use Next.js 15 with the App Router, deployed to Vercel's free tier.
 
 **Context**: We need a full-stack framework that supports SSR, API routes, and static generation — all within free hosting limits. The pool creator (admin) needs server-side functionality; players mostly consume read-heavy pages.
 
+**Note**: Next.js 15 changed default caching behavior (no-cache by default) and made `params`/`searchParams` async.
+
 **Rationale**:
 - App Router gives us React Server Components (RSC) — less client JS, faster pages
+- Next.js 15 introduced improved React 19 support and better RSC patterns
 - Vercel free tier: automatic deploys, preview URLs, serverless functions, edge network
-- Free tier limits (10s function timeout, 100GB bandwidth) are fine for a small friend-group app
+- Free tier limits (15s function timeout on Hobby plan, 100GB bandwidth) are fine for a small friend-group app
 - ISR (Incremental Static Regeneration) can cache leaderboard pages to minimize DB hits
 
 **Trade-offs**:
 - Locked into Vercel for zero-config deploys (but Next.js is portable)
-- 10s serverless timeout means we must keep DB queries fast
+- 15s serverless timeout means we must keep DB queries fast
 
 ---
 
@@ -30,14 +33,16 @@ This document records key architectural choices for OscarPoolVibes and the reaso
 
 **Rationale**:
 - Neon free tier: 0.5 GB storage, 1 compute endpoint, branching — plenty for this app
+- Acquired by Databricks (2025), providing strong financial backing and long-term viability.
 - Serverless driver (`@neondatabase/serverless`) works great in Vercel's serverless functions
 - Prisma provides type-safe queries, auto-generated types, migration management
 - PostgreSQL's relational model fits the data naturally (ceremony → categories → nominees)
 
 **Alternatives considered**:
-- **PlanetScale (MySQL)**: Good free tier but MySQL lacks some Postgres features; Prisma supports both
+- **PlanetScale (MySQL)**: No free tier (removed April 2024). Cheapest plan $5/month. MySQL lacks some Postgres features. Not viable for free-tier constraint.
 - **Supabase**: Also Postgres, but the extra BaaS features (realtime, auth) add complexity we don't need
 - **SQLite / Turso**: Lighter, but less natural for relational joins and Vercel serverless
+- **Drizzle ORM**: Considered as alternative to Prisma. More lightweight, better edge runtime support. Chose Prisma for its mature migration tooling, auto-generated types, and broader ecosystem.
 
 ---
 
@@ -54,32 +59,32 @@ This document records key architectural choices for OscarPoolVibes and the reaso
 - No need for background jobs or event-driven score updates
 
 **Trade-offs**:
-- If pools grew to thousands of members, we'd want to cache or materialize scores
+- The monetization plan (see `docs/MONETIZATION.md`) includes a Commissioner tier with 100+ member pools. At 100 members × 24 categories, scoring is still fast (~2,400 predictions). If pool sizes grow significantly beyond this, consider caching scores with ISR or materializing them on winner-set events.
 - For now, simplicity wins
 
 ---
 
-## ADR-4: NextAuth.js with Google SSO as Primary Auth
+## ADR-4: Auth.js with Google SSO as Primary Auth
 
-**Decision**: Use NextAuth.js v4 with Google OAuth as the primary login method, email magic-link as fallback.
+**Decision**: Use Auth.js (next-auth v5) with Google OAuth as the primary login method, email magic-link as fallback.
 
 **Context**: Users need accounts to join pools and make predictions. Auth must be free, simple, and familiar. Most users will be sharing invite links with friends — low-friction sign-up is critical.
 
 **Rationale**:
 - Google SSO is the lowest-friction option — most users already have a Google account
 - One-click sign-in reduces drop-off when friends follow an invite link
-- NextAuth.js is the de-facto auth library for Next.js
+- Auth.js (next-auth v5) is the de-facto auth library for Next.js App Router
 - Email magic-link as fallback for users who prefer not to use Google
 - GitHub OAuth available as optional tertiary provider (useful for developer audiences)
 - Session data stored in the DB via Prisma adapter — no external session store needed
 
 **Setup**:
 - Requires Google Cloud Console OAuth 2.0 credentials (free)
-- Env vars: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`
+- Env vars: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `RESEND_API_KEY`, `EMAIL_FROM`
 
 **Trade-offs**:
 - Google OAuth requires setting up a project in Google Cloud Console (one-time)
-- Magic-link fallback still requires a transactional email provider (Resend free tier: 100 emails/day)
+- Magic-link fallback requires a transactional email provider (Resend — verify current free tier limits at resend.com/pricing)
 - No password-based login (by design — simpler, more secure)
 
 ---
@@ -103,6 +108,8 @@ This document records key architectural choices for OscarPoolVibes and the reaso
 - Invite-only adds a `PoolInvite` table and invite management UI
 - Email invites require a transactional email provider (shared with magic-link auth)
 - Open pools have a minor risk of uninvited joins if a code leaks (acceptable for this use case)
+
+**Enforcement note**: The one-way access type transition (INVITE_ONLY → OPEN only) is enforced at the application layer in the pool-settings server action. The database enum allows both values. Add validation in `src/app/pools/[id]/settings` server action to reject OPEN → INVITE_ONLY transitions.
 
 ---
 
@@ -134,6 +141,15 @@ This document records key architectural choices for OscarPoolVibes and the reaso
 - PurgeCSS (built-in) keeps the bundle tiny
 - No runtime CSS-in-JS overhead
 - Huge ecosystem of UI component libraries (shadcn/ui) built on Tailwind
+
+**Alternatives considered**:
+- **CSS Modules**: Scoped CSS, no runtime overhead. But slower iteration and more boilerplate than Tailwind utilities.
+- **styled-components / Emotion**: Runtime CSS-in-JS adds JS bundle size and hydration overhead. Not ideal for RSC.
+- **vanilla-extract**: Zero-runtime CSS-in-JS with type safety. Good option but smaller ecosystem and steeper learning curve.
+
+**Trade-offs**:
+- Utility classes can make markup verbose — mitigate with component extraction
+- Team members need familiarity with Tailwind's class naming conventions
 
 ---
 
@@ -169,7 +185,94 @@ This document records key architectural choices for OscarPoolVibes and the reaso
 
 ---
 
+## ADR-10: WCAG 2.1 AA Accessibility Target
+
+**Decision**: Target WCAG 2.1 Level AA compliance for all user-facing pages.
+
+**Context**: OscarPoolVibes is a consumer-facing social app. Invite links are shared broadly — users with disabilities must be able to participate fully. Additionally, accessibility compliance is increasingly a legal requirement and improves SEO.
+
+**Rationale**:
+- **Mobile-first design**: Invite links are shared via group chats (mobile). Oscar night participation happens on phones. Mobile-first is not a polish item — it's the primary platform.
+- **Keyboard navigation**: All interactive elements (prediction dropdowns, leaderboard sorting, invite management) must work without a mouse
+- **Screen readers**: Semantic HTML + ARIA ensures blind/low-vision users can make predictions and view scores
+- **Color contrast**: Leaderboard highlights (correct/incorrect picks) must use color + icons/text, not color alone
+- **Focus management**: Modal dialogs (invite confirmation, conflict resolution) must trap and restore focus
+- **Touch targets**: Minimum 44×44px for all interactive elements on mobile
+
+**Implementation**:
+- Use semantic HTML (`<table>` for leaderboards, `<form>` for predictions, `<nav>` for navigation)
+- Test every component with axe-core during development
+- Lighthouse CI accessibility score ≥ 95 enforced in CI pipeline
+- Manual screen reader testing (VoiceOver on macOS, NVDA on Windows) before each release
+
+**Trade-offs**:
+- Some design choices may be constrained by accessibility requirements (e.g., contrast ratios limit color palette)
+- Development velocity slightly reduced by testing requirements — but catches issues early
+
+---
+
+## ADR-11: SEO & LLM/AI-Bot Crawler Optimization
+
+**Decision**: Optimize all public-facing pages for search engine discoverability and AI/LLM crawler comprehension.
+
+**Context**: OscarPoolVibes grows primarily through shared invite links, but organic search traffic ("oscar pool 2026", "oscar prediction game") is a significant acquisition channel. Additionally, AI-powered search (ChatGPT, Perplexity, Google AI Overviews) increasingly drives discovery, and these systems prefer structured, machine-readable content.
+
+**Rationale**:
+- **SSR by default**: React Server Components ensure search engines and AI crawlers see fully rendered content, not empty shells
+- **Structured data (JSON-LD)**: Provide machine-readable metadata (WebApplication, Event schema) that AI systems can ingest for rich answers
+- **`/llms.txt` manifest**: A plain-text file at the site root describing the app for AI crawlers (purpose, features, key URLs) — emerging standard for LLM discoverability
+- **Clean URL structure**: Human-readable slugs (`/pools/oscar-2026-film-buffs`) improve both SEO and AI comprehension over opaque IDs
+- **Open Graph / Twitter Cards**: Pool invite links shared on social media and messaging apps need rich previews to drive clicks
+- **Core Web Vitals**: Google ranks pages by LCP, INP, CLS — server components + ISR keep scores high
+
+**Implementation**:
+- Next.js `metadata` API for all page-level meta tags (title, description, og:image)
+- JSON-LD script tags on landing page, pool pages, and leaderboard pages
+- `sitemap.xml` generated via Next.js App Router `sitemap.ts` convention
+- `robots.txt` allowing all crawlers, with appropriate `noindex` on user-specific pages (predictions)
+- `/llms.txt` with app description, feature list, and API surface
+- ISR with 30-60s revalidation for leaderboard and results pages
+
+**Trade-offs**:
+- User-specific pages (my predictions, profile) should NOT be indexed — requires careful `noindex` / auth gating
+- Rich meta tags require per-page configuration — more work but critical for social sharing of invite links
+- `llms.txt` is an emerging convention, not a formal standard — low effort, high potential upside
+
+---
+
+## ADR-12: Comprehensive Testing Strategy
+
+**Decision**: Implement a multi-layer testing strategy covering all scenarios, permissions, error states, and accessibility.
+
+**Context**: OscarPoolVibes has complex permission logic (5 roles, ceremony-wide results), optimistic concurrency control, and time-sensitive features (prediction locking on Oscar night). Bugs during the ceremony are catastrophic — there's no "try again tomorrow."
+
+**Rationale**:
+- **Scoring correctness is paramount**: A scoring bug means wrong leaderboard rankings. 100% branch coverage on scoring functions.
+- **Permission matrix is complex**: 5 roles × ~20 actions = 100 permission scenarios. Every cell in the permission matrix (see `docs/USE_CASES.md`) must have a corresponding test.
+- **Concurrency**: Results entry with optimistic locking must be tested for conflict scenarios
+- **Error states**: Every user-facing error (expired invite, pool full, locked predictions) must be tested
+- **Accessibility**: Automated axe-core + Lighthouse CI catches regressions
+
+**Test layers**:
+1. **Unit tests (Vitest)**: Scoring logic, permission checks, validation helpers — pure functions
+2. **Integration tests (Vitest + Prisma)**: API routes, server actions with real DB transactions (test database)
+3. **Component tests (React Testing Library)**: Forms, leaderboard, prediction UI interactions
+4. **E2E tests (Playwright)**: Full user journeys across roles (sign up → create pool → invite → predict → score → view leaderboard)
+5. **Accessibility tests (axe-core + Lighthouse CI)**: Every page audited for WCAG 2.1 AA
+6. **Visual regression tests (Playwright screenshots)**: Catch unintended UI changes
+
+**Coverage targets**: See `docs/TESTING.md` for detailed requirements.
+
+**Trade-offs**:
+- E2E tests are slow — run only in CI, not on every save
+- Test database must be seeded consistently — use transactional rollback pattern
+- Visual regression tests produce false positives on font rendering differences across OS — use tolerance thresholds
+
+---
+
 ## Component Architecture
+
+The following diagram shows the high-level component structure. Server components handle data fetching and auth; client components handle interactivity. See `CLAUDE.md` for coding conventions.
 
 ```
 Layout (server)
