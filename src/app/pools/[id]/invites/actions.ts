@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth/auth";
 import { getMemberRole } from "@/lib/db/pool-members";
 import { createInvite, revokeInvite } from "@/lib/db/invites";
 import { getPool } from "@/lib/db/pools";
+import { trackServerEvent } from "@/lib/analytics/posthog-server";
 
 export async function sendInviteAction(poolId: string, email: string) {
   const session = await auth();
@@ -35,6 +36,7 @@ export async function sendInviteAction(poolId: string, email: string) {
       email: email.toLowerCase().trim(),
       invitedById: session.user.id,
     });
+    trackServerEvent(session.user.id, "invite_sent", { poolId });
     return { success: true, inviteId: invite.id };
   } catch (error) {
     if (error instanceof Error) {
@@ -58,6 +60,7 @@ export async function revokeInviteAction(poolId: string, inviteId: string) {
 
   try {
     await revokeInvite(inviteId);
+    trackServerEvent(session.user.id, "invite_revoked", { poolId });
     return { success: true };
   } catch (error) {
     if (error instanceof Error) {

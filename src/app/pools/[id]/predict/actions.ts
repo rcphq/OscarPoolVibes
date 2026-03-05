@@ -9,6 +9,7 @@ import {
 } from "@/lib/db/predictions";
 import { savePredictionsSchema } from "@/types/predictions";
 import type { SavePredictionsInput } from "@/types/predictions";
+import { trackServerEvent } from "@/lib/analytics/posthog-server";
 
 export async function savePredictions(
   input: SavePredictionsInput
@@ -100,7 +101,8 @@ export async function savePredictions(
     )
   );
 
-  // 7. Revalidate the path
+  // 7. Track and revalidate
+  trackServerEvent(userId, "predictions_saved", { poolId, categoryCount: predictions.length });
   revalidatePath(`/pools/${poolId}/predict`);
 
   return { success: true };

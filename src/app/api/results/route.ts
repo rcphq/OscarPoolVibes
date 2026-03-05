@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/auth";
 import { setResult, getResultsByCeremony } from "@/lib/results";
 import type { SetResultRequest } from "@/types/results";
+import { trackServerEvent } from "@/lib/analytics/posthog-server";
 
 /**
  * GET /api/results?ceremonyYearId=<id>
@@ -64,6 +65,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "User not found" }, { status: 401 });
   }
 
+  // Look up ceremonyYearId for analytics
+  const category = await prisma.category.findUnique({
+    where: { id: categoryId },
+    select: { ceremonyYearId: true },
+  });
+  const ceremonyYearId = category?.ceremonyYearId ?? "";
+
   const result = await setResult(user.id, {
     categoryId,
     winnerId,
@@ -71,6 +79,10 @@ export async function POST(request: NextRequest) {
   });
 
   if (!result.success) {
+    if (result.error.code === "CONFLICT") {
+      trackServerEvent(user.id, "result_conflict", { ceremonyYearId, categoryId });
+    }
+
     const statusMap = {
       CONFLICT: 409,
       UNAUTHORIZED: 403,
@@ -83,5 +95,6 @@ export async function POST(request: NextRequest) {
     });
   }
 
+  trackServerEvent(user.id, "result_set", { ceremonyYearId, categoryId });
   return NextResponse.json(result);
 }

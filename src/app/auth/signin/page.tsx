@@ -2,6 +2,7 @@
 
 import { signIn } from "next-auth/react"
 import { useState } from "react"
+import { usePostHog } from "posthog-js/react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -9,6 +10,7 @@ import { Label } from "@/components/ui/label"
 
 export default function SignInPage() {
   const [email, setEmail] = useState("")
+  const posthog = usePostHog()
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
@@ -21,7 +23,10 @@ export default function SignInPage() {
           <Button
             className="w-full"
             variant="outline"
-            onClick={() => signIn("google", { callbackUrl: "/pools" })}
+            onClick={() => {
+              posthog?.capture("auth_sign_in_clicked", { method: "google" })
+              signIn("google", { callbackUrl: "/pools" })
+            }}
           >
             <svg className="mr-2 size-4" viewBox="0 0 24 24">
               <path
@@ -63,7 +68,10 @@ export default function SignInPage() {
           </div>
           <Button
             className="w-full"
-            onClick={() => signIn("resend", { email, callbackUrl: "/pools" })}
+            onClick={() => {
+              posthog?.capture("auth_sign_in_clicked", { method: "email" })
+              signIn("resend", { email, callbackUrl: "/pools" })
+            }}
           >
             Sign in with Magic Link
           </Button>

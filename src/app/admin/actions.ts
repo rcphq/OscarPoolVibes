@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { auth } from "@/lib/auth/auth";
 import { prisma } from "@/lib/db/client";
+import { trackServerEvent } from "@/lib/analytics/posthog-server";
 
 // ─── Zod Schemas ────────────────────────────────────────────────────────────
 
@@ -61,7 +62,7 @@ export async function togglePredictionsLocked(
   ceremonyYearId: string
 ): Promise<ActionResult> {
   try {
-    await requireAdmin();
+    const userId = await requireAdmin();
 
     const ceremony = await prisma.ceremonyYear.findUnique({
       where: { id: ceremonyYearId },
@@ -72,11 +73,13 @@ export async function togglePredictionsLocked(
       return { success: false, error: "Ceremony year not found" };
     }
 
+    const newLocked = !ceremony.predictionsLocked;
     await prisma.ceremonyYear.update({
       where: { id: ceremonyYearId },
-      data: { predictionsLocked: !ceremony.predictionsLocked },
+      data: { predictionsLocked: newLocked },
     });
 
+    trackServerEvent(userId, "admin_predictions_locked", { ceremonyYearId, locked: newLocked });
     revalidatePath("/admin");
     return { success: true };
   } catch (e) {
@@ -121,7 +124,7 @@ export async function createCeremonyYear(
   formData: FormData
 ): Promise<ActionResult> {
   try {
-    await requireAdmin();
+    const userId = await requireAdmin();
 
     const rawYear = formData.get("year");
     const rawName = formData.get("name");
@@ -154,7 +157,7 @@ export async function createCeremonyYear(
       return { success: false, error: `Ceremony year ${year} already exists` };
     }
 
-    await prisma.ceremonyYear.create({
+    const created = await prisma.ceremonyYear.create({
       data: {
         year,
         name,
@@ -162,6 +165,7 @@ export async function createCeremonyYear(
       },
     });
 
+    trackServerEvent(userId, "admin_ceremony_created", { ceremonyYearId: created.id });
     revalidatePath("/admin");
     return { success: true };
   } catch (e) {

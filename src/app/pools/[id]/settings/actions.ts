@@ -11,6 +11,7 @@ import {
   removeMember,
   updateMemberRole,
 } from "@/lib/db/pool-members";
+import { trackServerEvent } from "@/lib/analytics/posthog-server";
 
 const updatePoolSchema = z.object({
   name: z.string().min(1, "Pool name is required").max(100),
@@ -42,7 +43,7 @@ async function requireAdmin(poolId: string) {
 }
 
 export async function updatePoolSettings(poolId: string, formData: FormData) {
-  await requireAdmin(poolId);
+  const userId = await requireAdmin(poolId);
 
   const raw = {
     name: formData.get("name") as string,
@@ -66,15 +67,17 @@ export async function updatePoolSettings(poolId: string, formData: FormData) {
     return { error: { _form: [message] } };
   }
 
+  trackServerEvent(userId, "pool_settings_updated", { poolId });
   revalidatePath(`/pools/${poolId}/settings`);
   return { success: true };
 }
 
 export async function archivePoolAction(poolId: string) {
-  await requireAdmin(poolId);
+  const userId = await requireAdmin(poolId);
 
   try {
     await archivePool(poolId);
+    trackServerEvent(userId, "pool_archived", { poolId });
   } catch {
     return { error: "Failed to archive pool" };
   }
@@ -91,6 +94,7 @@ export async function removeMemberAction(poolId: string, userId: string) {
 
   try {
     await removeMember(poolId, userId);
+    trackServerEvent(adminId, "member_removed", { poolId });
   } catch {
     return { error: "Failed to remove member" };
   }
@@ -104,10 +108,11 @@ export async function changeMemberRoleAction(
   userId: string,
   role: PoolMemberRole
 ) {
-  await requireAdmin(poolId);
+  const adminId = await requireAdmin(poolId);
 
   try {
     await updateMemberRole(poolId, userId, role);
+    trackServerEvent(adminId, "member_role_changed", { poolId, newRole: role });
   } catch {
     return { error: "Failed to change member role" };
   }
@@ -124,6 +129,7 @@ export async function leavePoolAction(poolId: string) {
 
   try {
     await removeMember(poolId, session.user.id);
+    trackServerEvent(session.user.id, "pool_left", { poolId });
   } catch {
     return { error: "Failed to leave pool" };
   }

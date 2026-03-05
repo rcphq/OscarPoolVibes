@@ -5,6 +5,7 @@ import { z } from "zod";
 import { auth } from "@/lib/auth/auth";
 import { createPool } from "@/lib/db/pools";
 import { prisma } from "@/lib/db/client";
+import { trackServerEvent } from "@/lib/analytics/posthog-server";
 
 const createPoolSchema = z.object({
   name: z
@@ -95,6 +96,11 @@ export async function createPoolAction(
       userId: session.user.id,
     });
     poolId = pool.id;
+    trackServerEvent(session.user.id, "pool_created", {
+      poolId,
+      accessType,
+      ceremonyYear: ceremonyYearId,
+    });
   } catch {
     return {
       errors: {

@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth/auth";
 import { getPoolByInviteCode } from "@/lib/db/pools";
 import { addMember } from "@/lib/db/pool-members";
 import { acceptInvite, getInviteByToken } from "@/lib/db/invites";
+import { trackServerEvent } from "@/lib/analytics/posthog-server";
 
 export async function joinOpenPool(code: string) {
   const session = await auth();
@@ -23,6 +24,7 @@ export async function joinOpenPool(code: string) {
 
   try {
     await addMember(pool.id, session.user.id);
+    trackServerEvent(session.user.id, "pool_joined", { poolId: pool.id, method: "code" });
   } catch (error) {
     if (error instanceof Error) {
       return { error: error.message };
@@ -53,6 +55,7 @@ export async function joinViaInvite(token: string) {
 
   try {
     await acceptInvite(token, session.user.id);
+    trackServerEvent(session.user.id, "pool_joined", { poolId: invite.poolId, method: "invite" });
   } catch (error) {
     if (error instanceof Error) {
       return { error: error.message };

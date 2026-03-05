@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Playfair_Display, Inter } from "next/font/google";
+import { auth } from "@/lib/auth/auth";
 import { Header } from "@/components/ui/Header";
+import { PostHogProvider } from "@/lib/analytics/posthog-provider";
+import { PostHogPageView } from "@/lib/analytics/posthog-pageview";
 import "./globals.css";
 
 const playfairDisplay = Playfair_Display({
@@ -20,16 +24,23 @@ export const metadata: Metadata = {
   description: "Create and manage Oscar prediction pools with friends",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await auth();
+
   return (
     <html lang="en" className={`dark ${playfairDisplay.variable} ${inter.variable}`}>
       <body className="antialiased">
-        <Header />
-        {children}
+        <PostHogProvider userId={session?.user?.id}>
+          <Suspense fallback={null}>
+            <PostHogPageView />
+          </Suspense>
+          <Header />
+          {children}
+        </PostHogProvider>
       </body>
     </html>
   );

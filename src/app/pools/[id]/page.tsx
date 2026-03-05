@@ -131,7 +131,7 @@ export default async function PoolDetailPage({
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <CopyInviteLink inviteCode={pool.inviteCode} />
+              <CopyInviteLink inviteCode={pool.inviteCode} poolId={pool.id} />
             </CardContent>
           </Card>
 

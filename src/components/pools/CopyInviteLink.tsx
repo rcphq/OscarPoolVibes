@@ -2,14 +2,17 @@
 
 import { useState, useCallback } from "react";
 import { Copy, Check } from "lucide-react";
+import { usePostHog } from "posthog-js/react";
 import { Button } from "@/components/ui/button";
 
 interface CopyInviteLinkProps {
   inviteCode: string;
+  poolId?: string;
 }
 
-export function CopyInviteLink({ inviteCode }: CopyInviteLinkProps) {
+export function CopyInviteLink({ inviteCode, poolId }: CopyInviteLinkProps) {
   const [copied, setCopied] = useState(false);
+  const posthog = usePostHog();
 
   const inviteUrl =
     typeof window !== "undefined"
@@ -19,6 +22,7 @@ export function CopyInviteLink({ inviteCode }: CopyInviteLinkProps) {
   const handleCopy = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(inviteUrl);
+      posthog?.capture("pool_invite_link_copied", { poolId: poolId ?? "" });
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
