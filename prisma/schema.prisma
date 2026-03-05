@@ -1,0 +1,239 @@
+// OscarPoolVibes — Prisma Schema
+// Source of truth for the database. See docs/SCHEMA.md for rationale.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── NextAuth.js Models ────────────────────────────────────────────────────────
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ─── Core Models ───────────────────────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts    Account[]
+  sessions    Session[]
+  pools       Pool[]           @relation("CreatedPools")
+  memberships PoolMember[]
+  invitesSent PoolInvite[]
+  resultSets  CategoryResult[] @relation("ResultSetBy")
+}
+
+model CeremonyYear {
+  id                String    @id @default(cuid())
+  year              Int       @unique
+  name              String // e.g., "96th Academy Awards"
+  ceremonyDate      DateTime?
+  isActive          Boolean   @default(false)
+  predictionsLocked Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+
+  categories Category[]
+  pools      Pool[]
+}
+
+model Category {
+  id                String @id @default(cuid())
+  ceremonyYearId    String
+  name              String // e.g., "Best Picture"
+  displayOrder      Int
+  pointValue        Int    @default(10)
+  runnerUpMultiplier Float  @default(0.5)
+
+  // The official winner — set via CategoryResult flow
+  winnerId String?
+
+  createdAt DateTime @default(now())
+
+  ceremonyYear CeremonyYear     @relation(fields: [ceremonyYearId], references: [id], onDelete: Cascade)
+  winner       Nominee?         @relation("CategoryWinner", fields: [winnerId], references: [id])
+  nominees     Nominee[]        @relation("CategoryNominees")
+  predictions  Prediction[]
+  results      CategoryResult[]
+
+  @@unique([ceremonyYearId, name])
+  @@index([ceremonyYearId, displayOrder])
+}
+
+model Nominee {
+  id         String  @id @default(cuid())
+  categoryId String
+  name       String // Movie title or person name
+  subtitle   String? // e.g., movie name for actor categories
+  imageUrl   String?
+  isWinner   Boolean @default(false) // Denormalized flag
+  createdAt  DateTime @default(now())
+
+  category            Category     @relation("CategoryNominees", fields: [categoryId], references: [id], onDelete: Cascade)
+  wonCategories       Category[]   @relation("CategoryWinner")
+  firstChoicePicks    Prediction[] @relation("FirstChoice")
+  runnerUpPicks       Prediction[] @relation("RunnerUp")
+  categoryResults     CategoryResult[]
+
+  @@unique([categoryId, name])
+  @@index([categoryId])
+}
+
+// ─── Pool Models ───────────────────────────────────────────────────────────────
+
+enum AccessType {
+  OPEN
+  INVITE_ONLY
+}
+
+enum PoolMemberRole {
+  MEMBER
+  ADMIN
+  RESULTS_MANAGER
+}
+
+model Pool {
+  id             String     @id @default(cuid())
+  name           String
+  ceremonyYearId String
+  inviteCode     String     @unique
+  accessType     AccessType @default(INVITE_ONLY)
+  maxMembers     Int?
+  createdById    String
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  ceremonyYear CeremonyYear @relation(fields: [ceremonyYearId], references: [id])
+  createdBy    User         @relation("CreatedPools", fields: [createdById], references: [id])
+  members      PoolMember[]
+  invites      PoolInvite[]
+
+  @@index([ceremonyYearId])
+  @@index([accessType])
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  EXPIRED
+}
+
+model PoolInvite {
+  id          String       @id @default(cuid())
+  poolId      String
+  email       String
+  invitedById String
+  status      InviteStatus @default(PENDING)
+  token       String       @unique
+  expiresAt   DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  pool      Pool @relation(fields: [poolId], references: [id], onDelete: Cascade)
+  invitedBy User @relation(fields: [invitedById], references: [id])
+
+  @@unique([poolId, email])
+  @@index([token])
+}
+
+model PoolMember {
+  id       String         @id @default(cuid())
+  poolId   String
+  userId   String
+  role     PoolMemberRole @default(MEMBER)
+  joinedAt DateTime       @default(now())
+
+  pool        Pool         @relation(fields: [poolId], references: [id], onDelete: Cascade)
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  predictions Prediction[]
+
+  @@unique([poolId, userId])
+  @@index([poolId])
+  @@index([userId])
+}
+
+// ─── Prediction & Results Models ───────────────────────────────────────────────
+
+model Prediction {
+  id             String @id @default(cuid())
+  poolMemberId   String
+  categoryId     String
+  firstChoiceId  String
+  runnerUpId     String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  poolMember  PoolMember @relation(fields: [poolMemberId], references: [id], onDelete: Cascade)
+  category    Category   @relation(fields: [categoryId], references: [id])
+  firstChoice Nominee    @relation("FirstChoice", fields: [firstChoiceId], references: [id])
+  runnerUp    Nominee    @relation("RunnerUp", fields: [runnerUpId], references: [id])
+
+  @@unique([poolMemberId, categoryId])
+  @@index([categoryId])
+}
+
+/// Tracks who set each category's winner, with optimistic concurrency control.
+/// Results are global per ceremony (not per-pool), but permissions to set
+/// results are granted at the pool level.
+model CategoryResult {
+  id         String   @id @default(cuid())
+  categoryId String   @unique // One result per category (global per ceremony)
+  winnerId   String
+  setById    String   // Who set this result
+  version    Int      @default(1) // Optimistic lock — increment on each update
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  winner   Nominee  @relation(fields: [winnerId], references: [id])
+  setBy    User     @relation("ResultSetBy", fields: [setById], references: [id])
+
+  @@index([categoryId])
+}

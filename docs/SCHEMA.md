@@ -9,14 +9,17 @@ User 1──* PoolMember *──1 Pool
 User 1──* Pool (createdBy)
 User 1──* PoolInvite (invitedBy)
 User 1──* Prediction
+User 1──* CategoryResult (setBy)
 Pool 1──* PoolInvite
 Pool *──1 CeremonyYear
 CeremonyYear 1──* Category
 Category 1──* Nominee
+Category 1──0..1 CategoryResult
 Prediction *──1 Category
 Prediction *──1 Nominee (firstChoice)
 Prediction *──1 Nominee (runnerUp)
 Category 0..1──1 Nominee (winner)
+CategoryResult *──1 Nominee (winner)
 ```
 
 ## Tables
@@ -136,7 +139,7 @@ Join table: which users are in which pools. A user can be a member of many pools
 | id | String (cuid) | PK |
 | poolId | String | FK → Pool |
 | userId | String | FK → User |
-| role | Enum (MEMBER, ADMIN) | Default: MEMBER. ADMIN = pool creator, can manage invites and settings |
+| role | Enum (MEMBER, ADMIN, RESULTS_MANAGER) | Default: MEMBER. ADMIN = pool creator. RESULTS_MANAGER = can set ceremony winners. |
 | joinedAt | DateTime | |
 
 **Unique constraint**: `(poolId, userId)`
@@ -158,6 +161,26 @@ A user's picks for a single category within a pool. Each user gets one first-cho
 **Unique constraint**: `(poolMemberId, categoryId)` — one prediction per member per category
 
 **Validation**: `firstChoiceId != runnerUpId` (enforced in application logic)
+
+### CategoryResult
+
+Tracks who set the winner for each category, with optimistic concurrency control for conflict prevention. Results are **global per ceremony** — Oscar winners are the same for every pool. Permissions to set results are granted at the pool level.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| id | String (cuid) | PK |
+| categoryId | String | FK → Category (unique — one result per category) |
+| winnerId | String | FK → Nominee (the winner) |
+| setById | String | FK → User (who set this result) |
+| version | Int | Optimistic lock counter — increment on each update |
+| createdAt | DateTime | |
+| updatedAt | DateTime | |
+
+**Unique constraint**: `categoryId` — one result per category globally
+
+**Design note**: The `version` field enables optimistic concurrency control. When updating a result, the client sends the `version` it last saw. If the server's version differs, it means someone else updated the result in the meantime, and a conflict error is returned with details about who changed it and what they set. This prevents two authorized users from unknowingly overwriting each other's result entries.
+
+**Permission model**: Users with `ADMIN` or `RESULTS_MANAGER` role in *any* pool for the ceremony can set results. Pool creators (ADMIN) can grant/revoke the `RESULTS_MANAGER` role to other pool members.
 
 ## Scoring Algorithm
 

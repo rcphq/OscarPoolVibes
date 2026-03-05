@@ -92,17 +92,33 @@ Phased delivery plan for OscarPoolVibes. Each phase is a working, deployable inc
 
 ---
 
-## Phase 6: Admin / Winner Management
+## Phase 6: Results Management & Permissions
 
-**Goal**: A pool creator (or site admin) can manage ceremony data and reveal winners.
+**Goal**: Authorized users can manually set ceremony results with conflict prevention. Results are global per ceremony.
 
+### 6a: Results Permission System
+- [x] Add `RESULTS_MANAGER` role to `PoolMemberRole` enum
+- [x] Implement permission check: ADMIN or RESULTS_MANAGER in any pool for the ceremony
+- [x] API to grant/revoke `RESULTS_MANAGER` role (`POST /api/pools/[poolId]/permissions`)
+- [x] API to list pool members with their roles (`GET /api/pools/[poolId]/permissions`)
+- [ ] Build UI for pool admins to manage who can set results
+
+### 6b: Setting Results with Conflict Prevention
+- [x] `CategoryResult` model with `version` field for optimistic concurrency control
+- [x] `setResult()` function: validates permission, checks nominee, detects version conflicts
+- [x] API route `POST /api/results` — set winner with `expectedVersion` for conflict safety
+- [x] API route `GET /api/results?ceremonyYearId=<id>` — get all results for a ceremony
+- [x] Sync winners to `Category.winnerId` and `Nominee.isWinner` on result set
+- [ ] Build results entry UI — dropdown per category, shows who last set each result
+- [ ] Show conflict resolution UI when two users try to set different winners
+- [ ] Add real-time or polling refresh to keep results UI in sync
+
+### 6c: Admin / Ceremony Management
 - [ ] Build admin page for managing ceremony years (`src/app/admin/page.tsx`)
-- [ ] Add UI to set winner for each category
 - [ ] Add UI to lock/unlock predictions
 - [ ] Add UI to create/edit categories and nominees (for future years)
-- [ ] Role-based access: only pool creator or admin can access these pages
 
-**Deliverable**: Admin can enter winners during the ceremony; leaderboard updates on refresh.
+**Deliverable**: Authorized users can enter winners during the ceremony with conflict detection; leaderboard updates on refresh.
 
 ---
 
