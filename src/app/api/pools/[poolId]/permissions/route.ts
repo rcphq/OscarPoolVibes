@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
+import { auth } from "@/lib/auth/auth";
 import { prisma } from "@/lib/db/client";
 import { grantResultsPermission, revokeResultsPermission } from "@/lib/results";
 
@@ -15,7 +15,7 @@ export async function GET(
   _request: NextRequest,
   context: RouteContext
 ) {
-  const session = await getServerSession();
+  const session = await auth();
   if (!session?.user?.email) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -55,7 +55,7 @@ export async function POST(
   request: NextRequest,
   context: RouteContext
 ) {
-  const session = await getServerSession();
+  const session = await auth();
   if (!session?.user?.email) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

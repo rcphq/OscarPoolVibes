@@ -254,9 +254,9 @@ OscarPoolVibes has comprehensive documentation (CLAUDE.md, SCHEMA.md, USE_CASES.
 
 | # | Title | Phase | Wave | Status |
 |---|-------|-------|------|--------|
-| #3 | Project scaffolding & core config | 1 | 1 | |
-| #4 | Prisma schema updates & Neon adapter | 1 | 1 | |
-| #5 | Design system foundation (shadcn/ui, fonts, theme) | 1 | 1 | |
+| #3 | Project scaffolding & core config | 1 | 1 | DONE |
+| #4 | Prisma schema updates & Neon adapter | 1 | 1 | DONE |
+| #5 | Design system foundation (shadcn/ui, fonts, theme) | 1 | 1 | DONE |
 | #6 | Seed script with 2025 ceremony data | 1 | 2 | |
 | #7 | Auth.js v5 with Google OAuth + email magic link | 2 | 2 | |
 | #8 | Auth UI, layout, header with design system | 2 | 2 | |
