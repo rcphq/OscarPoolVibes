@@ -4,7 +4,10 @@ A web app for running Oscar prediction pools with friends. Pick your winners and
 
 ## Features
 
-- **Oscar Pools** — Create or join a pool for a given Oscar ceremony year
+- **Multiple Pools** — Create and join multiple pools (work friends, family, film buffs)
+- **Open & Invite-Only Pools** — Open pools anyone can join via link; invite-only pools require explicit invitations
+- **Invite Links** — Generate shareable links for each pool; invite friends by email
+- **Google SSO** — One-click sign-in with Google (email magic-link fallback)
 - **Predictions** — Select a first-choice and runner-up pick for every category
 - **Weighted Scoring** — Each category has a configurable point value; first-choice and runner-up hits score differently
 - **Leaderboard** — Real-time rankings showing total points for every participant
@@ -48,7 +51,9 @@ OscarPoolVibes/
 ├── docs/                    # Project documentation
 │   ├── SCHEMA.md            # Database schema reference
 │   ├── ARCHITECTURE.md      # Architecture decisions & rationale
-│   └── PLAN.md              # Phased implementation plan
+│   ├── PLAN.md              # Phased implementation plan
+│   ├── MONETIZATION.md      # Monetization strategy & tier design
+│   └── DATABASE_ALTERNATIVES.md  # Database options comparison
 ├── CLAUDE.md                # Agentic coding guidelines
 └── README.md                # This file
 ```
@@ -82,6 +87,8 @@ npm run dev
 | `DATABASE_URL` | PostgreSQL connection string (Neon recommended) |
 | `NEXTAUTH_URL` | Base URL of the app (e.g. `http://localhost:3000`) |
 | `NEXTAUTH_SECRET` | Random secret for session encryption |
+| `GOOGLE_CLIENT_ID` | Google OAuth client ID (from Google Cloud Console) |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret |
 | `GITHUB_ID` | (optional) GitHub OAuth app client ID |
 | `GITHUB_SECRET` | (optional) GitHub OAuth app client secret |
 

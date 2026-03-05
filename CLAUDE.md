@@ -52,7 +52,9 @@ OscarPoolVibes is a Next.js 14 (App Router) web app for Oscar prediction pools. 
 ### Auth
 
 - NextAuth config lives in `src/lib/auth/`
-- Support email magic-link login at minimum; optionally GitHub OAuth
+- Google OAuth is the primary login method (lowest friction for invite links)
+- Email magic-link as fallback; optionally GitHub OAuth
+- Env vars needed: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`
 - Protect pool-write and admin routes with middleware or server-side session checks
 
 ### Vercel Free Tier Constraints
@@ -90,8 +92,9 @@ See `docs/SCHEMA.md` for the full schema. Key entities:
 - **CeremonyYear** — a single Oscar ceremony (e.g., 96th Academy Awards, 2024)
 - **Category** — an award category for a given ceremony year
 - **Nominee** — a nominated movie/person for a category
-- **Pool** — a group of friends competing together for a ceremony year
-- **PoolMember** — a user's membership in a pool
+- **Pool** — a group of friends competing together for a ceremony year (open or invite-only)
+- **PoolInvite** — explicit invitation to join an invite-only pool
+- **PoolMember** — a user's membership in a pool (users can be in multiple pools)
 - **Prediction** — a user's first-choice and runner-up pick for a category
 - **User** — authenticated user account
 
@@ -107,3 +110,5 @@ Required in `.env.local`:
 - `DATABASE_URL` — Neon Postgres connection string
 - `NEXTAUTH_URL` — app base URL
 - `NEXTAUTH_SECRET` — random secret for sessions
+- `GOOGLE_CLIENT_ID` — Google OAuth client ID
+- `GOOGLE_CLIENT_SECRET` — Google OAuth client secret

@@ -25,29 +25,40 @@ Phased delivery plan for OscarPoolVibes. Each phase is a working, deployable inc
 **Goal**: Users can sign up, sign in, and have a session.
 
 - [ ] Install and configure NextAuth.js with Prisma adapter
-- [ ] Set up email magic-link provider (Resend)
+- [ ] Set up Google OAuth provider (primary login method)
+- [ ] Set up email magic-link provider (Resend) as fallback
 - [ ] Optionally add GitHub OAuth provider
-- [ ] Create sign-in page (`src/app/auth/signin/page.tsx`)
+- [ ] Create sign-in page (`src/app/auth/signin/page.tsx`) with Google SSO button prominently displayed
 - [ ] Add session provider to root layout
 - [ ] Create auth middleware to protect routes
 - [ ] Add user avatar/name display in header
 
-**Deliverable**: Users can log in via email link and see their name in the header.
+**Deliverable**: Users can log in via Google SSO (or email link) and see their name/avatar in the header.
 
 ---
 
 ## Phase 3: Pool Management
 
-**Goal**: Users can create pools, generate invite codes, and join pools.
+**Goal**: Users can create and manage multiple pools with configurable access (open or invite-only).
 
-- [ ] Create pool page (`src/app/pools/page.tsx`) — list user's pools
-- [ ] Create pool creation form (`src/app/pools/create/page.tsx`)
-- [ ] Implement invite code generation (nanoid, 8 chars)
-- [ ] Create join-by-code page (`src/app/pools/join/page.tsx`)
-- [ ] Build pool detail page (`src/app/pools/[id]/page.tsx`) — shows members, link to predictions
-- [ ] Add shareable invite link with copy-to-clipboard
+- [ ] Create pool listing page (`src/app/pools/page.tsx`) — shows all pools the user belongs to or has created
+- [ ] Create pool creation form (`src/app/pools/create/page.tsx`) — name, ceremony year, access type (open/invite-only)
+- [ ] Support multiple pools per user (create several, join several)
+- [ ] Implement invite code generation (nanoid, 8 chars) for all pools
+- [ ] **Open pools**: anyone with the invite link/code can join directly
+- [ ] **Invite-only pools**: pool creator sends invites by email; only invited users can join
+- [ ] Build invite management UI for pool creators (`src/app/pools/[id]/invites/page.tsx`)
+  - [ ] Send invites by entering email addresses
+  - [ ] View pending/accepted/declined invite statuses
+  - [ ] Resend or revoke pending invites
+- [ ] Generate shareable invite links (`/pools/join?token=<unique-token>`)
+  - [ ] Open pool links go straight to join confirmation
+  - [ ] Invite-only links validate the token and email match
+- [ ] Build pool detail page (`src/app/pools/[id]/page.tsx`) — members list, pool settings, link to predictions
+- [ ] Add copy-to-clipboard for invite link/code
+- [ ] Pool creator can edit pool settings (name, access type) after creation
 
-**Deliverable**: Users can create a pool, share the invite code, and friends can join.
+**Deliverable**: Users can create multiple pools, choose open or invite-only access, send invite links, and friends can join via link or code.
 
 ---
 
@@ -111,16 +122,36 @@ Phased delivery plan for OscarPoolVibes. Each phase is a working, deployable inc
 
 ---
 
-## Phase 8: Stretch Goals (Post-MVP)
+## Phase 8: Stretch Goals & Backlog (Post-MVP)
 
 These are not required for launch but are natural extensions:
 
+### Engagement & Social
 - [ ] Real-time leaderboard updates during the ceremony (Pusher/Ably)
-- [ ] Historical stats — "how did you do across years"
-- [ ] Oscar data import script from an external API/Wikipedia
 - [ ] Social sharing — post your score to Twitter/Instagram
 - [ ] Email reminders before predictions lock
+- [ ] In-app notifications when pool members join or predictions lock
+- [ ] "Confidence picks" — let users mark a few categories they're most confident about (bonus multiplier)
+
+### Data & Content
+- [ ] Historical stats — "how did you do across years"
+- [ ] Oscar data import script from an external API/Wikipedia
 - [ ] Multiple scoring presets (casual, competitive, custom)
+- [ ] Category descriptions and nominee details (trailers, clips, acceptance speeches)
+
+### Pool Enhancements
+- [ ] Pool chat / comments thread for trash talk during the ceremony
+- [ ] Private vs public leaderboards (hide scores until ceremony ends)
+- [ ] Pool templates — save a pool's scoring config and reuse it next year
+- [ ] Bulk invite via CSV or contact list import
+- [ ] Pool member roles (co-admin, viewer)
+
+### Monetization (see `docs/MONETIZATION.md`)
+- [ ] Premium tier implementation (Stripe integration)
+- [ ] Larger pool sizes for paid users
+- [ ] Custom branding / themes for paid pools
+- [ ] Advanced analytics and historical stats for premium users
+- [ ] Ad-supported free tier with ad-free premium option
 
 ---
 
