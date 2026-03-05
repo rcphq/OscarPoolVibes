@@ -3,6 +3,7 @@
 import { useTransition, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import { revokeInviteAction } from "./actions";
 
 export function RevokeButton({
@@ -23,6 +24,7 @@ export function RevokeButton({
       if (result.error) {
         setError(result.error);
       } else {
+        toast.success("Invite revoked");
         router.refresh();
       }
     });

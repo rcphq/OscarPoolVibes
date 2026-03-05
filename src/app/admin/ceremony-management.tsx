@@ -2,7 +2,6 @@
 
 import { useState, useTransition } from "react";
 import {
-  Settings,
   Lock,
   Unlock,
   Plus,
@@ -23,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { toast } from "sonner";
 import {
   togglePredictionsLocked,
   toggleCeremonyActive,
@@ -118,7 +118,11 @@ function CeremonyYearCard({ ceremony }: { ceremony: CeremonyYearData }) {
     setError(null);
     startTransition(async () => {
       const result: ActionResult = await toggleCeremonyActive(ceremony.id);
-      if (!result.success) setError(result.error ?? "Failed to toggle");
+      if (!result.success) {
+        setError(result.error ?? "Failed to toggle");
+      } else {
+        toast.success(ceremony.isActive ? "Ceremony deactivated" : "Ceremony activated");
+      }
     });
   }
 
@@ -130,7 +134,11 @@ function CeremonyYearCard({ ceremony }: { ceremony: CeremonyYearData }) {
     }
     startTransition(async () => {
       const result: ActionResult = await togglePredictionsLocked(ceremony.id);
-      if (!result.success) setError(result.error ?? "Failed to toggle");
+      if (!result.success) {
+        setError(result.error ?? "Failed to toggle");
+      } else {
+        toast.success("Predictions unlocked");
+      }
     });
   }
 
@@ -138,7 +146,11 @@ function CeremonyYearCard({ ceremony }: { ceremony: CeremonyYearData }) {
     setLockWarning(false);
     startTransition(async () => {
       const result: ActionResult = await togglePredictionsLocked(ceremony.id);
-      if (!result.success) setError(result.error ?? "Failed to toggle");
+      if (!result.success) {
+        setError(result.error ?? "Failed to toggle");
+      } else {
+        toast.success("Predictions locked");
+      }
     });
   }
 
@@ -420,6 +432,7 @@ function CreateCeremonyForm({ onClose }: { onClose: () => void }) {
     startTransition(async () => {
       const result = await createCeremonyYear(formData);
       if (result.success) {
+        toast.success("Ceremony year created");
         onClose();
       } else {
         setError(result.error ?? "Failed to create ceremony year");
@@ -502,6 +515,7 @@ function AddCategoryForm({
     startTransition(async () => {
       const result = await addCategory(formData);
       if (result.success) {
+        toast.success("Category added");
         onClose();
       } else {
         setError(result.error ?? "Failed to add category");
@@ -600,6 +614,7 @@ function AddNomineeForm({
     startTransition(async () => {
       const result = await addNominee(formData);
       if (result.success) {
+        toast.success("Nominee added");
         onClose();
       } else {
         setError(result.error ?? "Failed to add nominee");

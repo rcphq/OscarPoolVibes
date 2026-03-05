@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth/auth";
 import { prisma } from "@/lib/db/client";
@@ -27,6 +28,18 @@ type ExistingResult = {
   setBy: { name: string | null };
   updatedAt: string;
 };
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ ceremonyYearId: string }>;
+}): Promise<Metadata> {
+  await params;
+  return {
+    title: "Enter Results | OscarPoolVibes",
+    description: "Enter official Oscar ceremony results.",
+  };
+}
 
 export default async function ResultsEntryPage({
   params,

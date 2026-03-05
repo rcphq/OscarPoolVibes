@@ -1,11 +1,15 @@
 import Link from "next/link"
+import Image from "next/image"
 import { auth } from "@/lib/auth/auth"
+import { SkipLink } from "@/components/ui/SkipLink"
+import { ThemeToggle } from "@/components/ui/theme-toggle"
 
 export async function Header() {
   const session = await auth()
 
   return (
     <header className="border-b border-border bg-card">
+      <SkipLink />
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link href="/" className="text-xl font-heading text-primary">
           OscarPoolVibes
@@ -17,12 +21,15 @@ export async function Header() {
           >
             Pools
           </Link>
+          <ThemeToggle />
           {session?.user ? (
             <div className="flex items-center gap-3">
               {session.user.image && (
-                <img
+                <Image
                   src={session.user.image}
                   alt=""
+                  width={32}
+                  height={32}
                   className="size-8 rounded-full"
                 />
               )}

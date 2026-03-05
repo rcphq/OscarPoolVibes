@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { toast } from "sonner";
 import { updatePoolSettings } from "./actions";
 
 interface PoolSettingsFormProps {
@@ -51,6 +52,7 @@ export function PoolSettingsForm({
         setMessage({ type: "error", text: errorText });
       } else {
         setMessage({ type: "success", text: "Settings updated successfully." });
+        toast.success("Pool settings saved!");
       }
     });
   }

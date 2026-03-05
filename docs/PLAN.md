@@ -2,7 +2,7 @@
 
 Phased delivery plan for OscarPoolVibes. Each phase is a working, deployable increment.
 
-> **Implementation Status (as of March 2026)**: Phases 1 through 6c are **DONE**. The app has working auth, pool management, predictions, scoring, leaderboard, results entry with conflict detection, permissions management, and an admin panel. Phase 7 (polish/a11y/SEO), 7.5 (comprehensive testing), and 8 (stretch) remain.
+> **Implementation Status (as of March 2026)**: Phases 1 through 7 are **DONE**. The app has working auth, pool management, predictions, scoring, leaderboard, results entry with conflict detection, permissions management, admin panel, accessibility (skip link, error/loading boundaries, table semantics, axe tests, touch targets), SEO (sitemap, robots, OG image, JSON-LD, llms.txt, page metadata), and UX polish (theme toggle, toast notifications, AlertDialog confirmations). Phase 7.5 (comprehensive testing) and 8 (stretch) remain.
 
 ---
 
@@ -155,34 +155,34 @@ Phased delivery plan for OscarPoolVibes. Each phase is a working, deployable inc
 
 **Goal**: Production-quality user experience meeting WCAG 2.1 AA, optimized for search engines and AI crawlers.
 
-### 7a: Accessibility (WCAG 2.1 AA)
-- [ ] Audit all pages with axe-core and fix violations
-- [ ] Implement keyboard navigation for all interactive elements
-- [ ] Add ARIA labels and roles where semantic HTML is insufficient
-- [ ] Ensure color contrast meets AA standards (4.5:1 text, 3:1 UI)
-- [ ] Implement focus management for modals and dynamic content
-- [ ] Test with screen readers (VoiceOver, NVDA)
-- [ ] Ensure touch targets are ≥ 44×44px on mobile
-- [ ] Set up Lighthouse CI accessibility checks (target: ≥ 95)
+### 7a: Accessibility (WCAG 2.1 AA) [DONE]
+- [x] Audit all pages with axe-core and fix violations
+- [x] Implement keyboard navigation for all interactive elements
+- [x] Add ARIA labels and roles where semantic HTML is insufficient
+- [x] Ensure color contrast meets AA standards (4.5:1 text, 3:1 UI)
+- [x] Implement focus management for modals and dynamic content
+- [ ] Test with screen readers (VoiceOver, NVDA) — deferred to Phase 7.5
+- [x] Ensure touch targets are ≥ 44×44px on mobile
+- [ ] Set up Lighthouse CI accessibility checks (target: ≥ 95) — deferred to Phase 7.5
 
-### 7b: SEO & LLM/AI-Bot Optimization
-- [ ] Add unique `<title>` and `<meta description>` to every page via Next.js `metadata` API
-- [ ] Implement Open Graph and Twitter Card meta tags (especially for pool invite links)
-- [ ] Add JSON-LD structured data (WebApplication, Organization) to key pages
-- [ ] Generate `sitemap.xml` via Next.js `sitemap.ts`
-- [ ] Create `robots.txt` with appropriate directives (`noindex` on user-specific pages)
-- [ ] Create `/llms.txt` manifest for AI crawler discoverability
-- [ ] Implement clean URL slugs for pools (e.g., `/pools/oscar-2026-film-buffs`)
-- [ ] Verify Core Web Vitals targets (LCP < 2.5s, INP < 200ms, CLS < 0.1)
+### 7b: SEO & LLM/AI-Bot Optimization [DONE]
+- [x] Add unique `<title>` and `<meta description>` to every page via Next.js `metadata` API
+- [x] Implement Open Graph and Twitter Card meta tags (especially for pool invite links)
+- [x] Add JSON-LD structured data (WebApplication, Organization) to key pages
+- [x] Generate `sitemap.xml` via Next.js `sitemap.ts`
+- [x] Create `robots.txt` with appropriate directives (`noindex` on user-specific pages)
+- [x] Create `/llms.txt` manifest for AI crawler discoverability
+- [ ] Implement clean URL slugs for pools — deferred (touches every route)
+- [ ] Verify Core Web Vitals targets — deferred to Phase 7.5
 
-### 7c: UX Polish
-- [ ] Add loading states (Suspense boundaries, skeleton loaders)
-- [ ] Add error boundaries (`error.tsx` files) for every route segment
-- [ ] Mobile-responsive design pass (mobile-first — this is the primary platform)
-- [ ] Add toast notifications for actions (saved, joined, error, etc.)
-- [ ] Light/dark theme support
-- [ ] Favicon and branding assets
-- [ ] Add `og:image` generation for pool invite link previews
+### 7c: UX Polish [DONE]
+- [x] Add loading states (Suspense boundaries, skeleton loaders)
+- [x] Add error boundaries (`error.tsx` files) for every route segment
+- [ ] Mobile-responsive design pass — deferred to Phase 7.5
+- [x] Add toast notifications for actions (saved, joined, error, etc.)
+- [x] Light/dark theme support
+- [ ] Favicon and branding assets — deferred
+- [x] Add `og:image` generation for pool invite link previews
 
 > See `docs/ARCHITECTURE.md` ADR-10 (accessibility), ADR-11 (SEO) for rationale.
 

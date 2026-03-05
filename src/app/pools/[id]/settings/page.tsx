@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { Settings, Users, AlertTriangle } from "lucide-react";
 import { auth } from "@/lib/auth/auth";
@@ -13,6 +14,18 @@ import {
 import { PoolSettingsForm } from "./pool-settings-form";
 import { ArchivePoolButton } from "./archive-pool-button";
 import { MemberManagement } from "./member-management";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  await params;
+  return {
+    title: "Pool Settings | OscarPoolVibes",
+    description: "Configure pool settings, manage members, and more.",
+  };
+}
 
 interface SettingsPageProps {
   params: Promise<{ id: string }>;

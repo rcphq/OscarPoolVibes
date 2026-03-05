@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import {
   Trophy,
   Medal,
@@ -69,9 +70,11 @@ function Avatar({
 }) {
   if (image) {
     return (
-      <img
+      <Image
         src={image}
         alt=""
+        width={32}
+        height={32}
         className="size-8 rounded-full"
       />
     );
@@ -189,21 +192,22 @@ export function LeaderboardTable({
   return (
     <div className="overflow-x-auto rounded-lg border">
       <table className="w-full min-w-[500px] border-collapse">
+        <caption className="sr-only">Pool leaderboard rankings</caption>
         <thead>
           <tr className="bg-navy text-sm">
-            <th className="px-4 py-3 text-left font-semibold text-gold-100/80">
+            <th scope="col" className="px-4 py-3 text-left font-semibold text-gold-100/80">
               Rank
             </th>
-            <th className="px-4 py-3 text-left font-semibold text-gold-100/80">
+            <th scope="col" className="px-4 py-3 text-left font-semibold text-gold-100/80">
               Player
             </th>
-            <th className="px-4 py-3 text-center font-semibold text-gold-300">
+            <th scope="col" className="px-4 py-3 text-center font-semibold text-gold-300">
               Score
             </th>
-            <th className="px-4 py-3 text-center font-semibold text-gold-100/80">
+            <th scope="col" className="px-4 py-3 text-center font-semibold text-gold-100/80">
               Correct
             </th>
-            <th className="w-10 px-2 py-3">
+            <th scope="col" className="w-10 px-2 py-3">
               <span className="sr-only">Expand</span>
             </th>
           </tr>
@@ -280,13 +284,13 @@ export function LeaderboardTable({
                       <table className="w-full border-collapse">
                         <thead>
                           <tr className="border-b border-border/50">
-                            <th className="py-2 pl-14 pr-4 text-left text-xs font-semibold text-muted-foreground">
+                            <th scope="col" className="py-2 pl-14 pr-4 text-left text-xs font-semibold text-muted-foreground">
                               Category
                             </th>
-                            <th className="px-4 py-2 text-center text-xs font-semibold text-muted-foreground">
+                            <th scope="col" className="px-4 py-2 text-center text-xs font-semibold text-muted-foreground">
                               Result
                             </th>
-                            <th className="px-4 py-2 text-center text-xs font-semibold text-muted-foreground">
+                            <th scope="col" className="px-4 py-2 text-center text-xs font-semibold text-muted-foreground">
                               Points
                             </th>
                           </tr>

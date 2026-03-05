@@ -17,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { toast } from "sonner";
 import { savePredictions } from "@/app/pools/[id]/predict/actions";
 
 type Nominee = {
@@ -133,6 +134,7 @@ export function PredictionForm({
           type: "success",
           message: "Predictions saved successfully!",
         });
+        toast.success("Predictions saved!");
       }
     });
   };

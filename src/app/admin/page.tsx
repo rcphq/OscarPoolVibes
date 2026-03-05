@@ -1,8 +1,14 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { Settings } from "lucide-react";
 import { auth } from "@/lib/auth/auth";
 import { prisma } from "@/lib/db/client";
 import { CeremonyManagement } from "./ceremony-management";
+
+export const metadata: Metadata = {
+  title: "Admin | OscarPoolVibes",
+  description: "Manage ceremony years, categories, and nominees.",
+};
 
 export default async function AdminPage() {
   const session = await auth();

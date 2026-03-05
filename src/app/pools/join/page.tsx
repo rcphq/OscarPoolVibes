@@ -1,9 +1,15 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/lib/auth/auth";
 import { getPoolByInviteCode } from "@/lib/db/pools";
 import { getInviteByToken } from "@/lib/db/invites";
 import { getMemberRole } from "@/lib/db/pool-members";
+
+export const metadata: Metadata = {
+  title: "Join Pool | OscarPoolVibes",
+  description: "Join an Oscar prediction pool and compete with friends.",
+};
 import {
   Card,
   CardContent,

@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { Trophy, Check, AlertTriangle, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -140,6 +141,7 @@ export function ResultsEntryForm({
               },
             },
           }));
+          toast.success(`Winner set: ${nominee?.name ?? "Unknown"}`);
         } else if (response.status === 409) {
           // Conflict — update local state with server's current result
           const conflict = data.error?.currentResult;

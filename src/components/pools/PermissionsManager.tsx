@@ -2,6 +2,8 @@
 
 import { useState, useCallback } from "react";
 import { Shield, ShieldCheck, ShieldOff, User, Loader2 } from "lucide-react";
+import Image from "next/image";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
 export interface PermissionMember {
@@ -62,13 +64,15 @@ export function PermissionsManager({
         const targetMember = members.find((m) => m.userId === targetUserId);
         const displayName =
           targetMember?.name || targetMember?.email || "User";
+        const successMessage =
+          action === "grant"
+            ? `${displayName} is now a Results Manager.`
+            : `${displayName} is no longer a Results Manager.`;
         setFeedback({
           type: "success",
-          message:
-            action === "grant"
-              ? `${displayName} is now a Results Manager.`
-              : `${displayName} is no longer a Results Manager.`,
+          message: successMessage,
         });
+        toast.success(successMessage);
       } catch (err) {
         // Revert optimistic update
         setMembers(previousMembers);
@@ -131,9 +135,11 @@ function MemberRow({
       <div className="flex items-center gap-3 min-w-0">
         {/* Avatar */}
         {member.image ? (
-          <img
+          <Image
             src={member.image}
             alt=""
+            width={32}
+            height={32}
             className="size-8 rounded-full shrink-0"
           />
         ) : (

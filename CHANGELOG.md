@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Features
+
+- **a11y:** Add skip link, error boundaries, loading skeletons, table semantics, axe tests (#28)
+- **seo:** Add sitemap, robots.txt, manifest, OG image, JSON-LD, llms.txt, page metadata (#29)
+- **ui:** Add theme toggle (dark/light/system), toast notifications, AlertDialog confirmations, touch targets (#30)
+- **ui:** Swap `<img>` to `next/image` for optimized avatar loading
+- **ui:** Add `<main>` semantic landmark for skip link target
+
 ## [0.1.0] - 2026-03-05
 
 ### Features

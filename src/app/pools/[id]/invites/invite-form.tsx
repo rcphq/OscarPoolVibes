@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 import { sendInviteAction } from "./actions";
 
 export function InviteForm({ poolId }: { poolId: string }) {
@@ -27,6 +28,7 @@ export function InviteForm({ poolId }: { poolId: string }) {
         setMessage({ type: "error", text: result.error });
       } else {
         setMessage({ type: "success", text: `Invite sent to ${email}` });
+        toast.success("Invite sent!");
         setEmail("");
         router.refresh();
       }

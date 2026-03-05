@@ -1,0 +1,28 @@
+# OscarPoolVibes
+
+## About
+OscarPoolVibes is a web application for creating and managing Oscar prediction pools. Users create pools, invite friends, make predictions for Academy Award categories (first choice and runner-up), and compete on a leaderboard.
+
+## Key Pages
+- / — Homepage with app description and sign-in
+- /auth/signin — Sign in with Google OAuth or email magic link
+- /pools — Browse and manage your prediction pools
+- /pools/[id] — Pool detail with members, predictions, and leaderboard
+- /pools/[id]/predict — Make predictions for each Oscar category
+- /pools/[id]/leaderboard — View pool rankings and scores
+- /pools/join?code=[code] — Join a pool via invite code
+- /results/[ceremonyYearId] — Enter ceremony results (authorized users only)
+- /admin — Manage ceremony years, categories, and nominees
+
+## Features
+- Google OAuth and email magic-link authentication
+- Open and invite-only pool types
+- First-choice and runner-up predictions per category
+- Real-time scoring with leaderboard
+- Results entry with optimistic concurrency control
+- Role-based permissions (Admin, Results Manager, Member)
+
+## Technology
+- Next.js 15 (App Router), TypeScript, Tailwind CSS
+- PostgreSQL on Neon, Prisma ORM
+- Auth.js v5, Vercel hosting

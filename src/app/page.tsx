@@ -1,5 +1,24 @@
+import type { Metadata } from "next";
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+
+export const metadata: Metadata = {
+  title: { absolute: "OscarPoolVibes — Predict the Oscars with Friends" },
+  description:
+    "Create a pool, invite your friends, and see who can predict the most winners on Hollywood's biggest night.",
+  openGraph: {
+    title: "OscarPoolVibes — Predict the Oscars with Friends",
+    description:
+      "Create a pool, invite your friends, and see who can predict the most winners on Hollywood's biggest night.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "OscarPoolVibes — Predict the Oscars with Friends",
+    description:
+      "Create a pool, invite your friends, and compete on Oscar night.",
+  },
+};
 
 export default function Home() {
   return (

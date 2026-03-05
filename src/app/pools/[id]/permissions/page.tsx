@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Shield, ArrowLeft } from "lucide-react";
@@ -15,6 +16,18 @@ import {
   PermissionsManager,
   type PermissionMember,
 } from "@/components/pools/PermissionsManager";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  await params;
+  return {
+    title: "Permissions | OscarPoolVibes",
+    description: "Manage pool member roles and permissions.",
+  };
+}
 
 interface PermissionsPageProps {
   params: Promise<{ id: string }>;

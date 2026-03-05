@@ -11,6 +11,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import Image from "next/image";
+import { toast } from "sonner";
 import { removeMemberAction, changeMemberRoleAction } from "./actions";
 
 interface Member {
@@ -67,6 +69,8 @@ function MemberRow({
       const result = await removeMemberAction(poolId, member.user.id);
       if (result && "error" in result) {
         setError(result.error ?? null);
+      } else {
+        toast.success("Member removed");
       }
     });
   }
@@ -81,6 +85,8 @@ function MemberRow({
       );
       if (result && "error" in result) {
         setError(result.error ?? null);
+      } else {
+        toast.success("Role updated");
       }
     });
   }
@@ -91,9 +97,11 @@ function MemberRow({
     <div className="flex items-center justify-between gap-3 rounded-lg border border-border bg-card/50 p-3">
       <div className="flex items-center gap-3 min-w-0">
         {member.user.image ? (
-          <img
+          <Image
             src={member.user.image}
             alt=""
+            width={32}
+            height={32}
             className="size-8 rounded-full"
           />
         ) : (

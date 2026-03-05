@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { redirect, notFound } from "next/navigation";
 import { Users, Crown, Settings, Trophy, BarChart3, ArrowLeft, Globe, Lock } from "lucide-react";
 import { auth } from "@/lib/auth/auth";
@@ -29,6 +30,10 @@ export async function generateMetadata({
   return {
     title: `${pool.name} | OscarPoolVibes`,
     description: `Oscar prediction pool for ${pool.ceremonyYear.name}`,
+    openGraph: {
+      title: `${pool.name} | OscarPoolVibes`,
+      description: `Oscar prediction pool for ${pool.ceremonyYear.name}`,
+    },
   };
 }
 
@@ -154,9 +159,11 @@ export default async function PoolDetailPage({
                   >
                     <div className="flex items-center gap-3">
                       {member.user.image ? (
-                        <img
+                        <Image
                           src={member.user.image}
                           alt=""
+                          width={32}
+                          height={32}
                           className="size-8 rounded-full"
                         />
                       ) : (

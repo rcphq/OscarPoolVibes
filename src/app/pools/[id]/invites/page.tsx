@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/lib/auth/auth";
@@ -14,6 +15,18 @@ import {
 import { Button } from "@/components/ui/button";
 import { InviteForm } from "./invite-form";
 import { RevokeButton } from "./revoke-button";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  await params;
+  return {
+    title: "Manage Invites | OscarPoolVibes",
+    description: "Send and manage pool invitations.",
+  };
+}
 
 interface InvitesPageProps {
   params: Promise<{ id: string }>;

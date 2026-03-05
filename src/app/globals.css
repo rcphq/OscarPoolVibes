@@ -3,6 +3,7 @@
 @import "shadcn/tailwind.css";
 
 @custom-variant dark (&:is(.dark *));
+@custom-variant pointer-coarse (@media (pointer: coarse));
 
 @theme inline {
   --color-background: var(--background);
@@ -190,6 +191,24 @@
   50% { transform: translateX(-10px); }
   75% { transform: translateX(8px); }
   100% { transform: translateX(-5px); }
+}
+
+/* Touch target minimums for mobile (WCAG 2.1 AA — 44x44px) */
+@media (pointer: coarse) {
+  [data-slot="button"][data-size="xs"],
+  [data-slot="button"][data-size="sm"],
+  [data-slot="button"][data-size="icon-xs"],
+  [data-slot="button"][data-size="icon-sm"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Sonner toast theme customization */
+[data-sonner-toaster] {
+  --normal-bg: var(--card);
+  --normal-border: var(--border);
+  --normal-text: var(--foreground);
 }
 
 @layer base {
