@@ -275,8 +275,8 @@ OscarPoolVibes has comprehensive documentation (CLAUDE.md, SCHEMA.md, USE_CASES.
 | #21 | Results entry UI | 6b | 7 | DONE |
 | #22 | Result conflict resolution UI + polling | 6b | 7 | DONE |
 | #23 | Admin page (ceremony management, prediction locking) | 6c | 7 | DONE |
-| #24 | Integration & component tests | - | 8 | |
-| #25 | Documentation updates post-implementation | - | 8 | |
+| #24 | Integration & component tests | - | 8 | DONE |
+| #25 | Documentation updates post-implementation | - | 8 | DONE |
 
 ---
 
