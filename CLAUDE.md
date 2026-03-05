@@ -8,12 +8,12 @@ OscarPoolVibes is a Next.js 15 (App Router) web app for Oscar prediction pools. 
 
 - **Framework**: Next.js 15 with App Router (NOT Pages Router)
 - **Language**: TypeScript — strict mode, no `any` types
-- **Database**: PostgreSQL on Neon, managed via Prisma ORM with `@prisma/adapter-neon`
+- **Database**: PostgreSQL on Neon, managed via Prisma 7 with `@prisma/adapter-neon` (see ADR-18 — `prisma.config.ts` required, no `url` in datasource block)
 - **Auth**: Auth.js v5 (next-auth) — App Router native
-- **Styling**: Tailwind CSS + shadcn/ui (Radix UI primitives)
+- **Styling**: Tailwind CSS v4 (CSS-first config via `@theme inline`, no `tailwind.config.ts` — see ADR-17) + shadcn/ui (Radix UI primitives)
 - **Icons**: Lucide React
 - **Fonts**: Playfair Display (headings) + Inter (body) via `next/font`
-- **Validation**: Zod for input schemas
+- **Validation**: Zod v4 for input schemas
 - **Testing**: Vitest + React Testing Library
 - **Hosting**: Vercel Hobby tier
 

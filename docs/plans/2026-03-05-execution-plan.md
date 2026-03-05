@@ -271,10 +271,10 @@ OscarPoolVibes has comprehensive documentation (CLAUDE.md, SCHEMA.md, USE_CASES.
 | #17 | Leaderboard UI with per-category breakdown | 5 | 5 | DONE |
 | #18 | Winner reveal animation (reduced-motion safe) | 5 | 5 | DONE |
 | #19 | Migrate existing Phase 6 code to Auth.js v5 | 6 | 6 | DONE (early, in Wave 2) |
-| #20 | Permissions management UI | 6a | 6 | |
-| #21 | Results entry UI | 6b | 7 | |
-| #22 | Result conflict resolution UI + polling | 6b | 7 | |
-| #23 | Admin page (ceremony management, prediction locking) | 6c | 7 | |
+| #20 | Permissions management UI | 6a | 6 | DONE |
+| #21 | Results entry UI | 6b | 7 | DONE |
+| #22 | Result conflict resolution UI + polling | 6b | 7 | DONE |
+| #23 | Admin page (ceremony management, prediction locking) | 6c | 7 | DONE |
 | #24 | Integration & component tests | - | 8 | |
 | #25 | Documentation updates post-implementation | - | 8 | |
 

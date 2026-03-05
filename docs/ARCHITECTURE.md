@@ -319,6 +319,58 @@ This document records key architectural choices for OscarPoolVibes and the reaso
 
 ---
 
+## ADR-17: Tailwind CSS v4 — CSS-First Configuration
+
+**Decision**: Use Tailwind CSS v4 with CSS-first configuration via `@theme inline` in `globals.css`, not a `tailwind.config.ts` file.
+
+**Context**: Tailwind CSS v4 introduced a new CSS-first configuration model. There is no `tailwind.config.ts` or `tailwind.config.js` in the project.
+
+**Implementation**:
+- Tailwind is loaded via `@import "tailwindcss"` in `src/app/globals.css`
+- All custom theme tokens (colors, radii, fonts) are defined inside `@theme inline {}` in CSS
+- PostCSS config (`postcss.config.mjs`) uses `@tailwindcss/postcss` plugin instead of the legacy `tailwindcss` plugin
+- shadcn/ui integration uses `@import "shadcn/tailwind.css"` and `tw-animate-css`
+- Gold scale and navy colors are registered as CSS custom properties inside `@theme inline`, making them available as Tailwind utilities (e.g., `bg-gold-500`, `text-navy`)
+
+**Rationale**:
+- Tailwind v4's CSS-first approach eliminates the JS config file, keeping all styling in one place
+- Better alignment with the CSS ecosystem and CSS custom properties
+- Simpler build pipeline (no JS config to process)
+
+---
+
+## ADR-18: Prisma 7 — Config File Required, No URL in Datasource
+
+**Decision**: Use Prisma 7 with a `prisma.config.ts` file at the project root. The `datasource` block in `schema.prisma` omits the `url` property.
+
+**Context**: Prisma 7 changed how database connections are configured. The `url` property is no longer specified in the `datasource` block of the schema file. Instead, connection configuration is managed through `prisma.config.ts` and environment variables.
+
+**Implementation**:
+- `prisma.config.ts` at project root with `defineConfig({ earlyAccess: true, schema: './prisma/schema.prisma' })`
+- `prisma/schema.prisma` datasource block contains only `provider = "postgresql"` (no `url`)
+- `DATABASE_URL` is read from environment variables by the Prisma engine at runtime
+- Uses `@prisma/adapter-neon` (v7.4.2) for serverless-compatible connections
+
+**Rationale**:
+- Required by Prisma 7 — the old `url = env("DATABASE_URL")` pattern in the schema is removed
+- `prisma.config.ts` provides a typed configuration surface for Prisma CLI and runtime settings
+- `earlyAccess: true` enables Prisma 7 features that are still stabilizing
+
+---
+
+## ADR-19: Zod v4 for Input Validation
+
+**Decision**: Use Zod v4 (^4.3.6) instead of Zod v3.
+
+**Context**: Zod v4 was released as a major version upgrade with performance improvements and API changes.
+
+**Rationale**:
+- Significant performance improvements over v3
+- Greenfield project with no v3 migration burden
+- Same core API surface for schema definition and validation
+
+---
+
 ## Component Architecture
 
 The following diagram shows the high-level component structure. Server components handle data fetching and auth; client components handle interactivity. See `CLAUDE.md` for coding conventions.

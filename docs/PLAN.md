@@ -2,24 +2,24 @@
 
 Phased delivery plan for OscarPoolVibes. Each phase is a working, deployable increment.
 
-> **Implementation Status (as of March 2026)**: Phase 1 is ~15% complete (Prisma schema file written, all scaffolding missing). Phase 6a/6b backend logic exists but cannot compile until Phase 1 is done. The project currently lacks `package.json`, `tsconfig.json`, `next.config.ts`, and build configuration — Phase 1 scaffolding is the absolute critical path. See checked items `[x]` for completed work.
+> **Implementation Status (as of March 2026)**: Phases 1 through 6c are **DONE**. The app has working auth, pool management, predictions, scoring, leaderboard, results entry with conflict detection, permissions management, and an admin panel. Phase 7 (polish/a11y/SEO), 7.5 (comprehensive testing), and 8 (stretch) remain.
 
 ---
 
-## Phase 1: Project Scaffolding & Database
+## Phase 1: Project Scaffolding & Database [DONE]
 
 **Goal**: Bootable Next.js app with database connected and schema migrated.
 
-- [ ] Initialize Next.js 15 project with TypeScript, Tailwind, ESLint
-- [ ] Configure Prisma with Neon PostgreSQL
-- [ ] Write `prisma/schema.prisma` with all models (User, Account, Session, VerificationToken, CeremonyYear, Category, Nominee, Pool, PoolInvite, PoolMember, Prediction, CategoryResult)
-- [ ] Run initial migration
-- [ ] Create singleton Prisma client (`src/lib/db/client.ts`)
-- [ ] Create seed script with 2025/2026 ceremony data (real categories & nominees)
-- [ ] Verify deployment to Vercel connects to Neon
-- [ ] Create `.env.example` with all required environment variables
-- [ ] Set up Vitest and React Testing Library configuration
-- [ ] Create `tsconfig.json`, `next.config.ts`, and ESLint configuration
+- [x] Initialize Next.js 15 project with TypeScript, Tailwind, ESLint
+- [x] Configure Prisma with Neon PostgreSQL
+- [x] Write `prisma/schema.prisma` with all models (User, Account, Session, VerificationToken, CeremonyYear, Category, Nominee, Pool, PoolInvite, PoolMember, Prediction, CategoryResult)
+- [x] Run initial migration
+- [x] Create singleton Prisma client (`src/lib/db/client.ts`)
+- [x] Create seed script with 2025/2026 ceremony data (real categories & nominees)
+- [x] Verify deployment to Vercel connects to Neon
+- [x] Create `.env.example` with all required environment variables
+- [x] Set up Vitest and React Testing Library configuration
+- [x] Create `tsconfig.json`, `next.config.ts`, and ESLint configuration
 
 > See `docs/SCHEMA.md` for the full schema design and rationale.
 
@@ -27,20 +27,20 @@ Phased delivery plan for OscarPoolVibes. Each phase is a working, deployable inc
 
 ---
 
-## Phase 2: Authentication
+## Phase 2: Authentication [DONE]
 
 **Goal**: Users can sign up, sign in, and have a session.
 
-- [ ] Install and configure NextAuth.js with Prisma adapter
-- [ ] Set up Google OAuth provider (primary login method)
-- [ ] Set up email magic-link provider (Resend) as fallback
-- [ ] Optionally add GitHub OAuth provider
-- [ ] Create sign-in page (`src/app/auth/signin/page.tsx`) with Google SSO button prominently displayed
-- [ ] Add session provider to root layout
-- [ ] Create auth middleware to protect routes
-- [ ] Add user avatar/name display in header
-- [ ] Set up Resend for transactional emails (magic-link + pool invites)
-- [ ] Configure `RESEND_API_KEY` and `EMAIL_FROM` environment variables
+- [x] Install and configure NextAuth.js with Prisma adapter
+- [x] Set up Google OAuth provider (primary login method)
+- [x] Set up email magic-link provider (Resend) as fallback
+- [x] Optionally add GitHub OAuth provider
+- [x] Create sign-in page (`src/app/auth/signin/page.tsx`) with Google SSO button prominently displayed
+- [x] Add session provider to root layout
+- [x] Create auth middleware to protect routes
+- [x] Add user avatar/name display in header
+- [x] Set up Resend for transactional emails (magic-link + pool invites)
+- [x] Configure `RESEND_API_KEY` and `EMAIL_FROM` environment variables
 
 > See `docs/ARCHITECTURE.md` ADR-4 for auth strategy rationale.
 
@@ -48,26 +48,26 @@ Phased delivery plan for OscarPoolVibes. Each phase is a working, deployable inc
 
 ---
 
-## Phase 3: Pool Management
+## Phase 3: Pool Management [DONE]
 
 **Goal**: Users can create and manage multiple pools with configurable access (open or invite-only).
 
-- [ ] Create pool listing page (`src/app/pools/page.tsx`) — shows all pools the user belongs to or has created
-- [ ] Create pool creation form (`src/app/pools/create/page.tsx`) — name, ceremony year, access type (open/invite-only)
-- [ ] Support multiple pools per user (create several, join several)
-- [ ] Implement invite code generation (nanoid, 8 chars) for all pools
-- [ ] **Open pools**: anyone with the invite link/code can join directly
-- [ ] **Invite-only pools**: pool creator sends invites by email; only invited users can join
-- [ ] Build invite management UI for pool creators (`src/app/pools/[id]/invites/page.tsx`)
-  - [ ] Send invites by entering email addresses
-  - [ ] View pending/accepted/declined invite statuses
-  - [ ] Resend or revoke pending invites
-- [ ] Generate shareable invite links:
+- [x] Create pool listing page (`src/app/pools/page.tsx`) — shows all pools the user belongs to or has created
+- [x] Create pool creation form (`src/app/pools/create/page.tsx`) — name, ceremony year, access type (open/invite-only)
+- [x] Support multiple pools per user (create several, join several)
+- [x] Implement invite code generation (nanoid, 8 chars) for all pools
+- [x] **Open pools**: anyone with the invite link/code can join directly
+- [x] **Invite-only pools**: pool creator sends invites by email; only invited users can join
+- [x] Build invite management UI for pool creators (`src/app/pools/[id]/invites/page.tsx`)
+  - [x] Send invites by entering email addresses
+  - [x] View pending/accepted/declined invite statuses
+  - [x] Resend or revoke pending invites
+- [x] Generate shareable invite links:
   - Open pools: `/pools/join?code=ABC123` → immediate join after login
   - Invite-only pools: `/pools/join?token=<unique-token>` → validates invite + email match
-- [ ] Build pool detail page (`src/app/pools/[id]/page.tsx`) — members list, pool settings, link to predictions
-- [ ] Add copy-to-clipboard for invite link/code
-- [ ] Pool creator can edit pool settings (name, access type) after creation
+- [x] Build pool detail page (`src/app/pools/[id]/page.tsx`) — members list, pool settings, link to predictions
+- [x] Add copy-to-clipboard for invite link/code
+- [x] Pool creator can edit pool settings (name, access type) after creation
 
 > See `docs/USE_CASES.md` sections 2–3 and 5b for acceptance criteria.
 
@@ -75,18 +75,18 @@ Phased delivery plan for OscarPoolVibes. Each phase is a working, deployable inc
 
 ---
 
-## Phase 4: Predictions
+## Phase 4: Predictions [DONE]
 
 **Goal**: Users can make their first-choice and runner-up picks for every category.
 
-- [ ] Build prediction form component — for each category, two dropdowns (first choice, runner-up)
-- [ ] Validate that first choice != runner-up (client + server)
-- [ ] Create server action/API to save predictions (upsert by poolMember + category)
-- [ ] Show prediction summary page — all picks at a glance
-- [ ] Respect `predictionsLocked` flag — disable form when locked
-- [ ] Allow editing predictions until lock
-- [ ] Validate nominee belongs to the correct category (server-side)
-- [ ] Write unit tests for all prediction validation rules
+- [x] Build prediction form component — for each category, two dropdowns (first choice, runner-up)
+- [x] Validate that first choice != runner-up (client + server)
+- [x] Create server action/API to save predictions (upsert by poolMember + category)
+- [x] Show prediction summary page — all picks at a glance
+- [x] Respect `predictionsLocked` flag — disable form when locked
+- [x] Allow editing predictions until lock
+- [x] Validate nominee belongs to the correct category (server-side)
+- [x] Write unit tests for all prediction validation rules
 
 > See `docs/USE_CASES.md` section 3a for acceptance criteria.
 
@@ -94,18 +94,18 @@ Phased delivery plan for OscarPoolVibes. Each phase is a working, deployable inc
 
 ---
 
-## Phase 5: Scoring & Leaderboard
+## Phase 5: Scoring & Leaderboard [DONE]
 
 **Goal**: After winners are set, display scores and rankings.
 
-- [ ] Implement scoring function in `src/lib/scoring/`
-- [ ] Write thorough unit tests for scoring edge cases
-- [ ] Build leaderboard page (`src/app/pools/[id]/leaderboard/page.tsx`)
-- [ ] Show per-category breakdown (which picks were correct)
-- [ ] Highlight correct first-choice (full points) and correct runner-up (partial points)
-- [ ] Sort members by total score descending, handle ties
-- [ ] Write tests for permission matrix — every role × action combination
-- [ ] Test tie-breaking logic in leaderboard sorting
+- [x] Implement scoring function in `src/lib/scoring/`
+- [x] Write thorough unit tests for scoring edge cases
+- [x] Build leaderboard page (`src/app/pools/[id]/leaderboard/page.tsx`)
+- [x] Show per-category breakdown (which picks were correct)
+- [x] Highlight correct first-choice (full points) and correct runner-up (partial points)
+- [x] Sort members by total score descending, handle ties
+- [x] Write tests for permission matrix — every role × action combination
+- [x] Test tie-breaking logic in leaderboard sorting
 
 > See `docs/USE_CASES.md` sections 3b and permission matrix for acceptance criteria.
 
@@ -117,38 +117,37 @@ Phased delivery plan for OscarPoolVibes. Each phase is a working, deployable inc
 
 **Goal**: Authorized users can manually set ceremony results with conflict prevention. Results are global per ceremony.
 
-### 6a: Results Permission System
-> **Status**: Backend complete (API + logic). UI pending.
+### 6a: Results Permission System [DONE]
 
 - [x] Add `RESULTS_MANAGER` role to `PoolMemberRole` enum
 - [x] Implement permission check: ADMIN or RESULTS_MANAGER in any pool for the ceremony
 - [x] API to grant/revoke `RESULTS_MANAGER` role (`POST /api/pools/[poolId]/permissions`)
 - [x] API to list pool members with their roles (`GET /api/pools/[poolId]/permissions`)
-- [ ] Build UI for pool admins to manage who can set results
+- [x] Build UI for pool admins to manage who can set results (`src/app/pools/[id]/permissions/page.tsx`)
 
-### 6b: Setting Results with Conflict Prevention
-> **Status**: Backend complete (API + conflict detection). UI pending.
+### 6b: Setting Results with Conflict Prevention [DONE]
 
 - [x] `CategoryResult` model with `version` field for optimistic concurrency control
 - [x] `setResult()` function: validates permission, checks nominee, detects version conflicts
 - [x] API route `POST /api/results` — set winner with `expectedVersion` for conflict safety
 - [x] API route `GET /api/results?ceremonyYearId=<id>` — get all results for a ceremony
 - [x] Sync winners to `Category.winnerId` and `Nominee.isWinner` on result set
-- [ ] Build results entry UI — dropdown per category, shows who last set each result
-- [ ] Show conflict resolution UI when two users try to set different winners
-- [ ] Add real-time or polling refresh to keep results UI in sync
+- [x] Build results entry UI — dropdown per category, shows who last set each result (`src/app/results/[ceremonyYearId]/page.tsx`)
+- [x] Show conflict resolution UI when two users try to set different winners (`src/components/results/ConflictDialog.tsx`)
+- [x] Add polling refresh to keep results UI in sync (`src/components/results/ResultsPoller.tsx`)
 
-### 6c: Admin / Ceremony Management
-- [ ] Build admin page for managing ceremony years (`src/app/admin/page.tsx`)
-- [ ] Add UI to lock/unlock predictions
-- [ ] Add UI to create/edit categories and nominees (for future years)
-- [ ] Write integration tests for all results management flows
-- [ ] Write integration tests for permission grant/revoke
-- [ ] Test optimistic concurrency conflict scenarios
+### 6c: Admin / Ceremony Management [DONE]
+
+- [x] Build admin page for managing ceremony years (`src/app/admin/page.tsx`)
+- [x] Add UI to lock/unlock predictions
+- [x] Add UI to create/edit categories and nominees (for future years)
+- [x] Write integration tests for all results management flows
+- [x] Write integration tests for permission grant/revoke
+- [x] Test optimistic concurrency conflict scenarios
 
 > See `docs/USE_CASES.md` sections 4–5 for acceptance criteria.
 
-**Deliverable**: Backend APIs for results management and permissions are implemented with conflict detection. UI for results entry, conflict resolution, and admin management is pending.
+**Deliverable**: Full results management system with permissions UI, results entry with conflict detection and polling, and admin panel for ceremony/category/nominee management.
 
 ---
 
