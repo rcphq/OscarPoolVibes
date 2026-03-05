@@ -52,6 +52,7 @@ OscarPoolVibes/
 │   ├── SCHEMA.md            # Database schema reference
 │   ├── ARCHITECTURE.md      # Architecture decisions & rationale
 │   ├── PLAN.md              # Phased implementation plan
+│   ├── USE_CASES.md         # All use cases organized by role
 │   ├── MONETIZATION.md      # Monetization strategy & tier design
 │   └── DATABASE_ALTERNATIVES.md  # Database options comparison
 ├── CLAUDE.md                # Agentic coding guidelines

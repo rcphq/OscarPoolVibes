@@ -94,9 +94,12 @@ See `docs/SCHEMA.md` for the full schema. Key entities:
 - **Nominee** — a nominated movie/person for a category
 - **Pool** — a group of friends competing together for a ceremony year (open or invite-only)
 - **PoolInvite** — explicit invitation to join an invite-only pool
-- **PoolMember** — a user's membership in a pool (users can be in multiple pools)
+- **PoolMember** — a user's membership in a pool (users can be in multiple pools; role: MEMBER, ADMIN, or RESULTS_MANAGER)
 - **Prediction** — a user's first-choice and runner-up pick for a category
+- **CategoryResult** — tracks who set each category's winner, with optimistic concurrency control for conflict prevention
 - **User** — authenticated user account
+
+See `docs/USE_CASES.md` for the complete breakdown of functionality by role (Visitor, User, Member, Results Manager, Admin).
 
 ## Error Handling
 
