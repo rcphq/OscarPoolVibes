@@ -23,12 +23,14 @@ Research and recommendations for how OscarPoolVibes could generate revenue while
 ### Free Tier (maximize adoption)
 
 - Create and join up to **3 pools** per ceremony year
-- Pool size up to **25 members**
+- Pool size up to **10 members**
 - Pick first-choice and runner-up for all categories
 - Basic leaderboard with rankings and scores
 - Share pool invite links (open and invite-only)
 - View results after ceremony
 - Standard scoring rules
+
+> These tier limits are reflected in the use case constraints. See [USE_CASES.md](USE_CASES.md) for how limits affect user flows.
 
 ### Pro Tier (~$4.99/year or $0.99/ceremony)
 
@@ -53,6 +55,12 @@ Research and recommendations for how OscarPoolVibes could generate revenue while
 
 **Pricing rationale**: The Oscars are annual, so yearly or per-ceremony pricing makes more sense than monthly. Price points are low enough to be impulse purchases ($0.99-$4.99) while the commissioner tier captures organizers who really care.
 
+### Tier Enforcement
+
+> **Implementation note**: The database schema does not currently include a `Subscription` or `UserTier` model. Tier limits (pool count, member cap) are enforced at the application layer. A `Subscription` model will be needed when Stripe integration is implemented in Monetization Stage 2. For MVP, all users have free-tier limits hardcoded in the application logic.
+
+> **Schema impact**: The `Pool.maxMembers` field (nullable Int) already exists and can be used for the per-pool member cap. The per-user pool count limit requires a query check at pool creation time.
+
 ---
 
 ## Creative Monetization Ideas
@@ -60,6 +68,8 @@ Research and recommendations for how OscarPoolVibes could generate revenue while
 ### A. Awards Season Pass ($2.99-$6.99)
 
 Bundle prediction pools for the full awards circuit: Golden Globes, SAG Awards, BAFTAs, Critics Choice, and the Oscars. Extends engagement from December through March. Offer a cumulative "Awards Season Champion" leaderboard.
+
+> **Schema impact**: The current data model is tightly coupled to Oscar ceremonies (`CeremonyYear`). Supporting Golden Globes, SAG, BAFTAs, etc. would require generalizing the ceremony model or creating parallel schemas. This is a significant architectural change, not just a feature addition. See `docs/ARCHITECTURE.md` ADR-6 for the current per-ceremony design.
 
 ### B. Cosmetic Trophies and Flair ($0.99-$2.99 each)
 
@@ -84,7 +94,8 @@ A mode where users rank categories by confidence level — higher confidence = h
 - Let commissioners collect real-money entry fees through the app (Stripe integration)
 - Take a 5-10% platform fee on payouts
 - Solves a real pain point: every pool organizer chases people on Venmo separately
-- Note: structure carefully to stay within social/entertainment pool regulations
+
+> **Legal considerations**: Real-money pool entry fees implicate state-by-state gambling regulations in the US. Key requirements may include: age verification (18+ or 21+), state-specific licensing, responsible gaming disclosures, and prize pool escrow requirements. Budget for legal review before implementing this feature. Some states prohibit paid prediction contests entirely. Consider limiting to "social pools" (no platform take rate) initially to reduce regulatory exposure.
 
 ### F. Sponsored Predictions / Brand Partnerships
 
@@ -95,7 +106,7 @@ A mode where users rank categories by confidence level — higher confidence = h
 
 ### G. Golden Ballot Challenge ($1.99 entry)
 
-A single global pool where all users compete. Small entry fee funds a prize pool. Top 10 get permanent "Golden Ballot 2027" profile flair. Creates a marquee competitive event beyond friend pools.
+A single global pool where all users compete. Small entry fee funds a prize pool. Top 10 get permanent "Golden Ballot [year]" profile flair. Creates a marquee competitive event beyond friend pools.
 
 ### H. Data and Insights Product
 
@@ -111,7 +122,7 @@ A single global pool where all users compete. Small entry fee funds a prize pool
 |---|---|---|---|---|
 | Year 1 (MVP) | 10K | 3% | $3.00 | ~$900 |
 | Year 2 (Growth) | 50K | 4% | $4.99 | ~$10K |
-| Year 3 (Scale) | 100K | 5% | $5.00 + cosmetics + ads | ~$50K |
+| Year 3 (Scale) | 100K | 5% | $5.00 avg | ~$25K subscriptions + ~$15K cosmetics + ~$10K ads |
 | With payment rails | 100K | 10% in paid pools | 5% of $10 avg entry | ~$50K+ |
 
 **Strongest near-term plays**:
@@ -125,7 +136,7 @@ A single global pool where all users compete. Small entry fee funds a prize pool
 
 ## Implementation Priority
 
-1. **Phase 1 (MVP)**: Everything free — focus on user growth and engagement
-2. **Phase 2 (Post-launch)**: Add Stripe for Pro/Commissioner tiers
-3. **Phase 3 (Growth)**: Cosmetics shop, Awards Season Pass
-4. **Phase 4 (Scale)**: Payment rails, brand partnerships, data product
+1. **Monetization Stage 1 (MVP launch)**: Everything free — focus on user growth and engagement
+2. **Monetization Stage 2 (Post-launch validation)**: Add Stripe for Pro/Commissioner tiers. Env vars needed: `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`
+3. **Monetization Stage 3 (Growth)**: Cosmetics shop, Awards Season Pass
+4. **Monetization Stage 4 (Scale)**: Payment rails, brand partnerships, data product
