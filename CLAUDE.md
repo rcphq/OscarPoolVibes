@@ -2,19 +2,20 @@
 
 ## Project Overview
 
-OscarPoolVibes is a Next.js 15 (App Router) web app for Oscar prediction pools. Users create/join pools, pick a first-choice and runner-up for each Academy Award category, and compete on a leaderboard. Hosted on Vercel free tier with Neon PostgreSQL.
+OscarPoolVibes is a Next.js 15 (App Router) web app for Oscar prediction pools. Users create/join pools, pick a first-choice and runner-up for each Academy Award category, and compete on a leaderboard. Hosted on Vercel Hobby tier with Neon PostgreSQL.
 
 ## Tech Stack
 
 - **Framework**: Next.js 15 with App Router (NOT Pages Router)
 - **Language**: TypeScript — strict mode, no `any` types
-- **Database**: PostgreSQL on Neon, managed via Prisma ORM
-- **Auth**: Auth.js (next-auth v5) — App Router native
+- **Database**: PostgreSQL on Neon, managed via Prisma ORM with `@prisma/adapter-neon`
+- **Auth**: Auth.js v5 (next-auth) — App Router native
 - **Styling**: Tailwind CSS + shadcn/ui (Radix UI primitives)
 - **Icons**: Lucide React
 - **Fonts**: Playfair Display (headings) + Inter (body) via `next/font`
+- **Validation**: Zod for input schemas
 - **Testing**: Vitest + React Testing Library
-- **Hosting**: Vercel free tier
+- **Hosting**: Vercel Hobby tier
 
 ## Key Conventions
 
@@ -66,15 +67,16 @@ Validate these at the server action / API route level. Never trust client-side v
 
 ### Auth
 
-- Auth.js (next-auth v5) config lives in `src/lib/auth/`
+- Auth.js v5 config lives in `src/lib/auth/auth.ts`
+- Use `auth()` for server-side session checks (NOT `getServerSession`)
 - Google OAuth is the primary login method (lowest friction for invite links)
-- Email magic-link as fallback; optionally GitHub OAuth
-- Env vars needed: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `RESEND_API_KEY`
+- Email magic-link via Resend as fallback; optionally GitHub OAuth
+- Env vars needed: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `AUTH_SECRET`, `RESEND_API_KEY`
 - Protect pool-write and admin routes with middleware or server-side session checks
 
 ### Vercel Free Tier Constraints
 
-- Serverless functions: 15s timeout (Hobby plan) — keep DB queries fast
+- Serverless functions: 15s timeout on Hobby plan (keep DB queries fast)
 - Edge functions: consider for leaderboard if latency matters
 - No cron jobs on free tier — use on-demand revalidation or ISR
 - Bundle size: keep client JS minimal; heavy logic stays server-side
@@ -115,6 +117,11 @@ See `docs/SCHEMA.md` for the full schema. Key entities:
 - **User** — authenticated user account
 
 See `docs/USE_CASES.md` for the complete breakdown of functionality by role (Visitor, User, Member, Results Manager, Admin), including error scenarios and lifecycle flows.
+
+## Commit Convention
+
+Format: `type(scope): description (#issue-number)`
+Valid scopes: `pools`, `scoring`, `auth`, `leaderboard`, `results`, `admin`, `a11y`, `seo`, `infra`, `ui`, `design`
 
 ## Error Handling
 
@@ -260,8 +267,8 @@ Scopes: pools, scoring, auth, leaderboard, results, admin, a11y, seo, infra, ui,
 
 Required in `.env.local`:
 - `DATABASE_URL` — Neon Postgres connection string
-- `NEXTAUTH_URL` — app base URL (e.g., `http://localhost:3000`)
-- `NEXTAUTH_SECRET` — random secret for sessions (`openssl rand -base64 32`)
+- `AUTH_URL` — app base URL (e.g., `http://localhost:3000`)
+- `AUTH_SECRET` — random secret for sessions (`openssl rand -base64 32`)
 - `GOOGLE_CLIENT_ID` — Google OAuth client ID (from Google Cloud Console)
 - `GOOGLE_CLIENT_SECRET` — Google OAuth client secret
 - `RESEND_API_KEY` — Resend API key for transactional emails

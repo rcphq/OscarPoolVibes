@@ -6,7 +6,7 @@ This document records key architectural choices for OscarPoolVibes and the reaso
 
 ## ADR-1: Next.js App Router on Vercel Free Tier
 
-**Decision**: Use Next.js 15 with the App Router, deployed to Vercel's free tier.
+**Decision**: Use Next.js 15 with the App Router, deployed to Vercel's Hobby tier.
 
 **Context**: We need a full-stack framework that supports SSR, API routes, and static generation — all within free hosting limits. The pool creator (admin) needs server-side functionality; players mostly consume read-heavy pages.
 
@@ -16,7 +16,7 @@ This document records key architectural choices for OscarPoolVibes and the reaso
 - App Router gives us React Server Components (RSC) — less client JS, faster pages
 - Next.js 15 introduced improved React 19 support and better RSC patterns
 - Vercel free tier: automatic deploys, preview URLs, serverless functions, edge network
-- Free tier limits (15s function timeout on Hobby plan, 100GB bandwidth) are fine for a small friend-group app
+- Hobby tier limits (15s function timeout, 100GB bandwidth) are fine for a small friend-group app
 - ISR (Incremental Static Regeneration) can cache leaderboard pages to minimize DB hits
 
 **Trade-offs**:
@@ -66,14 +66,14 @@ This document records key architectural choices for OscarPoolVibes and the reaso
 
 ## ADR-4: Auth.js with Google SSO as Primary Auth
 
-**Decision**: Use Auth.js (next-auth v5) with Google OAuth as the primary login method, email magic-link as fallback.
+**Decision**: Use Auth.js v5 (next-auth) with Google OAuth as the primary login method, email magic-link as fallback.
 
 **Context**: Users need accounts to join pools and make predictions. Auth must be free, simple, and familiar. Most users will be sharing invite links with friends — low-friction sign-up is critical.
 
 **Rationale**:
 - Google SSO is the lowest-friction option — most users already have a Google account
 - One-click sign-in reduces drop-off when friends follow an invite link
-- Auth.js (next-auth v5) is the de-facto auth library for Next.js App Router
+- Auth.js v5 is the de-facto auth library for Next.js App Router
 - Email magic-link as fallback for users who prefer not to use Google
 - GitHub OAuth available as optional tertiary provider (useful for developer audiences)
 - Session data stored in the DB via Prisma adapter — no external session store needed
@@ -267,6 +267,55 @@ This document records key architectural choices for OscarPoolVibes and the reaso
 - E2E tests are slow — run only in CI, not on every save
 - Test database must be seeded consistently — use transactional rollback pattern
 - Visual regression tests produce false positives on font rendering differences across OS — use tolerance thresholds
+
+---
+
+## ADR-13: Soft Delete for Pools and Pool Members
+
+**Decision**: Use `archivedAt` on Pool and `leftAt` on PoolMember instead of hard deletes.
+
+**Rationale**:
+- Preserves prediction history for leaderboard integrity
+- Pool members who leave retain their predictions for scoring
+- Archived pools are excluded from active listings but data remains intact
+- Rejoin semantics: if `leftAt` is set, clear it on rejoin (predictions preserved)
+
+---
+
+## ADR-14: Prediction Visibility Rules
+
+**Decision**: Other members' predictions are hidden until `predictionsLocked = true` on the ceremony year.
+
+**Rationale**:
+- Prevents copying picks from other members
+- Server-side enforcement: API never returns others' picks before lock
+- After lock, all picks are visible for comparison and discussion
+
+---
+
+## ADR-15: Zod for Input Validation
+
+**Decision**: Use Zod schemas for all user input validation at system boundaries.
+
+**Rationale**:
+- Type-safe validation with TypeScript inference
+- Shared schemas between client and server
+- Clear error messages for form validation
+- Pairs well with server actions and API routes
+
+---
+
+## ADR-16: "Black Tie" Design System
+
+**Decision**: Use a Gold + Deep Navy color scheme ("Black Tie") with dark-mode-first approach.
+
+**Context**: See `docs/plans/2026-03-05-design-system.md` for full specification.
+
+**Rationale**:
+- Oscar ceremony aesthetic — elegant, luxurious without being noisy
+- shadcn/ui components with custom CSS tokens mapped to gold/navy palette
+- Playfair Display (headings) + Inter (body) for typographic contrast
+- WCAG 2.1 AA compliant contrast ratios
 
 ---
 
