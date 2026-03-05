@@ -264,9 +264,9 @@ OscarPoolVibes has comprehensive documentation (CLAUDE.md, SCHEMA.md, USE_CASES.
 | #10 | Pool pages (list, create, detail) | 3 | 3 | DONE |
 | #11 | Invite system (open + invite-only flows) | 3 | 3 | DONE |
 | #12 | Pool settings & access control | 3 | 3 | DONE |
-| #13 | Prediction types, validation, server actions | 4 | 4 | |
-| #14 | Prediction form UI | 4 | 4 | |
-| #15 | Prediction summary & visibility rules | 4 | 4 | |
+| #13 | Prediction types, validation, server actions | 4 | 4 | DONE |
+| #14 | Prediction form UI | 4 | 4 | DONE |
+| #15 | Prediction summary & visibility rules | 4 | 4 | DONE |
 | #16 | Scoring engine (pure functions + unit tests) | 5 | 5 | |
 | #17 | Leaderboard UI with per-category breakdown | 5 | 5 | |
 | #18 | Winner reveal animation (reduced-motion safe) | 5 | 5 | |
