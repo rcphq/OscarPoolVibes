@@ -170,4 +170,4 @@ See [docs/TESTING.md](docs/TESTING.md) for the full testing strategy.
 
 ## License
 
-MIT
+Copyright (c) 2026 Ruben Llibre. All rights reserved. See [LICENSE](LICENSE) for details.
