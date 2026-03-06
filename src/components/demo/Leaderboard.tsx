@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { PlayerScore, CategoryScore } from "@/lib/demo/scoring";
 
 type LeaderboardProps = {
@@ -15,31 +15,71 @@ export function Leaderboard({
   onRestart,
 }: LeaderboardProps) {
   const [showBreakdown, setShowBreakdown] = useState(false);
+  const [phase, setPhase] = useState<"score" | "ranking" | "details">("score");
   const allScores = [userScore, ...rivalScores].sort(
     (a, b) => b.totalPoints - a.totalPoints
   );
   const userRank = allScores.findIndex((s) => s.name === userScore.name) + 1;
   const topScore = allScores[0].totalPoints;
 
+  // Staged reveal: score card -> ranking -> details
+  useEffect(() => {
+    const t1 = setTimeout(() => setPhase("ranking"), 1200);
+    const t2 = setTimeout(() => setPhase("details"), 2400);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
+  }, []);
+
   return (
     <div className="mx-auto max-w-2xl">
       {/* Hero score card */}
-      <div className="mb-8 rounded-xl border border-gold-500/30 bg-gradient-to-br from-gray-900 to-gray-950 p-6 text-center">
+      <div className="animate-scale-in mb-8 rounded-xl border border-gold-500/30 bg-gradient-to-br from-gray-900 to-gray-950 p-6 text-center">
         <p className="text-sm font-medium uppercase tracking-wider text-gold-500">
           Your Final Score
         </p>
-        <p className="mt-2 text-6xl font-bold text-gold-400">
-          {userScore.totalPoints}
-        </p>
+        <CountUpScore
+          target={userScore.totalPoints}
+          className="mt-2 text-6xl font-bold text-gold-400"
+        />
         <p className="mt-1 text-sm text-gray-400">
           out of {userScore.maxPossible} possible points
         </p>
-        <div className="mt-4 flex items-center justify-center gap-6">
-          <Stat
-            label="Rank"
-            value={`#${userRank}`}
-            accent={userRank <= 3}
-          />
+
+        {/* Rank reveal with trophy */}
+        <div
+          className={`mt-4 flex items-center justify-center gap-6 transition-all duration-500 ${
+            phase !== "score" ? "opacity-100" : "opacity-0"
+          }`}
+        >
+          <div className="text-center">
+            <p className="flex items-center justify-center gap-1">
+              {userRank <= 3 && (
+                <span
+                  className="animate-trophy-bounce inline-block text-lg"
+                  role="img"
+                  aria-label={
+                    userRank === 1
+                      ? "First place"
+                      : userRank === 2
+                        ? "Second place"
+                        : "Third place"
+                  }
+                >
+                  {userRank === 1 ? "\u{1F947}" : userRank === 2 ? "\u{1F948}" : "\u{1F949}"}
+                </span>
+              )}
+              <span
+                className={`text-xl font-bold ${
+                  userRank <= 3 ? "text-gold-400" : "text-gray-200"
+                }`}
+              >
+                #{userRank}
+              </span>
+            </p>
+            <p className="text-xs text-gray-500">Rank</p>
+          </div>
           <Stat
             label="Correct Picks"
             value={String(userScore.correctFirstChoices)}
@@ -51,120 +91,174 @@ export function Leaderboard({
         </div>
       </div>
 
-      {/* Leaderboard bar chart */}
-      <h3 className="mb-3 text-lg font-semibold text-gray-200">
-        Pool Rankings
-      </h3>
-      <div className="mb-8 space-y-2">
-        {allScores.map((score, index) => {
-          const isUser = score.name === userScore.name;
-          const barWidth =
-            topScore > 0 ? (score.totalPoints / topScore) * 100 : 0;
+      {/* Leaderboard bar chart — staggered entry */}
+      {phase !== "score" && (
+        <>
+          <h3 className="animate-fade-in mb-3 text-lg font-semibold text-gray-200">
+            Pool Rankings
+          </h3>
+          <div className="mb-8 space-y-2">
+            {allScores.map((score, index) => {
+              const isUser = score.name === userScore.name;
+              const barWidth =
+                topScore > 0 ? (score.totalPoints / topScore) * 100 : 0;
 
-          return (
-            <div
-              key={score.name}
-              className={`rounded-lg border px-4 py-2 ${
-                isUser
-                  ? "border-gold-500/40 bg-gold-500/10"
-                  : "border-gray-800 bg-gray-900/50"
-              }`}
-            >
-              <div className="mb-1 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`text-sm font-bold ${
-                      index === 0
-                        ? "text-gold-400"
-                        : index === 1
-                          ? "text-gray-300"
-                          : index === 2
-                            ? "text-amber-600"
-                            : "text-gray-500"
-                    }`}
-                  >
-                    #{index + 1}
-                  </span>
-                  <span
-                    className={`text-sm font-medium ${
-                      isUser ? "text-gold-300" : "text-gray-300"
-                    }`}
-                  >
-                    {isUser ? `${score.name} (You)` : score.name}
-                  </span>
-                </div>
-                <span
-                  className={`text-sm font-semibold ${
-                    isUser ? "text-gold-400" : "text-gray-400"
-                  }`}
-                >
-                  {score.totalPoints} pts
-                </span>
-              </div>
-              <div className="h-2 overflow-hidden rounded-full bg-gray-800">
+              return (
                 <div
-                  className={`h-full rounded-full transition-all duration-1000 ${
-                    isUser ? "bg-gold-500" : "bg-gray-600"
-                  }`}
-                  style={{ width: `${barWidth}%` }}
-                />
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Score breakdown toggle */}
-      <button
-        onClick={() => setShowBreakdown((b) => !b)}
-        className="mb-4 w-full rounded-lg border border-gray-700 py-2 text-sm font-medium text-gray-300 transition hover:border-gray-600 hover:text-gray-200"
-      >
-        {showBreakdown ? "Hide" : "Show"} Category Breakdown
-      </button>
-
-      {showBreakdown && (
-        <CategoryBreakdown scores={userScore.categoryScores} />
+                  key={score.name}
+                  className="animate-fade-in-up"
+                  style={{ animationDelay: `${index * 80}ms` }}
+                >
+                  <div
+                    className={`rounded-lg border px-4 py-2 transition-colors ${
+                      isUser
+                        ? "border-gold-500/40 bg-gold-500/10"
+                        : "border-gray-800 bg-gray-900/50"
+                    }`}
+                  >
+                    <div className="mb-1 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <RankBadge rank={index + 1} />
+                        <span
+                          className={`text-sm font-medium ${
+                            isUser ? "text-gold-300" : "text-gray-300"
+                          }`}
+                        >
+                          {isUser ? `${score.name} (You)` : score.name}
+                        </span>
+                      </div>
+                      <span
+                        className={`text-sm font-semibold ${
+                          isUser ? "text-gold-400" : "text-gray-400"
+                        }`}
+                      >
+                        {score.totalPoints} pts
+                      </span>
+                    </div>
+                    <div className="h-2 overflow-hidden rounded-full bg-gray-800">
+                      <div
+                        className={`animate-bar-fill h-full rounded-full ${
+                          isUser ? "bg-gold-500" : "bg-gray-600"
+                        }`}
+                        style={{
+                          width: `${barWidth}%`,
+                          animationDelay: `${index * 80 + 300}ms`,
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </>
       )}
 
-      {/* Score distribution chart */}
-      <h3 className="mb-3 mt-8 text-lg font-semibold text-gray-200">
-        Points by Category
-      </h3>
-      <div className="mb-8 space-y-1">
-        {userScore.categoryScores.map((cs) => (
-          <div key={cs.categoryId} className="flex items-center gap-2">
-            <span className="w-40 truncate text-xs text-gray-400">
-              {cs.categoryName}
-            </span>
-            <div className="flex-1">
-              <div className="h-4 overflow-hidden rounded bg-gray-800">
-                {cs.earnedPoints > 0 && (
-                  <div
-                    className={`h-full rounded ${
-                      cs.firstChoiceCorrect ? "bg-green-500" : "bg-yellow-500"
-                    }`}
-                    style={{
-                      width: `${(cs.earnedPoints / cs.pointValue) * 100}%`,
-                    }}
-                  />
-                )}
-              </div>
-            </div>
-            <span className="w-12 text-right text-xs font-medium text-gray-400">
-              {cs.earnedPoints}/{cs.pointValue}
-            </span>
-          </div>
-        ))}
-      </div>
+      {/* Details section — appears last */}
+      {phase === "details" && (
+        <div className="animate-fade-in-up">
+          {/* Score breakdown toggle */}
+          <button
+            onClick={() => setShowBreakdown((b) => !b)}
+            className="mb-4 w-full rounded-lg border border-gray-700 py-2 text-sm font-medium text-gray-300 transition hover:border-gray-600 hover:text-gray-200"
+            aria-expanded={showBreakdown}
+          >
+            {showBreakdown ? "Hide" : "Show"} Category Breakdown
+          </button>
 
-      {/* Restart */}
-      <button
-        onClick={onRestart}
-        className="w-full rounded-lg bg-gold-500 py-3 text-lg font-semibold text-gray-950 transition hover:bg-gold-400"
-      >
-        Try Again
-      </button>
+          {showBreakdown && (
+            <div className="animate-fade-in">
+              <CategoryBreakdown scores={userScore.categoryScores} />
+            </div>
+          )}
+
+          {/* Points by category chart */}
+          <h3 className="mb-3 mt-8 text-lg font-semibold text-gray-200">
+            Points by Category
+          </h3>
+          <div className="mb-8 space-y-1">
+            {userScore.categoryScores.map((cs, i) => (
+              <div
+                key={cs.categoryId}
+                className="flex items-center gap-2"
+                style={{ animationDelay: `${i * 30}ms` }}
+              >
+                <span className="w-40 truncate text-xs text-gray-400">
+                  {cs.categoryName}
+                </span>
+                <div className="flex-1">
+                  <div className="h-4 overflow-hidden rounded bg-gray-800">
+                    {cs.earnedPoints > 0 && (
+                      <div
+                        className={`animate-bar-fill h-full rounded ${
+                          cs.firstChoiceCorrect
+                            ? "bg-green-500"
+                            : "bg-yellow-500"
+                        }`}
+                        style={{
+                          width: `${(cs.earnedPoints / cs.pointValue) * 100}%`,
+                          animationDelay: `${i * 40}ms`,
+                        }}
+                      />
+                    )}
+                  </div>
+                </div>
+                <span className="w-12 text-right text-xs font-medium text-gray-400">
+                  {cs.earnedPoints}/{cs.pointValue}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          {/* Restart */}
+          <button
+            onClick={onRestart}
+            className="w-full rounded-lg bg-gold-500 py-3 text-lg font-semibold text-gray-950 transition hover:bg-gold-400"
+          >
+            Try Again
+          </button>
+        </div>
+      )}
     </div>
+  );
+}
+
+/** Animated number count-up */
+function CountUpScore({
+  target,
+  className,
+}: {
+  target: number;
+  className?: string;
+}) {
+  const [current, setCurrent] = useState(0);
+  const frameRef = useRef<number>(0);
+
+  useEffect(() => {
+    if (target === 0) return;
+    const duration = 800;
+    const start = performance.now();
+
+    const tick = (now: number) => {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      // Ease-out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setCurrent(Math.round(eased * target));
+
+      if (progress < 1) {
+        frameRef.current = requestAnimationFrame(tick);
+      }
+    };
+
+    frameRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frameRef.current);
+  }, [target]);
+
+  return (
+    <p className={className} aria-live="polite" aria-label={`Score: ${target}`}>
+      {current}
+    </p>
   );
 }
 
@@ -191,10 +285,23 @@ function Stat({
   );
 }
 
+function RankBadge({ rank }: { rank: number }) {
+  const colors =
+    rank === 1
+      ? "text-gold-400"
+      : rank === 2
+        ? "text-gray-300"
+        : rank === 3
+          ? "text-amber-600"
+          : "text-gray-500";
+
+  return <span className={`text-sm font-bold ${colors}`}>#{rank}</span>;
+}
+
 function CategoryBreakdown({ scores }: { scores: CategoryScore[] }) {
   return (
     <div className="overflow-hidden rounded-lg border border-gray-800">
-      <table className="w-full text-sm">
+      <table className="w-full text-sm" role="table">
         <thead>
           <tr className="border-b border-gray-800 bg-gray-900/80">
             <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-400">

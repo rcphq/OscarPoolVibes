@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { DEMO_CATEGORIES, getWinner } from "@/lib/demo/oscar-data";
 import type { Prediction } from "@/lib/demo/scoring";
 
@@ -19,9 +19,10 @@ export function ResultsReveal({ predictions, onComplete }: ResultsRevealProps) {
       setIsAutoRevealing(false);
       return;
     }
-    const timer = setTimeout(() => {
-      setRevealedCount((c) => c + 1);
-    }, 800);
+    const timer = setTimeout(
+      () => setRevealedCount((c) => c + 1),
+      900
+    );
     return () => clearTimeout(timer);
   }, [isAutoRevealing, revealedCount]);
 
@@ -36,28 +37,61 @@ export function ResultsReveal({ predictions, onComplete }: ResultsRevealProps) {
 
   const allRevealed = revealedCount >= DEMO_CATEGORIES.length;
 
+  // Running score tally
+  const runningScore = useMemo(() => {
+    let total = 0;
+    for (let i = 0; i < revealedCount; i++) {
+      const category = DEMO_CATEGORIES[i];
+      const prediction = predictions.find((p) => p.categoryId === category.id);
+      const winner = getWinner(category);
+      if (prediction?.firstChoiceId === winner.id) {
+        total += category.pointValue;
+      } else if (prediction?.runnerUpId === winner.id) {
+        total += Math.round(category.pointValue * 0.5);
+      }
+    }
+    return total;
+  }, [revealedCount, predictions]);
+
   return (
     <div className="mx-auto max-w-2xl">
+      {/* Header with running score */}
       <div className="mb-6 text-center">
-        <h2 className="text-2xl font-bold text-gold-400">And the Winners Are...</h2>
-        <p className="text-sm text-gray-400">
+        <h2 className="animate-fade-in text-2xl font-bold text-gold-400">
+          And the Winners Are...
+        </h2>
+        <p className="mt-1 text-sm text-gray-400">
           {allRevealed
             ? "All winners revealed!"
             : `${revealedCount}/${DEMO_CATEGORIES.length} categories revealed`}
         </p>
+        {revealedCount > 0 && (
+          <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-gold-500/20 bg-gold-500/5 px-4 py-1.5">
+            <span className="text-xs uppercase tracking-wider text-gold-600">
+              Score
+            </span>
+            <span
+              key={runningScore}
+              className="animate-count-up-bounce text-lg font-bold text-gold-400"
+            >
+              {runningScore}
+            </span>
+          </div>
+        )}
       </div>
 
+      {/* Controls */}
       {!isAutoRevealing && revealedCount === 0 && (
-        <div className="mb-6 flex justify-center gap-3">
+        <div className="animate-fade-in mb-6 flex justify-center gap-3">
           <button
             onClick={handleRevealNext}
-            className="rounded-lg bg-gray-800 px-4 py-2 text-sm font-medium text-gray-200 hover:bg-gray-700"
+            className="rounded-lg bg-gray-800 px-4 py-2 text-sm font-medium text-gray-200 transition hover:bg-gray-700"
           >
-            Reveal One by One
+            One by One
           </button>
           <button
             onClick={handleRevealAll}
-            className="rounded-lg bg-gold-500 px-4 py-2 text-sm font-semibold text-gray-950 hover:bg-gold-400"
+            className="animate-pulse-gold rounded-lg bg-gold-500 px-4 py-2 text-sm font-semibold text-gray-950 transition hover:bg-gold-400"
           >
             Reveal All
           </button>
@@ -68,16 +102,18 @@ export function ResultsReveal({ predictions, onComplete }: ResultsRevealProps) {
         <div className="mb-6 flex justify-center">
           <button
             onClick={handleRevealNext}
-            className="rounded-lg bg-gold-500 px-4 py-2 text-sm font-semibold text-gray-950 hover:bg-gold-400"
+            className="rounded-lg bg-gold-500 px-4 py-2 text-sm font-semibold text-gray-950 transition hover:bg-gold-400"
           >
             Reveal Next
           </button>
         </div>
       )}
 
+      {/* Category list */}
       <div className="space-y-2">
         {DEMO_CATEGORIES.map((category, index) => {
           const isRevealed = index < revealedCount;
+          const isJustRevealed = index === revealedCount - 1;
           const winner = getWinner(category);
           const prediction = predictions.find(
             (p) => p.categoryId === category.id
@@ -96,8 +132,10 @@ export function ResultsReveal({ predictions, onComplete }: ResultsRevealProps) {
                   ? gotPoints
                     ? "border-green-500/30 bg-green-950/20"
                     : "border-gray-700 bg-gray-900/50"
-                  : "border-gray-800 bg-gray-900/30"
-              }`}
+                  : index === revealedCount
+                    ? "animate-shimmer border-gold-500/20 bg-gray-900/40"
+                    : "border-gray-800 bg-gray-900/30"
+              } ${isJustRevealed ? "animate-dramatic-glow" : ""}`}
             >
               <div className="flex items-center justify-between px-4 py-3">
                 <div className="flex items-center gap-3">
@@ -110,28 +148,45 @@ export function ResultsReveal({ predictions, onComplete }: ResultsRevealProps) {
                 </div>
 
                 {isRevealed ? (
-                  <div className="flex items-center gap-2">
+                  <div
+                    className={`flex items-center gap-2 ${
+                      isJustRevealed ? "animate-slide-in-right" : ""
+                    }`}
+                  >
+                    {/* Winner name */}
                     <span className="text-sm font-semibold text-gold-300">
                       {winner.name}
                     </span>
+
+                    {/* Score badge */}
                     {firstChoiceCorrect && (
-                      <span className="rounded-full bg-green-500/20 px-2 py-0.5 text-xs font-medium text-green-400">
+                      <span
+                        className={`rounded-full bg-green-500/20 px-2 py-0.5 text-xs font-medium text-green-400 ${
+                          isJustRevealed ? "animate-confetti-pop" : ""
+                        }`}
+                      >
                         +{category.pointValue}
                       </span>
                     )}
                     {runnerUpCorrect && (
-                      <span className="rounded-full bg-yellow-500/20 px-2 py-0.5 text-xs font-medium text-yellow-400">
-                        +{Math.round(category.pointValue * 0.5)} runner-up
+                      <span
+                        className={`rounded-full bg-yellow-500/20 px-2 py-0.5 text-xs font-medium text-yellow-400 ${
+                          isJustRevealed ? "animate-confetti-pop" : ""
+                        }`}
+                      >
+                        +{Math.round(category.pointValue * 0.5)}
                       </span>
                     )}
                     {!gotPoints && prediction?.firstChoiceId && (
-                      <span className="rounded-full bg-red-500/20 px-2 py-0.5 text-xs font-medium text-red-400">
-                        0
+                      <span className="rounded-full bg-red-500/10 px-2 py-0.5 text-xs font-medium text-red-400/70">
+                        miss
                       </span>
                     )}
                   </div>
                 ) : (
-                  <span className="text-sm text-gray-600">???</span>
+                  <span className="text-sm text-gray-700">
+                    {index === revealedCount ? "..." : ""}
+                  </span>
                 )}
               </div>
             </div>
@@ -139,13 +194,28 @@ export function ResultsReveal({ predictions, onComplete }: ResultsRevealProps) {
         })}
       </div>
 
+      {/* View Leaderboard CTA */}
       {allRevealed && (
-        <button
-          onClick={onComplete}
-          className="mt-8 w-full rounded-lg bg-gold-500 py-3 text-lg font-semibold text-gray-950 transition hover:bg-gold-400"
-        >
-          View Leaderboard
-        </button>
+        <div className="animate-fade-in-up mt-8">
+          <div className="mb-4 text-center">
+            <span className="text-3xl" role="img" aria-label="Trophy">
+              {runningScore > 60 ? "\u{1F3C6}" : runningScore > 30 ? "\u{1F44F}" : "\u{1F3AC}"}
+            </span>
+            <p className="mt-1 text-sm text-gray-400">
+              {runningScore > 60
+                ? "Outstanding picks!"
+                : runningScore > 30
+                  ? "Solid showing!"
+                  : "Better luck next year!"}
+            </p>
+          </div>
+          <button
+            onClick={onComplete}
+            className="w-full rounded-lg bg-gold-500 py-3 text-lg font-semibold text-gray-950 transition hover:bg-gold-400"
+          >
+            View Leaderboard
+          </button>
+        </div>
       )}
     </div>
   );

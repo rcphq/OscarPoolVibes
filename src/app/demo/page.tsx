@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { PredictionForm } from "@/components/demo/PredictionForm";
+import { EnvelopeTransition } from "@/components/demo/EnvelopeTransition";
 import { ResultsReveal } from "@/components/demo/ResultsReveal";
 import { Leaderboard } from "@/components/demo/Leaderboard";
 import { scorePredictions } from "@/lib/demo/scoring";
@@ -10,7 +11,7 @@ import { CEREMONY_NAME } from "@/lib/demo/oscar-data";
 import type { Prediction } from "@/lib/demo/scoring";
 import Link from "next/link";
 
-type DemoPhase = "predict" | "reveal" | "leaderboard";
+type DemoPhase = "predict" | "envelope" | "reveal" | "leaderboard";
 
 const STORAGE_KEY = "oscar-demo-predictions";
 
@@ -37,8 +38,12 @@ export default function DemoPage() {
     } catch {
       // ignore
     }
-    setPhase("reveal");
+    setPhase("envelope");
   };
+
+  const handleEnvelopeComplete = useCallback(() => {
+    setPhase("reveal");
+  }, []);
 
   const handleRevealComplete = () => {
     setPhase("leaderboard");
@@ -57,6 +62,9 @@ export default function DemoPage() {
   const userScore = scorePredictions(predictions, "You");
   const rivalScores = getRivalScores();
 
+  // Map display phase for the indicator (envelope counts as "reveal")
+  const displayPhase = phase === "envelope" ? "reveal" : phase;
+
   return (
     <div className="min-h-screen">
       {/* Header */}
@@ -69,7 +77,7 @@ export default function DemoPage() {
             <span className="rounded-full bg-gold-500/10 px-3 py-1 text-xs font-medium text-gold-400">
               Demo Pool
             </span>
-            <PhaseIndicator phase={phase} />
+            <PhaseIndicator phase={displayPhase} />
           </div>
         </div>
       </header>
@@ -86,6 +94,9 @@ export default function DemoPage() {
             onSubmit={handlePredictionsSubmit}
             initialPredictions={predictions}
           />
+        )}
+        {phase === "envelope" && (
+          <EnvelopeTransition onComplete={handleEnvelopeComplete} />
         )}
         {phase === "reveal" && (
           <ResultsReveal
@@ -105,25 +116,32 @@ export default function DemoPage() {
   );
 }
 
-function PhaseIndicator({ phase }: { phase: DemoPhase }) {
-  const phases: { key: DemoPhase; label: string }[] = [
-    { key: "predict", label: "Predict" },
-    { key: "reveal", label: "Results" },
-    { key: "leaderboard", label: "Leaderboard" },
+function PhaseIndicator({
+  phase,
+}: {
+  phase: Exclude<DemoPhase, "envelope">;
+}) {
+  const phases = [
+    { key: "predict" as const, label: "Predict" },
+    { key: "reveal" as const, label: "Results" },
+    { key: "leaderboard" as const, label: "Leaderboard" },
   ];
 
+  const currentIndex = phases.findIndex((p) => p.key === phase);
+
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-1" role="navigation" aria-label="Demo progress">
       {phases.map((p, i) => (
         <div key={p.key} className="flex items-center">
           <span
-            className={`text-xs ${
-              p.key === phase
+            className={`text-xs transition-colors duration-300 ${
+              i === currentIndex
                 ? "font-semibold text-gold-400"
-                : phases.indexOf(phases.find((x) => x.key === phase)!) > i
+                : i < currentIndex
                   ? "text-gray-400"
                   : "text-gray-600"
             }`}
+            aria-current={i === currentIndex ? "step" : undefined}
           >
             {p.label}
           </span>
