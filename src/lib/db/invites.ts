@@ -1,6 +1,47 @@
 import { nanoid } from "nanoid";
+import type { PoolMemberRole, Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db/client";
-import { addMember } from "@/lib/db/pool-members";
+
+async function addMemberInTransaction(
+  tx: Prisma.TransactionClient,
+  poolId: string,
+  userId: string,
+  role: PoolMemberRole = "MEMBER"
+) {
+  const existing = await tx.poolMember.findUnique({
+    where: { poolId_userId: { poolId, userId } },
+  });
+
+  if (existing && existing.leftAt === null) {
+    throw new Error("User is already an active member of this pool");
+  }
+
+  const pool = await tx.pool.findUniqueOrThrow({
+    where: { id: poolId },
+    select: { maxMembers: true },
+  });
+
+  if (pool.maxMembers !== null) {
+    const activeCount = await tx.poolMember.count({
+      where: { poolId, leftAt: null },
+    });
+
+    if (activeCount >= pool.maxMembers) {
+      throw new Error("Pool has reached its maximum number of members");
+    }
+  }
+
+  if (existing) {
+    return tx.poolMember.update({
+      where: { id: existing.id },
+      data: { leftAt: null, role },
+    });
+  }
+
+  return tx.poolMember.create({
+    data: { poolId, userId, role },
+  });
+}
 
 export async function createInvite(data: {
   poolId: string;
@@ -113,18 +154,13 @@ export async function acceptInvite(token: string, userId: string) {
       throw new Error("Invite has expired");
     }
 
-    // Mark invite as accepted
-    await tx.poolInvite.update({
+    await addMemberInTransaction(tx, invite.poolId, userId);
+
+    return tx.poolInvite.update({
       where: { id: invite.id },
       data: { status: "ACCEPTED" },
+      include: { pool: true },
     });
-
-    // Add user as pool member (uses its own logic for max members, rejoin, etc.)
-    // We call addMember outside the transaction since it has its own transaction
-    return invite;
-  }).then(async (invite) => {
-    await addMember(invite.poolId, userId);
-    return invite;
   });
 }
 
@@ -147,11 +183,17 @@ export async function declineInvite(token: string) {
   });
 }
 
-export async function revokeInvite(inviteId: string) {
-  return prisma.poolInvite.update({
-    where: { id: inviteId },
+export async function revokeInvite(inviteId: string, poolId: string) {
+  const result = await prisma.poolInvite.updateMany({
+    where: { id: inviteId, poolId },
     data: { status: "EXPIRED" },
   });
+
+  if (result.count === 0) {
+    throw new Error("Invite not found");
+  }
+
+  return result;
 }
 
 export async function getPoolInvites(poolId: string) {
@@ -171,10 +213,7 @@ export async function getInvitesByEmail(email: string) {
     where: {
       email,
       status: "PENDING",
-      OR: [
-        { expiresAt: null },
-        { expiresAt: { gt: new Date() } },
-      ],
+      OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
     },
     include: {
       pool: {

@@ -68,7 +68,7 @@ export default function DemoPage() {
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <header className="border-b border-gray-800 bg-gray-950/80 backdrop-blur">
+      <header className="border-b border-border bg-background/80 backdrop-blur">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
           <Link href="/" className="text-lg font-bold text-gold-400">
             OscarPoolVibes
@@ -83,8 +83,8 @@ export default function DemoPage() {
       </header>
 
       {/* Ceremony banner */}
-      <div className="border-b border-gray-800 bg-gray-900/50 py-3 text-center">
-        <p className="text-sm font-medium text-gray-400">{CEREMONY_NAME}</p>
+      <div className="border-b border-border bg-card/50 py-3 text-center">
+        <p className="text-sm font-medium text-muted-foreground">{CEREMONY_NAME}</p>
       </div>
 
       {/* Main content */}
@@ -138,15 +138,15 @@ function PhaseIndicator({
               i === currentIndex
                 ? "font-semibold text-gold-400"
                 : i < currentIndex
-                  ? "text-gray-400"
-                  : "text-gray-600"
+                  ? "text-muted-foreground"
+                  : "text-muted-foreground/60"
             }`}
             aria-current={i === currentIndex ? "step" : undefined}
           >
             {p.label}
           </span>
           {i < phases.length - 1 && (
-            <span className="mx-1 text-gray-700">/</span>
+            <span className="mx-1 text-muted-foreground/40">/</span>
           )}
         </li>
       ))}

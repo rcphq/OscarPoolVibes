@@ -56,7 +56,7 @@ describe("createPool", () => {
     txPool.create.mockResolvedValue(createdPool)
     txPoolMember.create.mockResolvedValue({})
 
-    mockTransaction.mockImplementation(async (fn: Function) =>
+    mockTransaction.mockImplementation(async (fn: (clients: Record<string, unknown>) => unknown) =>
       fn({ pool: txPool, poolMember: txPoolMember })
     )
 
@@ -92,7 +92,7 @@ describe("createPool", () => {
     const txPoolMember = { create: vi.fn() }
 
     txPool.create.mockResolvedValue({ id: "pool-2" })
-    mockTransaction.mockImplementation(async (fn: Function) =>
+    mockTransaction.mockImplementation(async (fn: (clients: Record<string, unknown>) => unknown) =>
       fn({ pool: txPool, poolMember: txPoolMember })
     )
 

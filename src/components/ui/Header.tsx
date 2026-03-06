@@ -15,6 +15,14 @@ export async function Header() {
           OscarPoolVibes
         </Link>
         <nav className="flex items-center gap-4">
+          {!session?.user && (
+            <Link
+              href="/demo"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Demo
+            </Link>
+          )}
           <Link
             href="/pools"
             className="text-sm text-muted-foreground hover:text-foreground transition-colors"

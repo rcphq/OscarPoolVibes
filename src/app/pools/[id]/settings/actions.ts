@@ -110,6 +110,12 @@ export async function changeMemberRoleAction(
 ) {
   const adminId = await requireAdmin(poolId);
 
+  // Only MEMBER and RESULTS_MANAGER are assignable — prevent privilege escalation to ADMIN
+  const allowedRoles: PoolMemberRole[] = ["MEMBER", "RESULTS_MANAGER"];
+  if (!allowedRoles.includes(role)) {
+    return { error: `Role must be one of: ${allowedRoles.join(", ")}` };
+  }
+
   try {
     await updateMemberRole(poolId, userId, role);
     trackServerEvent(adminId, "member_role_changed", { poolId, newRole: role });

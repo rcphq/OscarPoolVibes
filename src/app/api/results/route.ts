@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { auth } from "@/lib/auth/auth";
 import { setResult, getResultsByCeremony } from "@/lib/results";
-import type { SetResultRequest } from "@/types/results";
 import { trackServerEvent } from "@/lib/analytics/posthog-server";
+
+const setResultSchema = z.object({
+  categoryId: z.string(),
+  winnerId: z.string(),
+  expectedVersion: z.number().int().nullable().optional(),
+});
 
 /**
  * GET /api/results?ceremonyYearId=<id>
@@ -44,15 +50,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body: SetResultRequest = await request.json();
-  const { categoryId, winnerId, expectedVersion } = body;
-
-  if (!categoryId || !winnerId) {
+  let body: z.infer<typeof setResultSchema>;
+  try {
+    body = setResultSchema.parse(await request.json());
+  } catch {
     return NextResponse.json(
       { error: "categoryId and winnerId are required" },
       { status: 400 }
     );
   }
+
+  const { categoryId, winnerId, expectedVersion } = body;
 
   // Look up userId from session email
   const { prisma } = await import("@/lib/db/client");
@@ -72,29 +80,36 @@ export async function POST(request: NextRequest) {
   });
   const ceremonyYearId = category?.ceremonyYearId ?? "";
 
-  const result = await setResult(user.id, {
-    categoryId,
-    winnerId,
-    expectedVersion: expectedVersion ?? null,
-  });
+  try {
+    const result = await setResult(user.id, {
+      categoryId,
+      winnerId,
+      expectedVersion: expectedVersion ?? null,
+    });
 
-  if (!result.success) {
-    if (result.error.code === "CONFLICT") {
-      trackServerEvent(user.id, "result_conflict", { ceremonyYearId, categoryId });
+    if (!result.success) {
+      if (result.error.code === "CONFLICT") {
+        trackServerEvent(user.id, "result_conflict", { ceremonyYearId, categoryId });
+      }
+
+      const statusMap = {
+        CONFLICT: 409,
+        UNAUTHORIZED: 403,
+        INVALID_NOMINEE: 400,
+        CATEGORY_NOT_FOUND: 404,
+      } as const;
+
+      return NextResponse.json(result, {
+        status: statusMap[result.error.code] ?? 500,
+      });
     }
 
-    const statusMap = {
-      CONFLICT: 409,
-      UNAUTHORIZED: 403,
-      INVALID_NOMINEE: 400,
-      CATEGORY_NOT_FOUND: 404,
-    } as const;
-
-    return NextResponse.json(result, {
-      status: statusMap[result.error.code],
-    });
+    trackServerEvent(user.id, "result_set", { ceremonyYearId, categoryId });
+    return NextResponse.json(result);
+  } catch {
+    return NextResponse.json(
+      { error: "Failed to set result. Please retry." },
+      { status: 500 }
+    );
   }
-
-  trackServerEvent(user.id, "result_set", { ceremonyYearId, categoryId });
-  return NextResponse.json(result);
 }

@@ -60,7 +60,7 @@ export function ResultsReveal({ predictions, onComplete }: ResultsRevealProps) {
         <h2 className="animate-fade-in text-2xl font-bold text-gold-400">
           And the Winners Are...
         </h2>
-        <p className="mt-1 text-sm text-gray-400">
+        <p className="mt-1 text-sm text-muted-foreground">
           {allRevealed
             ? "All winners revealed!"
             : `${revealedCount}/${DEMO_CATEGORIES.length} categories revealed`}
@@ -85,13 +85,13 @@ export function ResultsReveal({ predictions, onComplete }: ResultsRevealProps) {
         <div className="animate-fade-in mb-6 flex justify-center gap-3">
           <button
             onClick={handleRevealNext}
-            className="rounded-lg bg-gray-800 px-4 py-2 text-sm font-medium text-gray-200 transition hover:bg-gray-700"
+            className="rounded-lg bg-muted px-4 py-2 text-sm font-medium text-foreground transition hover:bg-muted/80"
           >
             One by One
           </button>
           <button
             onClick={handleRevealAll}
-            className="animate-pulse-gold rounded-lg bg-gold-500 px-4 py-2 text-sm font-semibold text-gray-950 transition hover:bg-gold-400"
+            className="animate-pulse-gold rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
           >
             Reveal All
           </button>
@@ -102,7 +102,7 @@ export function ResultsReveal({ predictions, onComplete }: ResultsRevealProps) {
         <div className="mb-6 flex justify-center">
           <button
             onClick={handleRevealNext}
-            className="rounded-lg bg-gold-500 px-4 py-2 text-sm font-semibold text-gray-950 transition hover:bg-gold-400"
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
           >
             Reveal Next
           </button>
@@ -130,11 +130,11 @@ export function ResultsReveal({ predictions, onComplete }: ResultsRevealProps) {
               className={`overflow-hidden rounded-lg border transition-all duration-500 ${
                 isRevealed
                   ? gotPoints
-                    ? "border-green-500/30 bg-green-950/20"
-                    : "border-gray-700 bg-gray-900/50"
+                    ? "border-green-500/30 bg-green-500/10"
+                    : "border-border bg-card/50"
                   : index === revealedCount
-                    ? "animate-shimmer border-gold-500/20 bg-gray-900/40"
-                    : "border-gray-800 bg-gray-900/30"
+                    ? "animate-shimmer border-gold-500/20 bg-card/40"
+                    : "border-border bg-card/30"
               } ${isJustRevealed ? "animate-dramatic-glow" : ""}`}
             >
               <div className="flex items-center justify-between px-4 py-3">
@@ -142,7 +142,7 @@ export function ResultsReveal({ predictions, onComplete }: ResultsRevealProps) {
                   <span className="text-xs font-medium text-gold-500">
                     {category.pointValue} pts
                   </span>
-                  <span className="font-medium text-gray-100">
+                  <span className="font-medium text-foreground">
                     {category.name}
                   </span>
                 </div>
@@ -184,7 +184,7 @@ export function ResultsReveal({ predictions, onComplete }: ResultsRevealProps) {
                     )}
                   </div>
                 ) : (
-                  <span className="text-sm text-gray-700">
+                  <span className="text-sm text-muted-foreground/40">
                     {index === revealedCount ? "..." : ""}
                   </span>
                 )}
@@ -201,7 +201,7 @@ export function ResultsReveal({ predictions, onComplete }: ResultsRevealProps) {
             <span className="text-3xl" role="img" aria-label="Trophy">
               {runningScore > 60 ? "\u{1F3C6}" : runningScore > 30 ? "\u{1F44F}" : "\u{1F3AC}"}
             </span>
-            <p className="mt-1 text-sm text-gray-400">
+            <p className="mt-1 text-sm text-muted-foreground">
               {runningScore > 60
                 ? "Outstanding picks!"
                 : runningScore > 30
@@ -211,7 +211,7 @@ export function ResultsReveal({ predictions, onComplete }: ResultsRevealProps) {
           </div>
           <button
             onClick={onComplete}
-            className="w-full rounded-lg bg-gold-500 py-3 text-lg font-semibold text-gray-950 transition hover:bg-gold-400"
+            className="w-full rounded-lg bg-primary py-3 text-lg font-semibold text-primary-foreground transition hover:bg-primary/90"
           >
             View Leaderboard
           </button>

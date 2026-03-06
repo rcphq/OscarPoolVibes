@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { auth } from "@/lib/auth/auth";
 import { prisma } from "@/lib/db/client";
 import { grantResultsPermission, revokeResultsPermission } from "@/lib/results";
+
+const permissionActionSchema = z.object({
+  targetUserId: z.string(),
+  action: z.enum(["grant", "revoke"]),
+});
 
 type RouteContext = {
   params: Promise<{ poolId: string }>;
@@ -21,6 +27,27 @@ export async function GET(
   }
 
   const { poolId } = await context.params;
+
+  // Verify caller is an ADMIN of this pool
+  const caller = await prisma.user.findUnique({
+    where: { email: session.user.email },
+    select: { id: true },
+  });
+
+  if (!caller) {
+    return NextResponse.json({ error: "User not found" }, { status: 401 });
+  }
+
+  const callerMembership = await prisma.poolMember.findUnique({
+    where: {
+      poolId_userId: { poolId, userId: caller.id },
+    },
+    select: { role: true },
+  });
+
+  if (!callerMembership || callerMembership.role !== "ADMIN") {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
 
   const members = await prisma.poolMember.findMany({
     where: { poolId },
@@ -71,18 +98,17 @@ export async function POST(
     return NextResponse.json({ error: "User not found" }, { status: 401 });
   }
 
-  const body = await request.json();
-  const { targetUserId, action } = body as {
-    targetUserId: string;
-    action: "grant" | "revoke";
-  };
-
-  if (!targetUserId || !["grant", "revoke"].includes(action)) {
+  let body: z.infer<typeof permissionActionSchema>;
+  try {
+    body = permissionActionSchema.parse(await request.json());
+  } catch {
     return NextResponse.json(
-      { error: "targetUserId and action ('grant' or 'revoke') are required" },
+      { error: "targetUserId (string) and action ('grant' or 'revoke') are required" },
       { status: 400 }
     );
   }
+
+  const { targetUserId, action } = body;
 
   const result =
     action === "grant"

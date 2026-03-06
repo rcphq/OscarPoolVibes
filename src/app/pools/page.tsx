@@ -71,6 +71,13 @@ export default async function PoolsPage() {
                     Create Your First Pool
                   </Link>
                 </Button>
+                <p className="mt-4 text-sm text-muted-foreground">
+                  or{" "}
+                  <Link href="/demo" className="text-primary underline hover:text-primary/80">
+                    try the demo
+                  </Link>{" "}
+                  to see how it works
+                </p>
               </CardContent>
             </Card>
           ) : (

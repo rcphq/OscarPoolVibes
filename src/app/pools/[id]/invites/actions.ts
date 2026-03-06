@@ -59,7 +59,7 @@ export async function revokeInviteAction(poolId: string, inviteId: string) {
   }
 
   try {
-    await revokeInvite(inviteId);
+    await revokeInvite(inviteId, poolId);
     trackServerEvent(session.user.id, "invite_revoked", { poolId });
     return { success: true };
   } catch (error) {

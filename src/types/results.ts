@@ -1,7 +1,7 @@
 /**
  * Types for the results management system.
  *
- * Results are global per ceremony — Oscar winners are the same for every pool.
+ * Results are global per ceremony - Oscar winners are the same for every pool.
  * Permissions to set results are granted at the pool level:
  * - Pool creators (ADMIN) always have permission
  * - RESULTS_MANAGER role can be granted to specific pool members
@@ -32,7 +32,7 @@ export type ConflictDetail = {
   setByName: string;
   setByEmail: string;
   version: number;
-  updatedAt: Date;
+  updatedAt: string;
 };
 
 export type CategoryResultView = {
@@ -42,7 +42,7 @@ export type CategoryResultView = {
   winnerName: string | null;
   setByName: string | null;
   version: number;
-  updatedAt: Date | null;
+  updatedAt: string | null;
 };
 
 export type ResultsPermission = {

@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db/client";
 import type { SetResultRequest, SetResultResponse } from "@/types/results";
 import { checkResultsPermission } from "./permissions";
@@ -44,7 +45,8 @@ export async function setResult(
       success: false,
       error: {
         code: "UNAUTHORIZED",
-        message: "You do not have permission to set results. Only pool creators and designated results managers can set winners.",
+        message:
+          "You do not have permission to set results. Only pool creators and designated results managers can set winners.",
       },
     };
   }
@@ -72,7 +74,7 @@ export async function setResult(
     });
 
     if (!existing) {
-      // First time setting — expectedVersion should be null
+      // First time setting - expectedVersion should be null
       if (expectedVersion !== null) {
         return {
           success: false,
@@ -85,7 +87,7 @@ export async function setResult(
               setByName: "",
               setByEmail: "",
               version: 0,
-              updatedAt: new Date(),
+              updatedAt: new Date().toISOString(),
             },
           },
         };
@@ -106,7 +108,7 @@ export async function setResult(
       return { success: true as const, version: result.version };
     }
 
-    // Existing result — check version for conflict
+    // Existing result - check version for conflict
     if (expectedVersion !== existing.version) {
       return {
         success: false,
@@ -119,29 +121,81 @@ export async function setResult(
             setByName: existing.setBy.name ?? "Unknown",
             setByEmail: existing.setBy.email,
             version: existing.version,
-            updatedAt: existing.updatedAt,
+            updatedAt: existing.updatedAt.toISOString(),
           },
         },
       };
     }
 
-    // Version matches — safe to update
-    const result = await tx.categoryResult.update({
-      where: {
-        categoryId,
-        version: expectedVersion, // Double-check in WHERE for race condition safety
-      },
-      data: {
-        winnerId,
-        setById: userId,
-        version: { increment: 1 },
-      },
-    });
+    // Version matches - safe to update
+    try {
+      const result = await tx.categoryResult.update({
+        where: {
+          categoryId,
+          version: expectedVersion, // Double-check in WHERE for race condition safety
+        },
+        data: {
+          winnerId,
+          setById: userId,
+          version: { increment: 1 },
+        },
+      });
 
-    // Sync to Category and Nominee
-    await syncWinner(tx, categoryId, winnerId);
+      // Sync to Category and Nominee
+      await syncWinner(tx, categoryId, winnerId);
 
-    return { success: true as const, version: result.version };
+      return { success: true as const, version: result.version };
+    } catch (error) {
+      // Another writer may have updated between the read and update.
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === "P2025"
+      ) {
+        const current = await tx.categoryResult.findUnique({
+          where: { categoryId },
+          include: {
+            winner: { select: { name: true } },
+            setBy: { select: { name: true, email: true } },
+          },
+        });
+
+        if (current) {
+          return {
+            success: false,
+            error: {
+              code: "CONFLICT" as const,
+              message: `This result was already updated by ${current.setBy.name ?? current.setBy.email}. Please review their selection before overriding.`,
+              currentResult: {
+                winnerId: current.winnerId,
+                winnerName: current.winner.name,
+                setByName: current.setBy.name ?? "Unknown",
+                setByEmail: current.setBy.email,
+                version: current.version,
+                updatedAt: current.updatedAt.toISOString(),
+              },
+            },
+          };
+        }
+
+        return {
+          success: false,
+          error: {
+            code: "CONFLICT" as const,
+            message: "This result changed while you were updating. Please refresh and try again.",
+            currentResult: {
+              winnerId: "",
+              winnerName: "",
+              setByName: "",
+              setByEmail: "",
+              version: 0,
+              updatedAt: new Date().toISOString(),
+            },
+          },
+        };
+      }
+
+      throw error;
+    }
   });
 }
 

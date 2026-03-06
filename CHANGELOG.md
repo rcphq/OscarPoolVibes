@@ -7,6 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-03-06
+
+### Added
+
+- **ui:** Link demo from homepage ("Try Demo" CTA), header nav (unauthenticated users), and pools empty state (#44)
+- **auth:** Middleware redirects authenticated users away from `/auth/signin` to `/pools` or `callbackUrl` (#46)
+- **auth:** Sign-in page honors `callbackUrl` query parameter instead of hardcoding `/pools` (#46)
+- **auth:** Homepage CTA changes to "My Pools" → `/pools` when logged in (#46)
+- **infra:** Security headers: X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy (#39)
+- **design:** Semantic color token style guide in CLAUDE.md for agentic contributors
+
+### Fixed
+
+- **design:** Demo components use semantic color tokens — light mode now works correctly (#45)
+- **auth:** Sign-in layout redirects authenticated users server-side (defense-in-depth) (#46)
+- **auth:** Middleware `startsWith("/")` no longer bypasses all auth checks (#35)
+- **pools:** Permissions GET requires ADMIN role — fixes IDOR leaking member PII (#36)
+- **pools:** Permissions POST validated with Zod schema (#37)
+- **results:** Results POST validated with Zod schema, status fallback for unknown error codes (#37)
+- **pools:** `revokeInvite` verifies invite belongs to the specified pool (#41)
+- **pools:** `changeMemberRole` restricted to MEMBER/RESULTS_MANAGER only (#46)
+- **auth:** `callbackUrl` in pool join redirect now URL-encoded (#32)
+- **results:** ResultsPoller uses ref pattern to prevent infinite re-render loop (#33)
+- **a11y:** ConflictDialog restores focus to previously focused element on close (#34)
+- **ui:** ResultsReveal "One by One" button now has visible hover feedback
+- **ui:** Rivals PRNG guards against zero non-winner edge case
+- **infra:** Fix `Function` type ESLint errors in pool tests
+
+### Changed
+
+- **infra:** Pin `next-auth` to exact beta version `5.0.0-beta.30` (remove `^` caret) (#42)
+- **infra:** Add `dotenv` to devDependencies (used by seed script)
+
 ## [0.1.1] - 2026-03-06
 
 ### Features

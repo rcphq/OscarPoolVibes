@@ -10,7 +10,8 @@ import { trackServerEvent } from "@/lib/analytics/posthog-server";
 export async function joinOpenPool(code: string) {
   const session = await auth();
   if (!session?.user?.id) {
-    redirect(`/auth/signin?callbackUrl=/pools/join?code=${encodeURIComponent(code)}`);
+    const callbackUrl = encodeURIComponent(`/pools/join?code=${encodeURIComponent(code)}`);
+    redirect(`/auth/signin?callbackUrl=${callbackUrl}`);
   }
 
   const pool = await getPoolByInviteCode(code);
@@ -38,7 +39,8 @@ export async function joinOpenPool(code: string) {
 export async function joinViaInvite(token: string) {
   const session = await auth();
   if (!session?.user?.id) {
-    redirect(`/auth/signin?callbackUrl=/pools/join?token=${encodeURIComponent(token)}`);
+    const callbackUrl = encodeURIComponent(`/pools/join?token=${encodeURIComponent(token)}`);
+    redirect(`/auth/signin?callbackUrl=${callbackUrl}`);
   }
 
   const invite = await getInviteByToken(token);
