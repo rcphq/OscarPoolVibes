@@ -30,7 +30,7 @@ export async function getResultsByCeremony(
       winnerName: result?.winner.name ?? null,
       setByName: result?.setBy.name ?? null,
       version: result?.version ?? 0,
-      updatedAt: result?.updatedAt ?? null,
+      updatedAt: result?.updatedAt.toISOString() ?? null,
     };
   });
 }
@@ -66,6 +66,6 @@ export async function getResultByCategory(
     winnerName: result?.winner.name ?? null,
     setByName: result?.setBy.name ?? null,
     version: result?.version ?? 0,
-    updatedAt: result?.updatedAt ?? null,
+    updatedAt: result?.updatedAt.toISOString() ?? null,
   };
 }

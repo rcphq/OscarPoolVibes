@@ -33,6 +33,7 @@ export function ConflictDialog({
 }: ConflictDialogProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const acceptButtonRef = useRef<HTMLButtonElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
 
   // Open/close the native dialog element
   useEffect(() => {
@@ -40,12 +41,22 @@ export function ConflictDialog({
     if (!dialog) return;
 
     if (open && !dialog.open) {
+      previousFocusRef.current = document.activeElement as HTMLElement;
       dialog.showModal();
       // Focus the first action button
       acceptButtonRef.current?.focus();
     } else if (!open && dialog.open) {
       dialog.close();
+      previousFocusRef.current?.focus();
+      previousFocusRef.current = null;
     }
+
+    return () => {
+      if (previousFocusRef.current) {
+        previousFocusRef.current.focus();
+        previousFocusRef.current = null;
+      }
+    };
   }, [open]);
 
   // Handle escape key

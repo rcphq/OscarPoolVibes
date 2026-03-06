@@ -59,10 +59,14 @@ function generateRivalPredictions(config: RivalConfig): Prediction[] {
     if (picksWinnerFirst) {
       // First choice is the winner; runner-up is random other
       firstChoiceId = winner.id;
-      runnerUpId = others[Math.floor(rng() * others.length)].id;
+      runnerUpId = others.length > 0
+        ? others[Math.floor(rng() * others.length)].id
+        : winner.id;
     } else {
       // First choice is random non-winner
-      firstChoiceId = others[Math.floor(rng() * others.length)].id;
+      firstChoiceId = others.length > 0
+        ? others[Math.floor(rng() * others.length)].id
+        : winner.id;
 
       // Runner-up might be the winner
       if (rng() < config.runnerUpAccuracy) {
@@ -73,7 +77,7 @@ function generateRivalPredictions(config: RivalConfig): Prediction[] {
         runnerUpId =
           remaining.length > 0
             ? remaining[Math.floor(rng() * remaining.length)].id
-            : others[0].id;
+            : others.length > 0 ? others[0].id : winner.id;
       }
     }
 

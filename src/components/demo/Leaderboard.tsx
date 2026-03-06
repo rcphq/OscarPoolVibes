@@ -39,7 +39,7 @@ export function Leaderboard({
   return (
     <div className="mx-auto max-w-2xl">
       {/* Hero score card */}
-      <div className="animate-scale-in mb-8 rounded-xl border border-gold-500/30 bg-gradient-to-br from-gray-900 to-gray-950 p-6 text-center">
+      <div className="animate-scale-in mb-8 rounded-xl border border-gold-500/30 bg-gradient-to-br from-card to-background p-6 text-center">
         <p className="text-sm font-medium uppercase tracking-wider text-gold-500">
           Your Final Score
         </p>
@@ -47,7 +47,7 @@ export function Leaderboard({
           target={userScore.totalPoints}
           className="mt-2 text-6xl font-bold text-gold-400"
         />
-        <p className="mt-1 text-sm text-gray-400">
+        <p className="mt-1 text-sm text-muted-foreground">
           out of {userScore.maxPossible} possible points
         </p>
 
@@ -76,13 +76,13 @@ export function Leaderboard({
               )}
               <span
                 className={`text-xl font-bold ${
-                  userRank <= 3 ? "text-gold-400" : "text-gray-200"
+                  userRank <= 3 ? "text-gold-400" : "text-foreground"
                 }`}
               >
                 #{userRank}
               </span>
             </p>
-            <p className="text-xs text-gray-500">Rank</p>
+            <p className="text-xs text-muted-foreground">Rank</p>
           </div>
           <Stat
             label="Correct Picks"
@@ -98,7 +98,7 @@ export function Leaderboard({
       {/* Leaderboard bar chart — staggered entry */}
       {phase !== "score" && (
         <>
-          <h3 className="animate-fade-in mb-3 text-lg font-semibold text-gray-200">
+          <h3 className="animate-fade-in mb-3 text-lg font-semibold text-foreground">
             Pool Rankings
           </h3>
           <div className="mb-8 space-y-2">
@@ -117,7 +117,7 @@ export function Leaderboard({
                     className={`rounded-lg border px-4 py-2 transition-colors ${
                       isUser
                         ? "border-gold-500/40 bg-gold-500/10"
-                        : "border-gray-800 bg-gray-900/50"
+                        : "border-border bg-card/50"
                     }`}
                   >
                     <div className="mb-1 flex items-center justify-between">
@@ -125,7 +125,7 @@ export function Leaderboard({
                         <RankBadge rank={index + 1} />
                         <span
                           className={`text-sm font-medium ${
-                            isUser ? "text-gold-300" : "text-gray-300"
+                            isUser ? "text-gold-300" : "text-foreground/80"
                           }`}
                         >
                           {isUser ? `${score.name} (You)` : score.name}
@@ -133,16 +133,16 @@ export function Leaderboard({
                       </div>
                       <span
                         className={`text-sm font-semibold ${
-                          isUser ? "text-gold-400" : "text-gray-400"
+                          isUser ? "text-gold-400" : "text-muted-foreground"
                         }`}
                       >
                         {score.totalPoints} pts
                       </span>
                     </div>
-                    <div className="h-2 overflow-hidden rounded-full bg-gray-800">
+                    <div className="h-2 overflow-hidden rounded-full bg-muted">
                       <div
                         className={`animate-bar-fill h-full rounded-full ${
-                          isUser ? "bg-gold-500" : "bg-gray-600"
+                          isUser ? "bg-gold-500" : "bg-muted-foreground/40"
                         }`}
                         style={{
                           width: `${barWidth}%`,
@@ -164,7 +164,7 @@ export function Leaderboard({
           {/* Score breakdown toggle */}
           <button
             onClick={() => setShowBreakdown((b) => !b)}
-            className="mb-4 w-full rounded-lg border border-gray-700 py-2 text-sm font-medium text-gray-300 transition hover:border-gray-600 hover:text-gray-200"
+            className="mb-4 w-full rounded-lg border border-border py-2 text-sm font-medium text-foreground/80 transition hover:border-border hover:text-foreground"
             aria-expanded={showBreakdown}
           >
             {showBreakdown ? "Hide" : "Show"} Category Breakdown
@@ -177,7 +177,7 @@ export function Leaderboard({
           )}
 
           {/* Points by category chart */}
-          <h3 className="mb-3 mt-8 text-lg font-semibold text-gray-200">
+          <h3 className="mb-3 mt-8 text-lg font-semibold text-foreground">
             Points by Category
           </h3>
           <div className="mb-8 space-y-1">
@@ -187,11 +187,11 @@ export function Leaderboard({
                 className="flex items-center gap-2"
                 style={{ animationDelay: `${i * 30}ms` }}
               >
-                <span className="w-40 truncate text-xs text-gray-400">
+                <span className="w-40 truncate text-xs text-muted-foreground">
                   {cs.categoryName}
                 </span>
                 <div className="flex-1">
-                  <div className="h-4 overflow-hidden rounded bg-gray-800">
+                  <div className="h-4 overflow-hidden rounded bg-muted">
                     {cs.earnedPoints > 0 && (
                       <div
                         className={`animate-bar-fill h-full rounded ${
@@ -207,7 +207,7 @@ export function Leaderboard({
                     )}
                   </div>
                 </div>
-                <span className="w-12 text-right text-xs font-medium text-gray-400">
+                <span className="w-12 text-right text-xs font-medium text-muted-foreground">
                   {cs.earnedPoints}/{cs.pointValue}
                 </span>
               </div>
@@ -217,7 +217,7 @@ export function Leaderboard({
           {/* Restart */}
           <button
             onClick={onRestart}
-            className="w-full rounded-lg bg-gold-500 py-3 text-lg font-semibold text-gray-950 transition hover:bg-gold-400"
+            className="w-full rounded-lg bg-primary py-3 text-lg font-semibold text-primary-foreground transition hover:bg-primary/90"
           >
             Try Again
           </button>
@@ -279,12 +279,12 @@ function Stat({
     <div className="text-center">
       <p
         className={`text-xl font-bold ${
-          accent ? "text-gold-400" : "text-gray-200"
+          accent ? "text-gold-400" : "text-foreground"
         }`}
       >
         {value}
       </p>
-      <p className="text-xs text-gray-500">{label}</p>
+      <p className="text-xs text-muted-foreground">{label}</p>
     </div>
   );
 }
@@ -294,30 +294,30 @@ function RankBadge({ rank }: { rank: number }) {
     rank === 1
       ? "text-gold-400"
       : rank === 2
-        ? "text-gray-300"
+        ? "text-foreground/80"
         : rank === 3
           ? "text-amber-600"
-          : "text-gray-500";
+          : "text-muted-foreground";
 
   return <span className={`text-sm font-bold ${colors}`}>#{rank}</span>;
 }
 
 function CategoryBreakdown({ scores }: { scores: CategoryScore[] }) {
   return (
-    <div className="overflow-hidden rounded-lg border border-gray-800">
+    <div className="overflow-hidden rounded-lg border border-border">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-gray-800 bg-gray-900/80">
-            <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-400">
+          <tr className="border-b border-border bg-card/80">
+            <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
               Category
             </th>
-            <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-400">
+            <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
               Your Pick
             </th>
-            <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-400">
+            <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
               Winner
             </th>
-            <th className="px-3 py-2 text-right text-xs font-medium uppercase tracking-wider text-gray-400">
+            <th className="px-3 py-2 text-right text-xs font-medium uppercase tracking-wider text-muted-foreground">
               Pts
             </th>
           </tr>
@@ -326,9 +326,9 @@ function CategoryBreakdown({ scores }: { scores: CategoryScore[] }) {
           {scores.map((cs) => (
             <tr
               key={cs.categoryId}
-              className="border-b border-gray-800/50 last:border-none"
+              className="border-b border-border/50 last:border-none"
             >
-              <td className="px-3 py-2 text-gray-300">{cs.categoryName}</td>
+              <td className="px-3 py-2 text-foreground/80">{cs.categoryName}</td>
               <td className="px-3 py-2">
                 <span
                   className={
@@ -336,7 +336,7 @@ function CategoryBreakdown({ scores }: { scores: CategoryScore[] }) {
                       ? "text-green-400"
                       : cs.runnerUpCorrect
                         ? "text-yellow-400"
-                        : "text-gray-500"
+                        : "text-muted-foreground"
                   }
                 >
                   {cs.firstChoiceName}
@@ -357,7 +357,7 @@ function CategoryBreakdown({ scores }: { scores: CategoryScore[] }) {
                       ? cs.firstChoiceCorrect
                         ? "text-green-400"
                         : "text-yellow-400"
-                      : "text-gray-600"
+                      : "text-muted-foreground/60"
                   }`}
                 >
                   {cs.earnedPoints}

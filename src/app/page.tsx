@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { auth } from "@/lib/auth/auth"
 
 export const metadata: Metadata = {
   title: { absolute: "OscarPoolVibes — Predict the Oscars with Friends" },
@@ -20,7 +21,8 @@ export const metadata: Metadata = {
   },
 };
 
-export default function Home() {
+export default async function Home() {
+  const session = await auth()
   return (
     <div className="flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center bg-background px-4">
       <div className="mx-auto max-w-2xl text-center space-y-8">
@@ -34,7 +36,12 @@ export default function Home() {
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <Button asChild size="lg" className="text-base px-8">
-            <Link href="/auth/signin">Get Started</Link>
+            <Link href={session?.user ? "/pools" : "/auth/signin"}>
+              {session?.user ? "My Pools" : "Get Started"}
+            </Link>
+          </Button>
+          <Button asChild variant="secondary" size="lg" className="text-base px-8">
+            <Link href="/demo">Try Demo</Link>
           </Button>
           <Button asChild variant="outline" size="lg" className="text-base px-8">
             <Link href="/pools">Browse Pools</Link>

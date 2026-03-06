@@ -65,11 +65,11 @@ export function PredictionForm({
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gold-400">Your Predictions</h2>
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-muted-foreground">
             Pick a first choice and runner-up for each category
           </p>
         </div>
-        <span className="rounded-full bg-gray-800 px-3 py-1 text-sm text-gray-300">
+        <span className="rounded-full bg-muted px-3 py-1 text-sm text-foreground/80">
           {filledCount}/{DEMO_CATEGORIES.length} complete
         </span>
       </div>
@@ -96,7 +96,7 @@ export function PredictionForm({
       <button
         onClick={handleSubmit}
         disabled={filledCount === 0}
-        className="mt-8 w-full rounded-lg bg-gold-500 py-3 text-lg font-semibold text-gray-950 transition hover:bg-gold-400 disabled:cursor-not-allowed disabled:opacity-40"
+        className="mt-8 w-full rounded-lg bg-primary py-3 text-lg font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-40"
       >
         {filledCount === DEMO_CATEGORIES.length
           ? "Lock In Predictions"
@@ -133,8 +133,8 @@ function CategoryPicker({
     <div
       className={`overflow-hidden rounded-lg border transition-colors ${
         isComplete
-          ? "border-gold-500/30 bg-gray-900/80"
-          : "border-gray-700 bg-gray-900/50"
+          ? "border-gold-500/30 bg-card/80"
+          : "border-border bg-card/50"
       }`}
     >
       <button
@@ -145,7 +145,7 @@ function CategoryPicker({
           <span className="text-xs font-medium text-gold-500">
             {category.pointValue} pts
           </span>
-          <span className="font-medium text-gray-100">{category.name}</span>
+          <span className="font-medium text-foreground">{category.name}</span>
         </div>
         <div className="flex items-center gap-3">
           {isComplete ? (
@@ -156,7 +156,7 @@ function CategoryPicker({
             <span className="text-xs text-yellow-400">Incomplete</span>
           ) : null}
           <svg
-            className={`h-4 w-4 text-gray-400 transition-transform ${
+            className={`h-4 w-4 text-muted-foreground transition-transform ${
               isExpanded ? "rotate-180" : ""
             }`}
             fill="none"
@@ -174,7 +174,7 @@ function CategoryPicker({
       </button>
 
       {isExpanded && (
-        <div className="border-t border-gray-800 px-4 py-3">
+        <div className="border-t border-border px-4 py-3">
           <fieldset className="mb-3">
             <legend className="mb-1 block text-xs font-medium uppercase tracking-wider text-gold-400">
               First Choice
@@ -195,7 +195,7 @@ function CategoryPicker({
           </fieldset>
 
           <fieldset>
-            <legend className="mb-1 block text-xs font-medium uppercase tracking-wider text-gray-400">
+            <legend className="mb-1 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
               Runner-Up
             </legend>
             <div className="grid gap-1">
@@ -244,13 +244,13 @@ function NomineeButton({
         isSelected
           ? "bg-gold-500/20 text-gold-300 ring-1 ring-gold-500/50"
           : isDisabled
-            ? "cursor-not-allowed text-gray-600"
-            : "text-gray-300 hover:bg-gray-800"
+            ? "cursor-not-allowed text-muted-foreground/60"
+            : "text-foreground/80 hover:bg-muted"
       }`}
     >
       <span>{name}</span>
       {subtitle && (
-        <span className="ml-2 text-xs text-gray-500">{subtitle}</span>
+        <span className="ml-2 text-xs text-muted-foreground">{subtitle}</span>
       )}
     </button>
   );

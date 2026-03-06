@@ -43,7 +43,7 @@ export function EnvelopeTransition({ onComplete }: EnvelopeTransitionProps) {
 
       {/* Locked text */}
       <p
-        className={`mb-8 text-sm font-medium uppercase tracking-[0.3em] text-gray-500 transition-opacity duration-500 ${
+        className={`mb-8 text-sm font-medium uppercase tracking-[0.3em] text-muted-foreground transition-opacity duration-500 ${
           stage >= 0 ? "animate-fade-in" : "opacity-0"
         }`}
         aria-hidden="true"
@@ -61,12 +61,12 @@ export function EnvelopeTransition({ onComplete }: EnvelopeTransitionProps) {
         <div
           className={`rounded-xl border-2 px-12 py-8 transition-all duration-700 ${
             stage >= 2
-              ? "animate-dramatic-glow border-gold-400 bg-gray-900"
-              : "border-gray-700 bg-gray-900/80"
+              ? "animate-dramatic-glow border-gold-400 bg-card"
+              : "border-border bg-card/80"
           }`}
         >
           {/* Envelope flap */}
-          <div className="absolute -top-px left-1/2 h-3 w-16 -translate-x-1/2 rounded-t-full bg-gray-800" />
+          <div className="absolute -top-px left-1/2 h-3 w-16 -translate-x-1/2 rounded-t-full bg-muted" />
 
           <div className="text-center">
             <p className="text-4xl" role="img" aria-label="Envelope">
@@ -74,7 +74,7 @@ export function EnvelopeTransition({ onComplete }: EnvelopeTransitionProps) {
             </p>
             <p
               className={`mt-4 text-lg font-semibold transition-all duration-500 ${
-                stage >= 2 ? "text-gold-400" : "text-gray-400"
+                stage >= 2 ? "text-gold-400" : "text-muted-foreground"
               }`}
             >
               {stage < 2
@@ -89,7 +89,7 @@ export function EnvelopeTransition({ onComplete }: EnvelopeTransitionProps) {
 
       {/* Shimmer bar */}
       {stage >= 2 && (
-        <div className="mt-8 h-1 w-48 overflow-hidden rounded-full bg-gray-800" aria-hidden="true">
+        <div className="mt-8 h-1 w-48 overflow-hidden rounded-full bg-muted" aria-hidden="true">
           <div className="animate-shimmer h-full w-full rounded-full bg-gradient-to-r from-transparent via-gold-500/40 to-transparent" />
         </div>
       )}
@@ -97,7 +97,7 @@ export function EnvelopeTransition({ onComplete }: EnvelopeTransitionProps) {
       {/* Skip link for accessibility */}
       <button
         onClick={onComplete}
-        className="mt-6 text-xs text-gray-400 underline transition-colors hover:text-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-400"
+        className="mt-6 text-xs text-muted-foreground underline transition-colors hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-400"
       >
         Skip animation
       </button>

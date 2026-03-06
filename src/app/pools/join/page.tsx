@@ -56,7 +56,8 @@ export default async function JoinPoolPage({ searchParams }: JoinPageProps) {
     const callbackParam = code
       ? `code=${encodeURIComponent(code)}`
       : `token=${encodeURIComponent(token!)}`;
-    redirect(`/auth/signin?callbackUrl=/pools/join?${callbackParam}`);
+    const callbackUrl = encodeURIComponent(`/pools/join?${callbackParam}`);
+    redirect(`/auth/signin?callbackUrl=${callbackUrl}`);
   }
 
   // --- OPEN pool join via invite code ---

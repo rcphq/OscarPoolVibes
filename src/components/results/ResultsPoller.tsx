@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useResultsPolling } from "@/hooks/useResultsPolling";
@@ -24,12 +24,16 @@ export function ResultsPoller({
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [secondsAgo, setSecondsAgo] = useState<number | null>(null);
 
+  // Stable ref for the callback to avoid infinite re-renders
+  const onResultsUpdateRef = useRef(onResultsUpdate);
+  useEffect(() => { onResultsUpdateRef.current = onResultsUpdate; });
+
   // Forward results to parent whenever they change
   useEffect(() => {
     if (results.length > 0) {
-      onResultsUpdate(results);
+      onResultsUpdateRef.current(results);
     }
-  }, [results, onResultsUpdate]);
+  }, [results]);
 
   // Update "X seconds ago" display every second
   useEffect(() => {

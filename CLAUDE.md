@@ -157,6 +157,37 @@ See `docs/plans/2026-03-05-design-system.md` for the full design system specific
 - **Motion**: `prefers-reduced-motion` must be respected — instant state change, no animation when set.
 - **Responsive**: Equal-weight desktop + mobile. Breakpoints follow Tailwind defaults.
 
+### Styling Conventions (Semantic Color Tokens)
+
+**This app supports dark and light mode.** All colors must work in both themes. The theme is toggled via a `dark` class on `<html>` (managed by `next-themes`). CSS custom properties in `globals.css` swap values automatically.
+
+**MANDATORY: Always use semantic Tailwind tokens. Never use hardcoded gray/slate/zinc classes.**
+
+| Purpose | Use This | NEVER This |
+|---------|----------|------------|
+| Page background | `bg-background` | `bg-gray-950`, `bg-slate-900` |
+| Card / elevated surface | `bg-card` | `bg-gray-900`, `bg-gray-800` |
+| Primary text | `text-foreground` | `text-gray-100`, `text-white` |
+| Secondary text | `text-muted-foreground` | `text-gray-400`, `text-gray-500` |
+| Subdued text | `text-muted-foreground/60` | `text-gray-600` |
+| Faint text | `text-muted-foreground/40` | `text-gray-700` |
+| Slightly dimmed text | `text-foreground/80` | `text-gray-300` |
+| Borders | `border-border` | `border-gray-800`, `border-gray-700` |
+| Muted / recessed area | `bg-muted` | `bg-gray-800`, `bg-gray-700` |
+| Hover on muted area | `hover:bg-muted` or `hover:bg-muted/80` | `hover:bg-gray-800` |
+| Primary button | `bg-primary text-primary-foreground` | `bg-gold-500 text-gray-950` |
+| Gradients | `from-card to-background` | `from-gray-900 to-gray-950` |
+| Secondary badge/button | `bg-secondary text-secondary-foreground` | `bg-gray-700 text-gray-200` |
+| Form inputs | `bg-input border-input` | `bg-gray-800 border-gray-700` |
+
+**Accent colors are OK to use directly:** `gold-*`, `green-*`, `yellow-*`, `red-*` — these are brand/status colors that work in both modes. Adjust opacity for dark/light compatibility (e.g., `bg-green-500/10` instead of `bg-green-950/20`).
+
+**When to use `dark:` prefix:** Only for accent color adjustments that genuinely need different values per theme (e.g., `text-gold-400 dark:text-gold-300`). Never use `dark:` as a substitute for semantic tokens.
+
+**Opacity modifiers:** Use `/80`, `/60`, `/40` on semantic tokens for progressive dimming (e.g., `text-muted-foreground/60`). This preserves theme compatibility.
+
+**Custom animations:** Defined in `globals.css` as `.animate-*` utility classes. Use semi-transparent gold overlays (`rgba(234, 179, 8, ...)`) that work on any background. All animations have `prefers-reduced-motion: reduce` overrides.
+
 ## SEO & LLM/AI-Bot Optimization
 
 ### SEO Fundamentals
