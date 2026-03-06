@@ -2,7 +2,7 @@
 
 Phased delivery plan for OscarPoolVibes. Each phase is a working, deployable increment.
 
-> **Implementation Status (as of March 2026)**: Phases 1 through 7 are **DONE**. The app has working auth, pool management, predictions, scoring, leaderboard, results entry with conflict detection, permissions management, admin panel, accessibility (skip link, error/loading boundaries, table semantics, axe tests, touch targets), SEO (sitemap, robots, OG image, JSON-LD, llms.txt, page metadata), and UX polish (theme toggle, toast notifications, AlertDialog confirmations). Phase 7.5 (comprehensive testing) and 8 (stretch) remain.
+> **Implementation Status (as of March 2026)**: Phases 1 through 7 are **DONE**. The app has working auth, pool management, predictions, scoring, leaderboard, results entry with conflict detection, permissions management, admin panel, accessibility (skip link, error/loading boundaries, table semantics, axe tests, touch targets), SEO (sitemap, robots, OG image, JSON-LD, llms.txt, page metadata), UX polish (theme toggle, toast notifications, AlertDialog confirmations), and an interactive demo pool at `/demo` with 97th Academy Awards data. Phase 7.5 (comprehensive testing) and 8 (stretch) remain.
 
 ---
 
@@ -183,6 +183,7 @@ Phased delivery plan for OscarPoolVibes. Each phase is a working, deployable inc
 - [x] Light/dark theme support
 - [ ] Favicon and branding assets — deferred
 - [x] Add `og:image` generation for pool invite link previews
+- [x] Interactive demo pool (`/demo`) with 97th Academy Awards data, AI rivals, and animated reveal flow
 
 > See `docs/ARCHITECTURE.md` ADR-10 (accessibility), ADR-11 (SEO) for rationale.
 

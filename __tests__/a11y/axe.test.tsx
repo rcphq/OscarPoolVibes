@@ -27,6 +27,9 @@ const mockEntries = [
     breakdown: [
       {
         categoryId: "cat-1",
+        categoryName: "Best Picture",
+        pointValue: 10,
+        runnerUpMultiplier: 0.5,
         firstChoiceId: "nom-1",
         runnerUpId: "nom-2",
         winnerId: "nom-1",

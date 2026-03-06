@@ -16,8 +16,8 @@ export function CopyInviteLink({ inviteCode, poolId }: CopyInviteLinkProps) {
 
   const inviteUrl =
     typeof window !== "undefined"
-      ? `${window.location.origin}/pools/join/${inviteCode}`
-      : `/pools/join/${inviteCode}`;
+      ? `${window.location.origin}/pools/join?code=${inviteCode}`
+      : `/pools/join?code=${inviteCode}`;
 
   const handleCopy = useCallback(async () => {
     try {
@@ -38,7 +38,7 @@ export function CopyInviteLink({ inviteCode, poolId }: CopyInviteLinkProps) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
-  }, [inviteUrl]);
+  }, [inviteUrl, posthog]);
 
   return (
     <div className="flex items-center gap-3">
