@@ -38,7 +38,7 @@ export function CopyInviteLink({ inviteCode, poolId }: CopyInviteLinkProps) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
-  }, [inviteUrl]);
+  }, [inviteUrl, posthog]);
 
   return (
     <div className="flex items-center gap-3">

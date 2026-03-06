@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-03-06
+
 ### Features
 
 - **a11y:** Add skip link, error boundaries, loading skeletons, table semantics, axe tests (#28)
@@ -14,6 +16,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **ui:** Add theme toggle (dark/light/system), toast notifications, AlertDialog confirmations, touch targets (#30)
 - **ui:** Swap `<img>` to `next/image` for optimized avatar loading
 - **ui:** Add `<main>` semantic landmark for skip link target
+- **ui:** Add interactive demo pool with 97th Academy Awards data (`/demo`)
+  - Predict → envelope transition → results reveal → leaderboard flow
+  - 7 AI rivals with deterministic seeded predictions
+  - Animated score count-up, bar charts, category breakdown
+  - localStorage persistence for predictions
+
+### Fixed
+
+- **pools:** Fix invite link 404 — use query parameter (`?code=`) instead of path segment (#9)
+- **pools:** Fix stale PostHog ref in `CopyInviteLink` useCallback deps
+- **ui:** Fix 6 incorrect Oscar winners and 1 fabricated nominee in demo data
+- **a11y:** Fix EnvelopeTransition `onComplete` re-fire on parent render (ref pattern)
+- **a11y:** Fix skip button contrast (gray-600 → gray-400) and add focus ring
+- **a11y:** Add `prefers-reduced-motion` coverage for all animation keyframes
+- **a11y:** Replace `<label>` with `<fieldset>`/`<legend>` in PredictionForm
+- **a11y:** Add disabled reason to nominee buttons via `aria-label`
+- **a11y:** Remove redundant `role="table"` on native `<table>`
+
+### Changed
+
+- **infra:** Pin TypeScript to 5.9.3
+- **infra:** Move `prisma` CLI to devDependencies
+- **scoring:** Import `MAX_POSSIBLE_POINTS` constant instead of recomputing
+- **ui:** Memoize `allScores`/`userRank` in Leaderboard, wrap handlers in `useCallback`
 
 ## [0.1.0] - 2026-03-05
 
