@@ -16,8 +16,8 @@ export function CopyInviteLink({ inviteCode, poolId }: CopyInviteLinkProps) {
 
   const inviteUrl =
     typeof window !== "undefined"
-      ? `${window.location.origin}/pools/join/${inviteCode}`
-      : `/pools/join/${inviteCode}`;
+      ? `${window.location.origin}/pools/join?code=${inviteCode}`
+      : `/pools/join?code=${inviteCode}`;
 
   const handleCopy = useCallback(async () => {
     try {
