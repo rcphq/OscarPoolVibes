@@ -1,17 +1,19 @@
 import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
-import { ArrowLeft, Lock, Clock, Trophy } from "lucide-react";
+import { ArrowLeft, Clock, Trophy } from "lucide-react";
 import { auth } from "@/lib/auth/auth";
 import { getPool } from "@/lib/db/pools";
 import { getMemberRole } from "@/lib/db/pool-members";
 import { getPredictionsByPool } from "@/lib/db/predictions";
-import { getCategoriesByCeremonyYear } from "@/lib/db/categories";
+import { getCategoriesWithNominees } from "@/lib/db/categories";
 import {
   calculateLeaderboard,
   type LeaderboardInput,
 } from "@/lib/scoring/calculate-leaderboard";
 import type { ScoringInput } from "@/lib/scoring/calculate-score";
 import { LeaderboardTable } from "@/components/leaderboard/LeaderboardTable";
+import { PreResultsLeaderboard } from "@/components/leaderboard/PreResultsLeaderboard";
+import { WhatIfSimulator } from "@/components/leaderboard/WhatIfSimulator";
 
 export async function generateMetadata({
   params,
@@ -58,7 +60,9 @@ export default async function LeaderboardPage({
     redirect("/pools");
   }
 
-  const categories = await getCategoriesByCeremonyYear(pool.ceremonyYearId);
+  const isAdmin = memberRole === "ADMIN";
+
+  const categories = await getCategoriesWithNominees(pool.ceremonyYearId);
 
   // Fetch all predictions for the pool (visibility handled by getPredictionsByPool)
   const { predictions, predictionsLocked, members } =
@@ -67,8 +71,10 @@ export default async function LeaderboardPage({
   // Check if any winners have been announced
   const hasAnyWinners = categories.some((c) => c.winnerId !== null);
 
-  // If predictions aren't locked yet, show a message
+  // If predictions aren't locked yet, show pre-results view
   if (!predictionsLocked) {
+    const currentMember = members.find((m) => m.userId === userId);
+    const currentUserPredictionCount = predictions.length;
     return (
       <main className="min-h-screen">
         <section className="bg-navy px-4 py-12 sm:px-6 lg:px-8">
@@ -84,21 +90,22 @@ export default async function LeaderboardPage({
             <h1 className="font-heading text-3xl font-bold text-gold-300 sm:text-4xl">
               Leaderboard
             </h1>
-            <p className="mt-2 text-gold-100/70">{pool.name}</p>
+            <p className="mt-2 text-gold-100/70">
+              {pool.name} &mdash; {pool.ceremonyYear.name}
+            </p>
           </div>
         </section>
 
-        <section className="px-4 py-16 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-md text-center">
-            <Lock className="mx-auto size-12 text-muted-foreground/40" />
-            <h2 className="mt-4 font-heading text-xl font-semibold">
-              Predictions Not Yet Locked
-            </h2>
-            <p className="mt-2 text-muted-foreground">
-              The leaderboard will be available once predictions are locked.
-              Until then, members can still update their picks.
-            </p>
-          </div>
+        <section className="px-4 py-8 sm:px-6 lg:px-8">
+          <PreResultsLeaderboard
+            poolName={pool.name}
+            ceremonyName={pool.ceremonyYear.name}
+            currentUserName={currentMember?.user.name ?? session.user.name ?? null}
+            currentUserImage={currentMember?.user.image ?? session.user.image ?? null}
+            currentUserPredictionCount={currentUserPredictionCount}
+            totalCategories={categories.length}
+            memberCount={members.length}
+          />
         </section>
       </main>
     );
@@ -203,6 +210,16 @@ export default async function LeaderboardPage({
               <Trophy className="size-3.5" />
               {categories.filter((c) => c.winnerId !== null).length} of{" "}
               {categories.length} categories decided
+            </div>
+          )}
+
+          {isAdmin && (
+            <div className="mt-4 block">
+              <WhatIfSimulator
+                categories={categories}
+                leaderboardInputs={leaderboardInputs}
+                currentUserId={userId}
+              />
             </div>
           )}
         </div>
