@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **docs:** v0.2.0 implementation plan with tiered scoring, invite sharing, pre-results leaderboard, and What If? simulator (#48, #49, #50, #51, #52, #53)
+
 ## [0.1.2] - 2026-03-06
 
 ### Added
