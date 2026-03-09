@@ -88,7 +88,7 @@ model Category {
   name              String // e.g., "Best Picture"
   displayOrder      Int
   pointValue        Int    @default(10)
-  runnerUpMultiplier Float  @default(0.5)
+  runnerUpMultiplier Float  @default(0.6)
 
   // The official winner — set via CategoryResult flow
   winnerId String?

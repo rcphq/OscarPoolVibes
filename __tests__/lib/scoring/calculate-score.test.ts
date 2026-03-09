@@ -10,7 +10,7 @@ function makeInput(overrides: Partial<ScoringInput> = {}): ScoringInput {
     categoryId: "cat-1",
     categoryName: "Best Picture",
     pointValue: 10,
-    runnerUpMultiplier: 0.5,
+    runnerUpMultiplier: 0.6,
     winnerId: "nominee-a",
     firstChoiceId: "nominee-a",
     runnerUpId: "nominee-b",
@@ -28,7 +28,7 @@ describe("calculateCategoryScore", () => {
     expect(result.isRunnerUpCorrect).toBe(false)
   })
 
-  it("awards half points when runnerUp matches winner", () => {
+  it("awards runner-up points when runnerUp matches winner", () => {
     const result = calculateCategoryScore(
       makeInput({
         winnerId: "nominee-b",
@@ -36,7 +36,7 @@ describe("calculateCategoryScore", () => {
         runnerUpId: "nominee-b",
       })
     )
-    expect(result.points).toBe(5)
+    expect(result.points).toBe(6)
     expect(result.isFirstChoiceCorrect).toBe(false)
     expect(result.isRunnerUpCorrect).toBe(true)
   })
@@ -110,11 +110,11 @@ describe("calculateTotalScore", () => {
   it("sums points across multiple categories", () => {
     const categories: ScoringInput[] = [
       makeInput({ categoryId: "1", winnerId: "nominee-a", firstChoiceId: "nominee-a" }), // 10
-      makeInput({ categoryId: "2", winnerId: "nominee-b", firstChoiceId: "nominee-a", runnerUpId: "nominee-b" }), // 5
+      makeInput({ categoryId: "2", winnerId: "nominee-b", firstChoiceId: "nominee-a", runnerUpId: "nominee-b" }), // 6
       makeInput({ categoryId: "3", winnerId: "nominee-c", firstChoiceId: "nominee-a", runnerUpId: "nominee-b" }), // 0
     ]
     const { total, breakdown } = calculateTotalScore(categories)
-    expect(total).toBe(15)
+    expect(total).toBe(16)
     expect(breakdown).toHaveLength(3)
   })
 
@@ -136,9 +136,9 @@ describe("calculateTotalScore", () => {
   it("handles mix of custom point values", () => {
     const categories: ScoringInput[] = [
       makeInput({ pointValue: 15, winnerId: "nominee-a", firstChoiceId: "nominee-a" }), // 15
-      makeInput({ pointValue: 5, winnerId: "nominee-b", firstChoiceId: "nominee-a", runnerUpId: "nominee-b" }), // 2.5
+      makeInput({ pointValue: 5, winnerId: "nominee-b", firstChoiceId: "nominee-a", runnerUpId: "nominee-b" }), // 3
     ]
     const { total } = calculateTotalScore(categories)
-    expect(total).toBe(17.5)
+    expect(total).toBe(18)
   })
 })

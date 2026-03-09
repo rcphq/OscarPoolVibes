@@ -69,13 +69,13 @@ An award category within a ceremony year. Categories can differ between years (s
 | name | String | e.g., "Best Picture" |
 | displayOrder | Int | Sort order on the UI |
 | pointValue | Int | Points awarded for a correct first-choice pick |
-| runnerUpMultiplier | Float | Default 0.5 — multiplier applied to pointValue for runner-up hit |
+| runnerUpMultiplier | Float | Default 0.6 — multiplier applied to pointValue for runner-up hit |
 | winnerId | String? | FK → Nominee (set after winners announced) |
 | createdAt | DateTime | |
 
 **Unique constraint**: `(ceremonyYearId, name)`
 
-**Design note**: `pointValue` allows different categories to be worth different amounts (e.g., Best Picture worth more than Best Short Film). `runnerUpMultiplier` is stored per-category so it can be tuned, but will default to 0.5.
+**Design note**: `pointValue` allows different categories to be worth different amounts (e.g., Best Picture worth more than Best Short Film). `runnerUpMultiplier` is stored per-category so it can be tuned, but will default to 0.6.
 
 ### Nominee
 
@@ -218,6 +218,21 @@ Total score = sum of points across all categories
 ```
 
 Leaderboard = all pool members sorted by total score descending.
+
+### 4-Tier Point System
+
+Categories are assigned point values based on a 4-tier system reflecting their prominence and audience interest:
+
+| Tier | Points | Runner-up | Categories |
+|------|--------|-----------|------------|
+| 1 | 180 | 108 | Best Picture, Best Director, Best Actor, Best Actress, Best Supporting Actor, Best Supporting Actress |
+| 2 | 90 | 54 | Best Film Editing, Best Cinematography, Best Visual Effects, Best Original Screenplay, Best Adapted Screenplay, Best Animated Feature |
+| 3 | 30 | 18 | Best Costume Design, Best Production Design, Best Makeup and Hairstyling, Best Original Song, Best Sound |
+| 4 | 15 | 9 | Best Animated Short, Best Live Action Short, Best Documentary Short, Best Documentary Feature, Best International Feature Film, Best Original Score, Best Casting (2026 only) |
+
+### Runner-Up Multiplier (0.6x)
+
+The runner-up multiplier is set to 0.6 rather than 0.5. This creates meaningful tier overlap: a Tier 1 runner-up pick (108 points) is worth more than a Tier 2 first-choice pick (90 points). This rewards players who have strong instincts about the marquee categories even when their first pick doesn't win, preventing a strategy of only focusing on lower-tier categories for easy points.
 
 ## Indexing Strategy
 

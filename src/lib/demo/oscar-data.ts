@@ -23,7 +23,7 @@ export const DEMO_CATEGORIES: DemoCategory[] = [
   {
     id: "best-picture",
     name: "Best Picture",
-    pointValue: 15,
+    pointValue: 180,
     nominees: [
       { id: "bp-anora", name: "Anora", isWinner: true },
       { id: "bp-brutalist", name: "The Brutalist", isWinner: false },
@@ -40,7 +40,7 @@ export const DEMO_CATEGORIES: DemoCategory[] = [
   {
     id: "best-director",
     name: "Best Director",
-    pointValue: 12,
+    pointValue: 180,
     nominees: [
       { id: "bd-corbet", name: "Brady Corbet", subtitle: "The Brutalist", isWinner: false },
       { id: "bd-audiard", name: "Jacques Audiard", subtitle: "Emilia Pérez", isWinner: false },
@@ -52,7 +52,7 @@ export const DEMO_CATEGORIES: DemoCategory[] = [
   {
     id: "best-actress",
     name: "Best Actress",
-    pointValue: 10,
+    pointValue: 180,
     nominees: [
       { id: "ba-madison", name: "Mikey Madison", subtitle: "Anora", isWinner: true },
       { id: "ba-moore", name: "Demi Moore", subtitle: "The Substance", isWinner: false },
@@ -64,7 +64,7 @@ export const DEMO_CATEGORIES: DemoCategory[] = [
   {
     id: "best-actor",
     name: "Best Actor",
-    pointValue: 10,
+    pointValue: 180,
     nominees: [
       { id: "bac-brody", name: "Adrien Brody", subtitle: "The Brutalist", isWinner: true },
       { id: "bac-chalamet", name: "Timothée Chalamet", subtitle: "A Complete Unknown", isWinner: false },
@@ -76,7 +76,7 @@ export const DEMO_CATEGORIES: DemoCategory[] = [
   {
     id: "best-supporting-actress",
     name: "Best Supporting Actress",
-    pointValue: 8,
+    pointValue: 180,
     nominees: [
       { id: "bsa-saldana", name: "Zoe Saldaña", subtitle: "Emilia Pérez", isWinner: true },
       { id: "bsa-grande", name: "Ariana Grande", subtitle: "Wicked", isWinner: false },
@@ -88,7 +88,7 @@ export const DEMO_CATEGORIES: DemoCategory[] = [
   {
     id: "best-supporting-actor",
     name: "Best Supporting Actor",
-    pointValue: 8,
+    pointValue: 180,
     nominees: [
       { id: "bsac-pearson", name: "Kieran Culkin", subtitle: "A Real Pain", isWinner: true },
       { id: "bsac-norton", name: "Edward Norton", subtitle: "A Complete Unknown", isWinner: false },
@@ -100,7 +100,7 @@ export const DEMO_CATEGORIES: DemoCategory[] = [
   {
     id: "best-original-screenplay",
     name: "Best Original Screenplay",
-    pointValue: 7,
+    pointValue: 90,
     nominees: [
       { id: "bos-anora", name: "Anora", subtitle: "Sean Baker", isWinner: true },
       { id: "bos-brutalist", name: "The Brutalist", subtitle: "Brady Corbet & Mona Fastvold", isWinner: false },
@@ -112,7 +112,7 @@ export const DEMO_CATEGORIES: DemoCategory[] = [
   {
     id: "best-adapted-screenplay",
     name: "Best Adapted Screenplay",
-    pointValue: 7,
+    pointValue: 90,
     nominees: [
       { id: "bas-complete-unknown", name: "A Complete Unknown", subtitle: "James Mangold & Jay Cocks", isWinner: false },
       { id: "bas-conclave", name: "Conclave", subtitle: "Peter Straughan", isWinner: true },
@@ -124,7 +124,7 @@ export const DEMO_CATEGORIES: DemoCategory[] = [
   {
     id: "best-animated",
     name: "Best Animated Feature",
-    pointValue: 6,
+    pointValue: 90,
     nominees: [
       { id: "ban-flow", name: "Flow", isWinner: true },
       { id: "ban-inside-out-2", name: "Inside Out 2", isWinner: false },
@@ -136,7 +136,7 @@ export const DEMO_CATEGORIES: DemoCategory[] = [
   {
     id: "best-international",
     name: "Best International Feature Film",
-    pointValue: 6,
+    pointValue: 15,
     nominees: [
       { id: "bif-still-here", name: "I'm Still Here", subtitle: "Brazil", isWinner: false },
       { id: "bif-girl-needle", name: "The Girl with the Needle", subtitle: "Denmark", isWinner: false },
@@ -148,7 +148,7 @@ export const DEMO_CATEGORIES: DemoCategory[] = [
   {
     id: "best-cinematography",
     name: "Best Cinematography",
-    pointValue: 5,
+    pointValue: 90,
     nominees: [
       { id: "bc-brutalist", name: "The Brutalist", subtitle: "Lol Crawley", isWinner: true },
       { id: "bc-dune2", name: "Dune: Part Two", subtitle: "Greig Fraser", isWinner: false },
@@ -160,7 +160,7 @@ export const DEMO_CATEGORIES: DemoCategory[] = [
   {
     id: "best-editing",
     name: "Best Film Editing",
-    pointValue: 5,
+    pointValue: 90,
     nominees: [
       { id: "be-anora", name: "Anora", isWinner: true },
       { id: "be-brutalist", name: "The Brutalist", isWinner: false },
@@ -172,7 +172,7 @@ export const DEMO_CATEGORIES: DemoCategory[] = [
   {
     id: "best-score",
     name: "Best Original Score",
-    pointValue: 5,
+    pointValue: 15,
     nominees: [
       { id: "bsc-brutalist", name: "The Brutalist", subtitle: "Daniel Blumberg", isWinner: true },
       { id: "bsc-conclave", name: "Conclave", subtitle: "Volker Bertelmann", isWinner: false },
@@ -184,7 +184,7 @@ export const DEMO_CATEGORIES: DemoCategory[] = [
   {
     id: "best-song",
     name: "Best Original Song",
-    pointValue: 5,
+    pointValue: 30,
     nominees: [
       { id: "bsn-emilia-journey", name: "El Mal", subtitle: "Emilia Pérez", isWinner: true },
       { id: "bsn-kiss-sky", name: "Kiss the Sky", subtitle: "The Wild Robot", isWinner: false },
@@ -196,7 +196,7 @@ export const DEMO_CATEGORIES: DemoCategory[] = [
   {
     id: "best-production-design",
     name: "Best Production Design",
-    pointValue: 4,
+    pointValue: 30,
     nominees: [
       { id: "bpd-brutalist", name: "The Brutalist", isWinner: false },
       { id: "bpd-conclave", name: "Conclave", isWinner: false },
@@ -208,7 +208,7 @@ export const DEMO_CATEGORIES: DemoCategory[] = [
   {
     id: "best-costume",
     name: "Best Costume Design",
-    pointValue: 4,
+    pointValue: 30,
     nominees: [
       { id: "bcd-complete-unknown", name: "A Complete Unknown", isWinner: false },
       { id: "bcd-conclave", name: "Conclave", isWinner: false },
@@ -220,7 +220,7 @@ export const DEMO_CATEGORIES: DemoCategory[] = [
   {
     id: "best-makeup",
     name: "Best Makeup and Hairstyling",
-    pointValue: 4,
+    pointValue: 30,
     nominees: [
       { id: "bmh-different-man", name: "A Different Man", isWinner: false },
       { id: "bmh-emilia", name: "Emilia Pérez", isWinner: false },
@@ -232,7 +232,7 @@ export const DEMO_CATEGORIES: DemoCategory[] = [
   {
     id: "best-sound",
     name: "Best Sound",
-    pointValue: 4,
+    pointValue: 30,
     nominees: [
       { id: "bso-complete-unknown", name: "A Complete Unknown", isWinner: false },
       { id: "bso-dune2", name: "Dune: Part Two", isWinner: true },
@@ -244,7 +244,7 @@ export const DEMO_CATEGORIES: DemoCategory[] = [
   {
     id: "best-vfx",
     name: "Best Visual Effects",
-    pointValue: 4,
+    pointValue: 90,
     nominees: [
       { id: "bvx-alien", name: "Alien: Romulus", isWinner: false },
       { id: "bvx-better-man", name: "Better Man", isWinner: false },
@@ -256,7 +256,7 @@ export const DEMO_CATEGORIES: DemoCategory[] = [
   {
     id: "best-documentary",
     name: "Best Documentary Feature",
-    pointValue: 5,
+    pointValue: 15,
     nominees: [
       { id: "bdf-no-other-land", name: "No Other Land", isWinner: true },
       { id: "bdf-black-box", name: "Black Box Diaries", isWinner: false },

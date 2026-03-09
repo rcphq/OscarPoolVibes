@@ -19,6 +19,7 @@ interface CategoryInput {
   name: string
   displayOrder: number
   pointValue: number
+  runnerUpMultiplier: number
   nominees: NomineeInput[]
 }
 
@@ -39,7 +40,8 @@ const ceremony2025: CeremonyInput = {
     {
       name: 'Best Picture',
       displayOrder: 1,
-      pointValue: 15,
+      pointValue: 180,
+      runnerUpMultiplier: 0.6,
       nominees: [
         { name: 'Anora' },
         { name: 'The Brutalist' },
@@ -56,7 +58,8 @@ const ceremony2025: CeremonyInput = {
     {
       name: 'Best Director',
       displayOrder: 2,
-      pointValue: 10,
+      pointValue: 180,
+      runnerUpMultiplier: 0.6,
       nominees: [
         { name: 'Sean Baker', subtitle: 'Anora' },
         { name: 'Brady Corbet', subtitle: 'The Brutalist' },
@@ -68,7 +71,8 @@ const ceremony2025: CeremonyInput = {
     {
       name: 'Best Actress',
       displayOrder: 3,
-      pointValue: 10,
+      pointValue: 180,
+      runnerUpMultiplier: 0.6,
       nominees: [
         { name: 'Cynthia Erivo', subtitle: 'Wicked' },
         { name: 'Karla Sofía Gascón', subtitle: 'Emilia Pérez' },
@@ -80,7 +84,8 @@ const ceremony2025: CeremonyInput = {
     {
       name: 'Best Actor',
       displayOrder: 4,
-      pointValue: 10,
+      pointValue: 180,
+      runnerUpMultiplier: 0.6,
       nominees: [
         { name: 'Adrien Brody', subtitle: 'The Brutalist' },
         { name: 'Timothée Chalamet', subtitle: 'A Complete Unknown' },
@@ -92,7 +97,8 @@ const ceremony2025: CeremonyInput = {
     {
       name: 'Best Supporting Actress',
       displayOrder: 5,
-      pointValue: 10,
+      pointValue: 180,
+      runnerUpMultiplier: 0.6,
       nominees: [
         { name: 'Monica Barbaro', subtitle: 'A Complete Unknown' },
         { name: 'Ariana Grande', subtitle: 'Wicked' },
@@ -104,7 +110,8 @@ const ceremony2025: CeremonyInput = {
     {
       name: 'Best Supporting Actor',
       displayOrder: 6,
-      pointValue: 10,
+      pointValue: 180,
+      runnerUpMultiplier: 0.6,
       nominees: [
         { name: 'Yura Borisov', subtitle: 'Anora' },
         { name: 'Kieran Culkin', subtitle: 'A Real Pain' },
@@ -116,7 +123,8 @@ const ceremony2025: CeremonyInput = {
     {
       name: 'Best Original Screenplay',
       displayOrder: 7,
-      pointValue: 10,
+      pointValue: 90,
+      runnerUpMultiplier: 0.6,
       nominees: [
         { name: 'Sean Baker', subtitle: 'Anora' },
         { name: 'Brady Corbet, Mona Fastvold', subtitle: 'The Brutalist' },
@@ -128,7 +136,8 @@ const ceremony2025: CeremonyInput = {
     {
       name: 'Best Adapted Screenplay',
       displayOrder: 8,
-      pointValue: 10,
+      pointValue: 90,
+      runnerUpMultiplier: 0.6,
       nominees: [
         { name: 'James Mangold, Jay Cocks', subtitle: 'A Complete Unknown' },
         { name: 'Peter Straughan', subtitle: 'Conclave' },
@@ -140,7 +149,8 @@ const ceremony2025: CeremonyInput = {
     {
       name: 'Best Animated Feature',
       displayOrder: 9,
-      pointValue: 10,
+      pointValue: 90,
+      runnerUpMultiplier: 0.6,
       nominees: [
         { name: 'Flow' },
         { name: 'Inside Out 2' },
@@ -152,7 +162,8 @@ const ceremony2025: CeremonyInput = {
     {
       name: 'Best International Feature',
       displayOrder: 10,
-      pointValue: 10,
+      pointValue: 15,
+      runnerUpMultiplier: 0.6,
       nominees: [
         { name: "I'm Still Here", subtitle: 'Brazil' },
         { name: 'The Girl with the Needle', subtitle: 'Denmark' },
@@ -164,7 +175,8 @@ const ceremony2025: CeremonyInput = {
     {
       name: 'Best Documentary Feature',
       displayOrder: 11,
-      pointValue: 10,
+      pointValue: 15,
+      runnerUpMultiplier: 0.6,
       nominees: [
         { name: 'Black Box Diaries' },
         { name: 'No Other Land' },
@@ -176,7 +188,8 @@ const ceremony2025: CeremonyInput = {
     {
       name: 'Best Film Editing',
       displayOrder: 12,
-      pointValue: 10,
+      pointValue: 90,
+      runnerUpMultiplier: 0.6,
       nominees: [
         { name: 'Anora' },
         { name: 'The Brutalist' },
@@ -188,7 +201,8 @@ const ceremony2025: CeremonyInput = {
     {
       name: 'Best Cinematography',
       displayOrder: 13,
-      pointValue: 10,
+      pointValue: 90,
+      runnerUpMultiplier: 0.6,
       nominees: [
         { name: 'The Brutalist' },
         { name: 'Dune: Part Two' },
@@ -200,7 +214,8 @@ const ceremony2025: CeremonyInput = {
     {
       name: 'Best Production Design',
       displayOrder: 14,
-      pointValue: 10,
+      pointValue: 30,
+      runnerUpMultiplier: 0.6,
       nominees: [
         { name: 'The Brutalist' },
         { name: 'Conclave' },
@@ -212,7 +227,8 @@ const ceremony2025: CeremonyInput = {
     {
       name: 'Best Costume Design',
       displayOrder: 15,
-      pointValue: 10,
+      pointValue: 30,
+      runnerUpMultiplier: 0.6,
       nominees: [
         { name: 'A Complete Unknown' },
         { name: 'Conclave' },
@@ -224,7 +240,8 @@ const ceremony2025: CeremonyInput = {
     {
       name: 'Best Makeup and Hairstyling',
       displayOrder: 16,
-      pointValue: 10,
+      pointValue: 30,
+      runnerUpMultiplier: 0.6,
       nominees: [
         { name: 'A Different Man' },
         { name: 'Emilia Pérez' },
@@ -236,7 +253,8 @@ const ceremony2025: CeremonyInput = {
     {
       name: 'Best Original Score',
       displayOrder: 17,
-      pointValue: 10,
+      pointValue: 15,
+      runnerUpMultiplier: 0.6,
       nominees: [
         { name: 'The Brutalist' },
         { name: 'Conclave' },
@@ -248,7 +266,8 @@ const ceremony2025: CeremonyInput = {
     {
       name: 'Best Original Song',
       displayOrder: 18,
-      pointValue: 10,
+      pointValue: 30,
+      runnerUpMultiplier: 0.6,
       nominees: [
         { name: '"El Mal"', subtitle: 'Emilia Pérez' },
         { name: '"The Journey"', subtitle: 'The Six Triple Eight' },
@@ -260,7 +279,8 @@ const ceremony2025: CeremonyInput = {
     {
       name: 'Best Sound',
       displayOrder: 19,
-      pointValue: 10,
+      pointValue: 30,
+      runnerUpMultiplier: 0.6,
       nominees: [
         { name: 'A Complete Unknown' },
         { name: 'Dune: Part Two' },
@@ -272,7 +292,8 @@ const ceremony2025: CeremonyInput = {
     {
       name: 'Best Visual Effects',
       displayOrder: 20,
-      pointValue: 10,
+      pointValue: 90,
+      runnerUpMultiplier: 0.6,
       nominees: [
         { name: 'Alien: Romulus' },
         { name: 'Better Man' },
@@ -284,7 +305,8 @@ const ceremony2025: CeremonyInput = {
     {
       name: 'Best Animated Short',
       displayOrder: 21,
-      pointValue: 10,
+      pointValue: 15,
+      runnerUpMultiplier: 0.6,
       nominees: [
         { name: 'Beautiful Men' },
         { name: 'In the Shadow of the Cypress' },
@@ -296,7 +318,8 @@ const ceremony2025: CeremonyInput = {
     {
       name: 'Best Live Action Short',
       displayOrder: 22,
-      pointValue: 10,
+      pointValue: 15,
+      runnerUpMultiplier: 0.6,
       nominees: [
         { name: 'A Lien' },
         { name: 'Anuja' },
@@ -308,7 +331,8 @@ const ceremony2025: CeremonyInput = {
     {
       name: 'Best Documentary Short',
       displayOrder: 23,
-      pointValue: 10,
+      pointValue: 15,
+      runnerUpMultiplier: 0.6,
       nominees: [
         { name: 'Death by Numbers' },
         { name: 'I Am Ready, Warden' },
@@ -330,7 +354,8 @@ const ceremony2026: CeremonyInput = {
     {
       name: 'Best Picture',
       displayOrder: 1,
-      pointValue: 15,
+      pointValue: 180,
+      runnerUpMultiplier: 0.6,
       nominees: [
         { name: 'Bugonia' },
         { name: 'F1' },
@@ -347,7 +372,8 @@ const ceremony2026: CeremonyInput = {
     {
       name: 'Best Director',
       displayOrder: 2,
-      pointValue: 10,
+      pointValue: 180,
+      runnerUpMultiplier: 0.6,
       nominees: [
         { name: 'Chloé Zhao', subtitle: 'Hamnet' },
         { name: 'Josh Safdie', subtitle: 'Marty Supreme' },
@@ -359,7 +385,8 @@ const ceremony2026: CeremonyInput = {
     {
       name: 'Best Actress',
       displayOrder: 3,
-      pointValue: 10,
+      pointValue: 180,
+      runnerUpMultiplier: 0.6,
       nominees: [
         { name: 'Jessie Buckley', subtitle: 'Hamnet' },
         { name: 'Rose Byrne', subtitle: 'If I Had Legs I\'d Kick You' },
@@ -371,7 +398,8 @@ const ceremony2026: CeremonyInput = {
     {
       name: 'Best Actor',
       displayOrder: 4,
-      pointValue: 10,
+      pointValue: 180,
+      runnerUpMultiplier: 0.6,
       nominees: [
         { name: 'Timothée Chalamet', subtitle: 'Marty Supreme' },
         { name: 'Leonardo DiCaprio', subtitle: 'One Battle after Another' },
@@ -383,7 +411,8 @@ const ceremony2026: CeremonyInput = {
     {
       name: 'Best Supporting Actress',
       displayOrder: 5,
-      pointValue: 10,
+      pointValue: 180,
+      runnerUpMultiplier: 0.6,
       nominees: [
         { name: 'Elle Fanning', subtitle: 'Sentimental Value' },
         { name: 'Inga Ibsdotter Lilleaas', subtitle: 'Sentimental Value' },
@@ -395,7 +424,8 @@ const ceremony2026: CeremonyInput = {
     {
       name: 'Best Supporting Actor',
       displayOrder: 6,
-      pointValue: 10,
+      pointValue: 180,
+      runnerUpMultiplier: 0.6,
       nominees: [
         { name: 'Benicio del Toro', subtitle: 'One Battle after Another' },
         { name: 'Jacob Elordi', subtitle: 'Frankenstein' },
@@ -407,7 +437,8 @@ const ceremony2026: CeremonyInput = {
     {
       name: 'Best Original Screenplay',
       displayOrder: 7,
-      pointValue: 10,
+      pointValue: 90,
+      runnerUpMultiplier: 0.6,
       nominees: [
         { name: 'Robert Kaplow', subtitle: 'Blue Moon' },
         { name: 'Jafar Panahi', subtitle: 'It Was Just an Accident' },
@@ -419,7 +450,8 @@ const ceremony2026: CeremonyInput = {
     {
       name: 'Best Adapted Screenplay',
       displayOrder: 8,
-      pointValue: 10,
+      pointValue: 90,
+      runnerUpMultiplier: 0.6,
       nominees: [
         { name: 'Will Tracy', subtitle: 'Bugonia' },
         { name: 'Guillermo del Toro', subtitle: 'Frankenstein' },
@@ -431,7 +463,8 @@ const ceremony2026: CeremonyInput = {
     {
       name: 'Best Animated Feature',
       displayOrder: 9,
-      pointValue: 10,
+      pointValue: 90,
+      runnerUpMultiplier: 0.6,
       nominees: [
         { name: 'Arco' },
         { name: 'Elio' },
@@ -443,7 +476,8 @@ const ceremony2026: CeremonyInput = {
     {
       name: 'Best International Feature',
       displayOrder: 10,
-      pointValue: 10,
+      pointValue: 15,
+      runnerUpMultiplier: 0.6,
       nominees: [
         { name: 'The Secret Agent', subtitle: 'Brazil' },
         { name: 'It Was Just an Accident', subtitle: 'France' },
@@ -455,7 +489,8 @@ const ceremony2026: CeremonyInput = {
     {
       name: 'Best Documentary Feature',
       displayOrder: 11,
-      pointValue: 10,
+      pointValue: 15,
+      runnerUpMultiplier: 0.6,
       nominees: [
         { name: 'The Alabama Solution' },
         { name: 'Come See Me in the Good Light' },
@@ -467,7 +502,8 @@ const ceremony2026: CeremonyInput = {
     {
       name: 'Best Film Editing',
       displayOrder: 12,
-      pointValue: 10,
+      pointValue: 90,
+      runnerUpMultiplier: 0.6,
       nominees: [
         { name: 'F1', subtitle: 'Stephen Mirrione' },
         { name: 'Marty Supreme', subtitle: 'Ronald Bronstein and Josh Safdie' },
@@ -479,7 +515,8 @@ const ceremony2026: CeremonyInput = {
     {
       name: 'Best Cinematography',
       displayOrder: 13,
-      pointValue: 10,
+      pointValue: 90,
+      runnerUpMultiplier: 0.6,
       nominees: [
         { name: 'Frankenstein', subtitle: 'Dan Laustsen' },
         { name: 'Marty Supreme', subtitle: 'Darius Khondji' },
@@ -491,7 +528,8 @@ const ceremony2026: CeremonyInput = {
     {
       name: 'Best Production Design',
       displayOrder: 14,
-      pointValue: 10,
+      pointValue: 30,
+      runnerUpMultiplier: 0.6,
       nominees: [
         { name: 'Frankenstein' },
         { name: 'Hamnet' },
@@ -503,7 +541,8 @@ const ceremony2026: CeremonyInput = {
     {
       name: 'Best Costume Design',
       displayOrder: 15,
-      pointValue: 10,
+      pointValue: 30,
+      runnerUpMultiplier: 0.6,
       nominees: [
         { name: 'Avatar: Fire and Ash' },
         { name: 'Frankenstein' },
@@ -515,7 +554,8 @@ const ceremony2026: CeremonyInput = {
     {
       name: 'Best Makeup and Hairstyling',
       displayOrder: 16,
-      pointValue: 10,
+      pointValue: 30,
+      runnerUpMultiplier: 0.6,
       nominees: [
         { name: 'Frankenstein' },
         { name: 'Kokuho' },
@@ -527,7 +567,8 @@ const ceremony2026: CeremonyInput = {
     {
       name: 'Best Original Score',
       displayOrder: 17,
-      pointValue: 10,
+      pointValue: 15,
+      runnerUpMultiplier: 0.6,
       nominees: [
         { name: 'Bugonia', subtitle: 'Jerskin Fendrix' },
         { name: 'Frankenstein', subtitle: 'Alexandre Desplat' },
@@ -539,7 +580,8 @@ const ceremony2026: CeremonyInput = {
     {
       name: 'Best Original Song',
       displayOrder: 18,
-      pointValue: 10,
+      pointValue: 30,
+      runnerUpMultiplier: 0.6,
       nominees: [
         { name: '"Dear Me"', subtitle: 'Diane Warren: Relentless' },
         { name: '"Golden"', subtitle: 'KPop Demon Hunters' },
@@ -551,7 +593,8 @@ const ceremony2026: CeremonyInput = {
     {
       name: 'Best Sound',
       displayOrder: 19,
-      pointValue: 10,
+      pointValue: 30,
+      runnerUpMultiplier: 0.6,
       nominees: [
         { name: 'F1' },
         { name: 'Frankenstein' },
@@ -563,7 +606,8 @@ const ceremony2026: CeremonyInput = {
     {
       name: 'Best Visual Effects',
       displayOrder: 20,
-      pointValue: 10,
+      pointValue: 90,
+      runnerUpMultiplier: 0.6,
       nominees: [
         { name: 'Avatar: Fire and Ash' },
         { name: 'F1' },
@@ -575,7 +619,8 @@ const ceremony2026: CeremonyInput = {
     {
       name: 'Best Animated Short',
       displayOrder: 21,
-      pointValue: 10,
+      pointValue: 15,
+      runnerUpMultiplier: 0.6,
       nominees: [
         { name: 'Butterfly' },
         { name: 'Forevergreen' },
@@ -587,7 +632,8 @@ const ceremony2026: CeremonyInput = {
     {
       name: 'Best Live Action Short',
       displayOrder: 22,
-      pointValue: 10,
+      pointValue: 15,
+      runnerUpMultiplier: 0.6,
       nominees: [
         { name: "Butcher's Stain" },
         { name: 'A Friend of Dorothy' },
@@ -599,7 +645,8 @@ const ceremony2026: CeremonyInput = {
     {
       name: 'Best Documentary Short',
       displayOrder: 23,
-      pointValue: 10,
+      pointValue: 15,
+      runnerUpMultiplier: 0.6,
       nominees: [
         { name: 'All the Empty Rooms' },
         { name: 'Armed Only with a Camera: The Life and Death of Brent Renaud' },
@@ -611,7 +658,8 @@ const ceremony2026: CeremonyInput = {
     {
       name: 'Best Casting',
       displayOrder: 24,
-      pointValue: 10,
+      pointValue: 15,
+      runnerUpMultiplier: 0.6,
       nominees: [
         { name: 'Hamnet', subtitle: 'Nina Gold' },
         { name: 'Marty Supreme', subtitle: 'Jennifer Venditti' },
@@ -656,12 +704,14 @@ async function seedCeremony(ceremony: CeremonyInput) {
       update: {
         displayOrder: cat.displayOrder,
         pointValue: cat.pointValue,
+        runnerUpMultiplier: cat.runnerUpMultiplier,
       },
       create: {
         ceremonyYearId: ceremonyYear.id,
         name: cat.name,
         displayOrder: cat.displayOrder,
         pointValue: cat.pointValue,
+        runnerUpMultiplier: cat.runnerUpMultiplier,
       },
     })
 
