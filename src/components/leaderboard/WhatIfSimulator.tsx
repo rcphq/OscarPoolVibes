@@ -78,8 +78,8 @@ export function WhatIfSimulator({
   const [mockWinners, setMockWinners] = useState<Map<string, string>>(
     new Map()
   );
-  const [isSimulating, setIsSimulating] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const isSimulating = mockWinners.size > 0;
 
   const sortedCategories = useMemo(
     () => [...categories].sort((a, b) => a.displayOrder - b.displayOrder),
@@ -95,7 +95,6 @@ export function WhatIfSimulator({
       }
     }
     setMockWinners(next);
-    setIsSimulating(true);
   }, [categories]);
 
   const handleCategoryChange = useCallback(
@@ -107,11 +106,6 @@ export function WhatIfSimulator({
         } else {
           next.set(categoryId, nomineeId);
         }
-        if (next.size > 0) {
-          setIsSimulating(true);
-        } else {
-          setIsSimulating(false);
-        }
         return next;
       });
     },
@@ -120,7 +114,6 @@ export function WhatIfSimulator({
 
   const handleReset = useCallback(() => {
     setMockWinners(new Map());
-    setIsSimulating(false);
   }, []);
 
   const simulatedEntries: LeaderboardEntry[] | null = useMemo(() => {

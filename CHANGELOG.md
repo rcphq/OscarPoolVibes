@@ -9,7 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **docs:** v0.2.0 implementation plan with tiered scoring, invite sharing, pre-results leaderboard, and What If? simulator (#48, #49, #50, #51, #52, #53)
+- **pools:** Invite sharing — WhatsApp, X/Twitter, and Copy Link buttons inline + post-create dialog (#50)
+- **results:** "Enter Results" button on pool detail page for ADMIN and RESULTS_MANAGER roles (#49)
+- **leaderboard:** Pre-results view showing own completion stats with sealed badges for other members (#52)
+- **leaderboard:** "What If?" admin simulator — pick hypothetical winners, see simulated leaderboard (#53)
+- **scoring:** 4-tier point system: 180/90/30/15 with 0.6x runner-up multiplier (#51)
+- **infra:** Extract category DB queries into `src/lib/db/categories.ts` (#52)
+
+### Fixed
+
+- **pools:** Disabled accessType select now submits value via hidden input (#48)
+- **leaderboard:** Replace hardcoded gray tokens with semantic color tokens in LeaderboardTable (#52)
+- **leaderboard:** Derive `isSimulating` from state instead of separate setter (review fix)
 
 ## [0.1.2] - 2026-03-06
 
