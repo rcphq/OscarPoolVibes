@@ -1,10 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
 import { redirect, notFound } from "next/navigation";
-import { Users, Crown, Settings, Trophy, BarChart3, ArrowLeft, Globe, Lock } from "lucide-react";
+import { Users, Crown, Settings, Trophy, BarChart3, ArrowLeft, Globe, Lock, ClipboardCheck } from "lucide-react";
 import { auth } from "@/lib/auth/auth";
 import { getPool } from "@/lib/db/pools";
 import { getMemberRole } from "@/lib/db/pool-members";
+import { checkResultsPermission } from "@/lib/results/permissions";
 import {
   Card,
   CardHeader,
@@ -63,6 +64,7 @@ export default async function PoolDetailPage({
   }
 
   const isAdmin = memberRole === "ADMIN";
+  const { canSetResults } = await checkResultsPermission(session.user.id, pool.ceremonyYearId);
 
   return (
     <main className="min-h-screen">
@@ -109,6 +111,14 @@ export default async function PoolDetailPage({
                   Leaderboard
                 </Link>
               </Button>
+              {canSetResults && (
+                <Button variant="outline" asChild>
+                  <Link href={`/results/${pool.ceremonyYear.id}`}>
+                    <ClipboardCheck className="size-4" />
+                    Enter Results
+                  </Link>
+                </Button>
+              )}
               {isAdmin && (
                 <Button variant="outline" asChild>
                   <Link href={`/pools/${pool.id}/settings`}>
