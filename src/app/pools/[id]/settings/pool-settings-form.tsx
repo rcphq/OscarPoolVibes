@@ -86,9 +86,12 @@ export function PoolSettingsForm({
           </SelectContent>
         </Select>
         {isAlreadyOpen && (
-          <p className="text-xs text-muted-foreground">
-            Open pools cannot be changed back to invite-only.
-          </p>
+          <>
+            <input type="hidden" name="accessType" value={accessType} />
+            <p className="text-xs text-muted-foreground">
+              Open pools cannot be changed back to invite-only.
+            </p>
+          </>
         )}
       </div>
 
