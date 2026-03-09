@@ -14,7 +14,8 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CopyInviteLink } from "@/components/pools/CopyInviteLink";
+import { InviteShareButtons } from "@/components/pools/InviteShareButtons";
+import { InviteShareDialog } from "@/components/pools/InviteShareDialog";
 
 export async function generateMetadata({
   params,
@@ -40,10 +41,13 @@ export async function generateMetadata({
 
 export default async function PoolDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const { id } = await params;
+  const resolvedSearchParams = await searchParams;
   const session = await auth();
 
   if (!session?.user?.id) {
@@ -65,9 +69,19 @@ export default async function PoolDetailPage({
 
   const isAdmin = memberRole === "ADMIN";
   const { canSetResults } = await checkResultsPermission(session.user.id, pool.ceremonyYearId);
+  const showCreatedDialog =
+    resolvedSearchParams.created === "1" && isAdmin;
+  const inviteUrl = `${process.env.AUTH_URL || ""}/pools/join?code=${pool.inviteCode}`;
 
   return (
     <main className="min-h-screen">
+      {showCreatedDialog && (
+        <InviteShareDialog
+          open={showCreatedDialog}
+          inviteUrl={inviteUrl}
+          poolName={pool.name}
+        />
+      )}
       {/* Header Section */}
       <section className="bg-navy px-4 py-12 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-4xl">
@@ -146,7 +160,10 @@ export default async function PoolDetailPage({
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <CopyInviteLink inviteCode={pool.inviteCode} poolId={pool.id} />
+              <InviteShareButtons
+                inviteUrl={inviteUrl}
+                poolName={pool.name}
+              />
             </CardContent>
           </Card>
 

@@ -109,5 +109,5 @@ export async function createPoolAction(
     };
   }
 
-  redirect(`/pools/${poolId}`);
+  redirect(`/pools/${poolId}?created=1`);
 }
