@@ -40,7 +40,7 @@ function RankBadge({ rank }: { rank: number }) {
   }
   if (rank === 2) {
     return (
-      <span className="inline-flex items-center justify-center gap-1 rounded-full bg-gray-300/15 px-2.5 py-1 text-sm font-bold text-gray-300">
+      <span className="inline-flex items-center justify-center gap-1 rounded-full bg-secondary/50 px-2.5 py-1 text-sm font-bold text-muted-foreground">
         <Medal className="size-4" />
         {rank}
       </span>
@@ -117,7 +117,7 @@ function CategoryBreakdownRow({
   if (isCorrectFirst) {
     rowClass = "bg-gold-500/10";
   } else if (isCorrectRunner) {
-    rowClass = "bg-gray-300/5";
+    rowClass = "bg-secondary/20";
   }
 
   return (
@@ -139,7 +139,7 @@ function CategoryBreakdownRow({
             1st choice correct
           </span>
         ) : isCorrectRunner ? (
-          <span className="inline-flex items-center gap-1 text-sm text-gray-300">
+          <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
             <Check className="size-3.5" />
             Runner-up correct
           </span>

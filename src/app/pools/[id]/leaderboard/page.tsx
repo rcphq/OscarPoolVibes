@@ -5,7 +5,7 @@ import { auth } from "@/lib/auth/auth";
 import { getPool } from "@/lib/db/pools";
 import { getMemberRole } from "@/lib/db/pool-members";
 import { getPredictionsByPool } from "@/lib/db/predictions";
-import { prisma } from "@/lib/db/client";
+import { getCategoriesByCeremonyYear } from "@/lib/db/categories";
 import {
   calculateLeaderboard,
   type LeaderboardInput,
@@ -58,22 +58,7 @@ export default async function LeaderboardPage({
     redirect("/pools");
   }
 
-  // Fetch categories with nominees and winner info for this ceremony
-  const categories = await prisma.category.findMany({
-    where: { ceremonyYearId: pool.ceremonyYearId },
-    select: {
-      id: true,
-      name: true,
-      displayOrder: true,
-      pointValue: true,
-      runnerUpMultiplier: true,
-      winnerId: true,
-      winner: {
-        select: { id: true, name: true },
-      },
-    },
-    orderBy: { displayOrder: "asc" },
-  });
+  const categories = await getCategoriesByCeremonyYear(pool.ceremonyYearId);
 
   // Fetch all predictions for the pool (visibility handled by getPredictionsByPool)
   const { predictions, predictionsLocked, members } =
