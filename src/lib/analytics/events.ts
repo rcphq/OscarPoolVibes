@@ -32,6 +32,10 @@ export type EventMap = {
   admin_ceremony_created: { ceremonyYearId: string }
   member_role_changed: { poolId: string; newRole: string }
   member_removed: { poolId: string }
+
+  // Scoring overrides
+  scoring_overridden: { poolId: string; updatedCount: number }
+  scoring_reverted_to_defaults: { poolId: string }
 }
 
 export type EventName = keyof EventMap

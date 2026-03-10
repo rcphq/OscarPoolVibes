@@ -11,23 +11,25 @@ import {
 import { InviteShareButtons } from "@/components/pools/InviteShareButtons";
 
 interface InviteShareDialogProps {
-  open: boolean;
+  defaultOpen: boolean;
   inviteUrl: string;
   poolName: string;
+  inviteCode: string;
 }
 
 export function InviteShareDialog({
-  open: initialOpen,
+  defaultOpen,
   inviteUrl,
   poolName,
+  inviteCode,
 }: InviteShareDialogProps) {
-  const [open, setOpen] = useState(initialOpen);
+  const [open, setOpen] = useState(defaultOpen);
 
   useEffect(() => {
-    if (initialOpen) {
+    if (defaultOpen) {
       window.history.replaceState({}, "", window.location.pathname);
     }
-  }, [initialOpen]);
+  }, [defaultOpen]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -38,7 +40,7 @@ export function InviteShareDialog({
             Invite friends to join your pool.
           </DialogDescription>
         </DialogHeader>
-        <InviteShareButtons inviteUrl={inviteUrl} poolName={poolName} />
+        <InviteShareButtons inviteUrl={inviteUrl} poolName={poolName} inviteCode={inviteCode} />
       </DialogContent>
     </Dialog>
   );

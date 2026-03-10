@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { Settings, Users, AlertTriangle } from "lucide-react";
+import Link from "next/link";
+import { Settings, Users, AlertTriangle, Sliders, ChevronRight } from "lucide-react";
 import { auth } from "@/lib/auth/auth";
 import { getPool } from "@/lib/db/pools";
 import { getMemberRole } from "@/lib/db/pool-members";
@@ -99,6 +100,29 @@ export default async function PoolSettingsPage({ params }: SettingsPageProps) {
               }))}
               currentUserId={session.user.id}
             />
+          </CardContent>
+        </Card>
+
+        {/* Scoring Settings discovery card */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Sliders className="size-5 text-primary" />
+              <CardTitle>Scoring &amp; Points</CardTitle>
+            </div>
+            <CardDescription>
+              Customize point values for each award category. Changes apply to
+              all pools for this ceremony.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link
+              href={`/pools/${poolId}/scoring`}
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+            >
+              Manage Scoring
+              <ChevronRight className="size-4" />
+            </Link>
           </CardContent>
         </Card>
 

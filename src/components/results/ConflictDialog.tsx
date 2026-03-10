@@ -35,23 +35,31 @@ export function ConflictDialog({
   const acceptButtonRef = useRef<HTMLButtonElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
 
-  // Open/close the native dialog element
+  // Open/close the native dialog element and manage focus.
+  //
+  // The cleanup function is the single owner of "tear down an open dialog":
+  // it runs both on open→false transitions (before the new effect body) and
+  // on component unmount-while-open. This avoids a double-restoration issue
+  // where the previous cleanup restored focus before the effect body also
+  // tried to (with a now-null ref), and prevents a stuck modal backdrop if
+  // the parent unmounts while the dialog is showing.
   useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
 
     if (open && !dialog.open) {
+      // Save focus origin so we can restore it when the dialog closes
       previousFocusRef.current = document.activeElement as HTMLElement;
       dialog.showModal();
-      // Focus the first action button
+      // Move focus into the dialog immediately (WCAG 2.4.3 focus order)
       acceptButtonRef.current?.focus();
-    } else if (!open && dialog.open) {
-      dialog.close();
-      previousFocusRef.current?.focus();
-      previousFocusRef.current = null;
     }
 
     return () => {
+      // Close the dialog if it's still open (handles both the open→false
+      // transition and the unmount-while-open case gracefully)
+      if (dialog?.open) dialog.close();
+      // Restore focus to wherever it was before the dialog opened
       if (previousFocusRef.current) {
         previousFocusRef.current.focus();
         previousFocusRef.current = null;

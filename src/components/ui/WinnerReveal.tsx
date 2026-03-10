@@ -56,7 +56,7 @@ export function WinnerReveal({ isCorrect, type, children }: WinnerRevealProps) {
           "relative rounded-lg border-2 p-0.5",
           isGold
             ? "border-gold-400 bg-gold-400/10"
-            : "border-gray-300 bg-gray-300/10"
+            : "border-border bg-muted/30"
         )}
       >
         <div
@@ -64,7 +64,7 @@ export function WinnerReveal({ isCorrect, type, children }: WinnerRevealProps) {
             "absolute -top-2 right-2 rounded-full px-2 py-0.5 text-xs font-semibold",
             isGold
               ? "bg-gold-400 text-navy-dark"
-              : "bg-gray-300 text-gray-800"
+              : "bg-secondary text-secondary-foreground"
           )}
         >
           {isGold ? "Correct!" : "Runner-up"}
@@ -88,7 +88,7 @@ export function WinnerReveal({ isCorrect, type, children }: WinnerRevealProps) {
     <div
       className={cn(
         "relative overflow-hidden rounded-lg border-2 p-0.5",
-        isGold ? "border-gold-400" : "border-gray-300",
+        isGold ? "border-gold-400" : "border-border",
         animationPhase === "glow" && isGold && "animate-[glow-pulse_2s_ease-in-out_infinite]",
         animationPhase === "glow" && !isGold && "animate-[glow-pulse-silver_2s_ease-in-out_infinite]"
       )}

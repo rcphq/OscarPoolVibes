@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import { auth } from "@/lib/auth/auth";
-import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "Sign In | OscarPoolVibes",
@@ -8,14 +6,13 @@ export const metadata: Metadata = {
     "Sign in to OscarPoolVibes to create and join Oscar prediction pools.",
 };
 
-export default async function SignInLayout({
+// Note: authenticated users are redirected away from this route by middleware
+// (src/middleware.ts), which correctly preserves the `callbackUrl` query param.
+// A redundant redirect here would break callbackUrl flows (e.g., pool invite links).
+export default function SignInLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth();
-  if (session?.user) {
-    redirect("/pools");
-  }
   return children;
 }

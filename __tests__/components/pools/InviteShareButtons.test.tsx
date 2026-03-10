@@ -6,15 +6,17 @@ import { InviteShareButtons } from "@/components/pools/InviteShareButtons"
 const defaultProps = {
   inviteUrl: "https://example.com/pools/join?code=abc123",
   poolName: "Film Buffs 2026",
+  inviteCode: "abc123",
 }
 
 describe("InviteShareButtons", () => {
-  it("renders all three share buttons", () => {
+  it("renders all three share buttons and the invite code", () => {
     render(<InviteShareButtons {...defaultProps} />)
 
     expect(screen.getByRole("button", { name: /copy invite link/i })).toBeInTheDocument()
     expect(screen.getByRole("link", { name: /share on whatsapp/i })).toBeInTheDocument()
     expect(screen.getByRole("link", { name: /share on x/i })).toBeInTheDocument()
+    expect(screen.getByText(defaultProps.inviteCode)).toBeInTheDocument()
   })
 
   it("shows 'Copied' feedback after clicking copy button", async () => {

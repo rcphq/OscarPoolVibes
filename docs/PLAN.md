@@ -2,7 +2,7 @@
 
 Phased delivery plan for OscarPoolVibes. Each phase is a working, deployable increment.
 
-> **Implementation Status (as of March 2026)**: Phases 1 through 7 are **DONE**. The app has working auth, pool management, predictions, scoring, leaderboard, results entry with conflict detection, permissions management, admin panel, accessibility (skip link, error/loading boundaries, table semantics, axe tests, touch targets), SEO (sitemap, robots, OG image, JSON-LD, llms.txt, page metadata), UX polish (theme toggle, toast notifications, AlertDialog confirmations), and an interactive demo pool at `/demo` with 97th Academy Awards data. Phase 7.5 (comprehensive testing) and 8 (stretch) remain.
+> **Implementation Status (as of March 2026)**: Phases 1 through 7 are **DONE**, plus substantial v0.2.0 additions and a bug-fix pass. The app has working auth, pool management, predictions, 4-tier scoring with manual override UI (`/pools/[id]/scoring`), leaderboard (with pre-results sealed view and What If? admin simulation), results entry with conflict detection, permissions management, site-level admin gating via `SITE_ADMIN_EMAILS`, HSTS + XSS security headers, accessibility, SEO, UX polish (theme toggle, toasts, invite sharing dialog with social buttons), favicon/PWA manifest, and an interactive demo pool at `/demo`. Phase 7.5 (comprehensive testing — #24, #58) and Phase 8 (stretch) remain. Remaining open infra issues: #40 (rate limiting), #42 (pin next-auth), #43 (ws cleanup).
 
 ---
 
@@ -181,13 +181,30 @@ Phased delivery plan for OscarPoolVibes. Each phase is a working, deployable inc
 - [ ] Mobile-responsive design pass — deferred to Phase 7.5
 - [x] Add toast notifications for actions (saved, joined, error, etc.)
 - [x] Light/dark theme support
-- [ ] Favicon and branding assets — deferred
+- [x] Favicon and branding assets — favicon, app icons, apple-icon, android-chrome, PWA manifest (#56)
 - [x] Add `og:image` generation for pool invite link previews
 - [x] Interactive demo pool (`/demo`) with 97th Academy Awards data, AI rivals, and animated reveal flow
 
 > See `docs/ARCHITECTURE.md` ADR-10 (accessibility), ADR-11 (SEO) for rationale.
 
 **Deliverable**: A polished, accessible, SEO-optimized app ready for Oscar night.
+
+---
+
+## v0.2.0 Additions (Post-Phase 7) [DONE]
+
+Work completed after the initial Phase 7 delivery, tracked via GitHub issues #48–#57.
+
+- [x] **Bug: disabled accessType select not submitting** — fixed with hidden input (#48)
+- [x] **Enter Results nav link** — added to pool detail page for ADMIN/RESULTS_MANAGER (#49)
+- [x] **Invite sharing dialog** — post-creation modal + social share buttons (WhatsApp, X, Copy) on pool detail (#50)
+- [x] **4-tier scoring** — tiered point values (180/90/30/15) with 0.6× runner-up, seeded for 2025 + 2026 (#51)
+- [x] **Pre-results leaderboard** — sealed prediction stats view before results posted (#52)
+- [x] **What If? simulation** — admin-only client-side leaderboard simulation with random/manual winners (#53)
+- [x] **Security hardening** — site-level admin via `SITE_ADMIN_EMAILS`, permissions tightened, session helpers (#54)
+- [x] **Favicon + PWA manifest** — full icon set, apple-icon, web manifest with dark theme (#56)
+- [x] **Invite link overflow fix** — stacked layout, invite code pill restored (#55)
+- [x] **Manual scoring overrides** — `/pools/[id]/scoring` page for ADMIN/RESULTS_MANAGER to override per-category point values; revert-to-defaults; `Category.scoringLastChangedBy` audit field; `Math.round()` float fix (#57)
 
 ---
 

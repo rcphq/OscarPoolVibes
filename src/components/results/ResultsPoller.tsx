@@ -24,9 +24,11 @@ export function ResultsPoller({
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [secondsAgo, setSecondsAgo] = useState<number | null>(null);
 
-  // Stable ref for the callback to avoid infinite re-renders
+  // Stable ref so the polling interval effect below doesn't need to restart
+  // when the parent passes a new callback reference. The dep array ensures this
+  // only re-runs when the callback actually changes — not on every render.
   const onResultsUpdateRef = useRef(onResultsUpdate);
-  useEffect(() => { onResultsUpdateRef.current = onResultsUpdate; });
+  useEffect(() => { onResultsUpdateRef.current = onResultsUpdate; }, [onResultsUpdate]);
 
   // Forward results to parent whenever they change
   useEffect(() => {
