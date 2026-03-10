@@ -6,8 +6,7 @@ export const metadata: Metadata = {
     "Sign in to OscarPoolVibes to create and join Oscar prediction pools.",
 };
 
-// Note: authenticated users are redirected away from this route by middleware
-// (src/middleware.ts), which correctly preserves the `callbackUrl` query param.
+// Middleware handles redirecting authenticated users away from this route.
 // A redundant redirect here would break callbackUrl flows (e.g., pool invite links).
 export default function SignInLayout({
   children,

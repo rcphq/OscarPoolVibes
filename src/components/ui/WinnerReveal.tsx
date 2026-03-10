@@ -30,10 +30,9 @@ export function WinnerReveal({ isCorrect, type, children }: WinnerRevealProps) {
     if (!isCorrect || hasAnimated.current || prefersReducedMotion) return;
     hasAnimated.current = true;
 
-    // Start shimmer
     setAnimationPhase("shimmer");
 
-    // Transition to persistent glow after shimmer completes
+    // Transition to pulsing glow after shimmer completes
     const timer = setTimeout(() => {
       setAnimationPhase("glow");
     }, 1500);

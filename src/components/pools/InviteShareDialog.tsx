@@ -25,6 +25,8 @@ export function InviteShareDialog({
 }: InviteShareDialogProps) {
   const [open, setOpen] = useState(defaultOpen);
 
+  // Strip the query param that triggered this dialog (e.g. ?created=true)
+  // so a page refresh doesn't re-open it.
   useEffect(() => {
     if (defaultOpen) {
       window.history.replaceState({}, "", window.location.pathname);
