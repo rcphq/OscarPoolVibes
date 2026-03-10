@@ -14,12 +14,14 @@ interface InviteShareDialogProps {
   open: boolean;
   inviteUrl: string;
   poolName: string;
+  inviteCode: string;
 }
 
 export function InviteShareDialog({
   open: initialOpen,
   inviteUrl,
   poolName,
+  inviteCode,
 }: InviteShareDialogProps) {
   const [open, setOpen] = useState(initialOpen);
 
@@ -38,7 +40,7 @@ export function InviteShareDialog({
             Invite friends to join your pool.
           </DialogDescription>
         </DialogHeader>
-        <InviteShareButtons inviteUrl={inviteUrl} poolName={poolName} />
+        <InviteShareButtons inviteUrl={inviteUrl} poolName={poolName} inviteCode={inviteCode} />
       </DialogContent>
     </Dialog>
   );

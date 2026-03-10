@@ -80,6 +80,7 @@ export default async function PoolDetailPage({
           open={showCreatedDialog}
           inviteUrl={inviteUrl}
           poolName={pool.name}
+          inviteCode={pool.inviteCode}
         />
       )}
       {/* Header Section */}
