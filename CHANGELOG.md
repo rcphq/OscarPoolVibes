@@ -26,6 +26,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **pools:** Disabled accessType select now submits value via hidden input (#48)
 - **leaderboard:** Replace hardcoded gray tokens with semantic color tokens in LeaderboardTable (#52)
 - **leaderboard:** Derive `isSimulating` from state instead of separate setter (review fix)
+- **results:** `ResultsPoller` ref-sync `useEffect` was missing a dependency array, running on every render (#33)
+- **results:** `ConflictDialog` focus restore and `dialog.close()` are now owned by the cleanup function — prevents a stuck modal backdrop on unmount-while-open and eliminates the double-restoration when closing normally (#34)
+- **auth:** Removed `signin/layout.tsx` server-side redirect to `/pools` — it ignored `callbackUrl`, breaking pool invite link flows; middleware already handles the redirect correctly (#46)
+- **pools:** `InviteShareDialog` was not passing `inviteCode` through to `InviteShareButtons`, causing a TypeScript build error (#50)
+
+### Security
+
+- **infra:** Added `Strict-Transport-Security` (HSTS, 2-year max-age, includeSubDomains, preload) to all responses (#39)
+- **infra:** Added `X-XSS-Protection: 1; mode=block` to all responses (#39)
+
+### Style
+
+- **ui:** `WinnerReveal` runner-up state replaced hardcoded `gray-300`/`gray-800` with semantic tokens (`border-border`, `bg-muted/30`, `bg-secondary`, `text-secondary-foreground`) — renders correctly in both light and dark modes (#45)
 
 ## [0.1.2] - 2026-03-06
 
@@ -41,7 +54,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - **design:** Demo components use semantic color tokens — light mode now works correctly (#45)
-- **auth:** Sign-in layout redirects authenticated users server-side (defense-in-depth) (#46)
+- **auth:** Sign-in page correctly reads `callbackUrl` from query params (#46)
 - **auth:** Middleware `startsWith("/")` no longer bypasses all auth checks (#35)
 - **pools:** Permissions GET requires ADMIN role — fixes IDOR leaking member PII (#36)
 - **pools:** Permissions POST validated with Zod schema (#37)

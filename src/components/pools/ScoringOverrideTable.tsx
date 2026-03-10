@@ -1,14 +1,15 @@
 "use client";
 
 /**
- * ScoringOverrideTable — interactive table for overriding per-category point values.
+ * ScoringOverrideTable - interactive table for overriding per-category point values.
  *
  * Rendered inside /pools/[id]/scoring/page.tsx (server component).
  * All data mutations go through server actions in actions.ts.
  */
 
+import type { ComponentProps } from "react";
 import { useEffect, useState, useTransition } from "react";
-import { RotateCcw, Save, Info } from "lucide-react";
+import { Info, RotateCcw, Save, Undo2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,11 +26,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { TIER_GROUPS } from "@/lib/scoring/defaults";
 import {
-  updateCategoryScoring,
   revertScoringToDefaults,
+  updateCategoryScoring,
 } from "@/app/pools/[id]/scoring/actions";
-
-// ── Types ────────────────────────────────────────────────────────────────────
 
 type CategoryRow = {
   id: string;
@@ -59,7 +58,18 @@ type FieldErrors = {
   runnerUpPoints?: string;
 };
 
-// ── Validation ───────────────────────────────────────────────────────────────
+type ScoringSection = {
+  key: string;
+  tierLabel: string;
+  defaultPointValue?: number;
+  defaultRunnerUp?: number;
+  helperText?: string;
+  rows: CategoryRow[];
+};
+
+const KNOWN_TIER_CATEGORY_NAMES = new Set(
+  TIER_GROUPS.flatMap((tier) => tier.categories)
+);
 
 function validateField(
   field: "pointValue" | "runnerUpPoints",
@@ -67,18 +77,61 @@ function validateField(
   otherValue: number
 ): string | undefined {
   if (!Number.isInteger(value)) return "Must be a whole number";
+
   if (field === "pointValue") {
     if (value < 1) return "Must be at least 1";
     if (value > 500) return "Cannot exceed 500";
-  } else {
-    if (value < 0) return "Cannot be negative";
-    if (value > 500) return "Cannot exceed 500";
-    if (value > otherValue) return "Cannot exceed 1st place points";
+    if (otherValue > value) return "Cannot be less than 2nd place points";
+    return undefined;
   }
+
+  if (value < 0) return "Cannot be negative";
+  if (value > 500) return "Cannot exceed 500";
+  if (value > otherValue) return "Cannot exceed 1st place points";
   return undefined;
 }
 
-// ── Component ─────────────────────────────────────────────────────────────────
+function getDefaultRunnerUpPoints(defaults: CategoryRow["defaults"]): number {
+  return Math.round(defaults.pointValue * defaults.runnerUpMultiplier);
+}
+
+function buildScoringSections(categories: CategoryRow[]): ScoringSection[] {
+  const sortedCategories = [...categories].sort(
+    (left, right) => left.displayOrder - right.displayOrder
+  );
+
+  const presetSections = TIER_GROUPS.map((tier) => {
+    const rows = sortedCategories.filter((row) => tier.categories.includes(row.name));
+
+    return {
+      key: tier.tierLabel,
+      tierLabel: tier.tierLabel,
+      defaultPointValue: tier.defaultPointValue,
+      defaultRunnerUp: Math.round(
+        tier.defaultPointValue * tier.defaultRunnerUpMultiplier
+      ),
+      rows,
+    };
+  }).filter((section) => section.rows.length > 0);
+
+  const additionalRows = sortedCategories.filter(
+    (row) => !KNOWN_TIER_CATEGORY_NAMES.has(row.name)
+  );
+
+  if (additionalRows.length === 0) {
+    return presetSections;
+  }
+
+  return [
+    ...presetSections,
+    {
+      key: "additional-categories",
+      tierLabel: "Additional Categories",
+      helperText: "Not part of the preset Oscar tier list, but still editable here.",
+      rows: additionalRows,
+    },
+  ];
+}
 
 export function ScoringOverrideTable({
   poolId,
@@ -88,20 +141,15 @@ export function ScoringOverrideTable({
   const [edits, setEdits] = useState<Record<string, FieldEdits>>({});
   const [errors, setErrors] = useState<Record<string, FieldErrors>>({});
   const [isPending, startTransition] = useTransition();
+  const sections = buildScoringSections(categories);
 
-  // Build a lookup map from category name → row for tier grouping
-  const categoryByName = new Map<string, CategoryRow>(
-    categories.map((c) => [c.name, c])
-  );
-
-  // Derived
   const isDirty = Object.keys(edits).length > 0;
   const hasErrors = Object.values(errors).some(
-    (e) => e.pointValue !== undefined || e.runnerUpPoints !== undefined
+    (entry) =>
+      entry.pointValue !== undefined || entry.runnerUpPoints !== undefined
   );
   const dirtyCount = Object.keys(edits).length;
 
-  // Resolve displayed value: local edit first, then server value
   function getValue(
     categoryId: string,
     field: "pointValue" | "runnerUpPoints",
@@ -110,18 +158,17 @@ export function ScoringOverrideTable({
     return edits[categoryId]?.[field] ?? original;
   }
 
-  // Unsaved changes — native browser warning on close/refresh
   useEffect(() => {
     if (!isDirty) return;
-    const handler = (e: BeforeUnloadEvent) => {
-      e.preventDefault();
-      e.returnValue = "";
+
+    const handler = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = "";
     };
+
     window.addEventListener("beforeunload", handler);
     return () => window.removeEventListener("beforeunload", handler);
   }, [isDirty]);
-
-  // ── Handlers ─────────────────────────────────────────────────────────────
 
   function handleChange(
     categoryId: string,
@@ -129,8 +176,9 @@ export function ScoringOverrideTable({
     raw: string,
     original: FieldEdits
   ) {
-    const parsed = parseFloat(raw);
-    const value = isNaN(parsed) ? 0 : parsed;
+    const parsed = Number(raw);
+    const value = Number.isNaN(parsed) ? 0 : parsed;
+
     setEdits((prev) => ({
       ...prev,
       [categoryId]: {
@@ -146,18 +194,27 @@ export function ScoringOverrideTable({
     value: number,
     otherValue: number
   ) {
-    const error = validateField(field, value, otherValue);
+    const fieldError = validateField(field, value, otherValue);
+    const companionField = field === "pointValue" ? "runnerUpPoints" : "pointValue";
+    const companionError = validateField(companionField, otherValue, value);
+
     setErrors((prev) => {
       const current = prev[categoryId] ?? {};
-      const updated = { ...current, [field]: error };
-      // Clean up undefined keys so hasErrors check stays accurate
+      const updated: FieldErrors = {
+        ...current,
+        [field]: fieldError,
+        [companionField]: companionError,
+      };
+
       if (updated.pointValue === undefined) delete updated.pointValue;
       if (updated.runnerUpPoints === undefined) delete updated.runnerUpPoints;
+
       if (Object.keys(updated).length === 0) {
         const next = { ...prev };
         delete next[categoryId];
         return next;
       }
+
       return { ...prev, [categoryId]: updated };
     });
   }
@@ -175,20 +232,40 @@ export function ScoringOverrideTable({
     });
   }
 
+  function handleRowResetToDefaults(
+    categoryId: string,
+    defaults: CategoryRow["defaults"]
+  ) {
+    setEdits((prev) => ({
+      ...prev,
+      [categoryId]: {
+        pointValue: defaults.pointValue,
+        runnerUpPoints: getDefaultRunnerUpPoints(defaults),
+      },
+    }));
+    setErrors((prev) => {
+      const next = { ...prev };
+      delete next[categoryId];
+      return next;
+    });
+  }
+
   function handleSave() {
     startTransition(async () => {
-      const updates = Object.entries(edits).map(([categoryId, vals]) => ({
+      const updates = Object.entries(edits).map(([categoryId, values]) => ({
         categoryId,
-        ...vals,
+        ...values,
       }));
+
       const result = await updateCategoryScoring(poolId, updates);
       if ("error" in result) {
         toast.error(result.error);
-      } else {
-        toast.success("Scoring saved");
-        setEdits({});
-        setErrors({});
+        return;
       }
+
+      toast.success("Scoring saved");
+      setEdits({});
+      setErrors({});
     });
   }
 
@@ -197,31 +274,39 @@ export function ScoringOverrideTable({
       const result = await revertScoringToDefaults(poolId);
       if ("error" in result) {
         toast.error(result.error);
-      } else {
-        toast.success("Scoring reverted to defaults");
-        setEdits({});
-        setErrors({});
+        return;
       }
+
+      toast.success("Scoring reverted to defaults");
+      setEdits({});
+      setErrors({});
     });
   }
 
-  // ── Render ────────────────────────────────────────────────────────────────
-
   return (
     <div className="pb-20">
-      {/* Ceremony-wide notice */}
-      <div className="flex items-start gap-2 rounded-md border border-gold-500/30 bg-gold-500/5 px-4 py-3 text-sm text-muted-foreground mb-6">
-        <Info className="size-4 mt-0.5 shrink-0 text-gold-400" />
-        <span>
-          Changes apply to <strong className="text-foreground">all pools</strong>{" "}
-          for the{" "}
-          <strong className="text-foreground">{ceremonyYearName}</strong>{" "}
-          ceremony.
-        </span>
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex items-start gap-2 rounded-md border border-gold-500/30 bg-gold-500/5 px-4 py-3 text-sm text-muted-foreground">
+          <Info className="mt-0.5 size-4 shrink-0 text-gold-400" />
+          <span>
+            Changes apply to <strong className="text-foreground">all pools</strong>{" "}
+            for the <strong className="text-foreground">{ceremonyYearName}</strong>{" "}
+            ceremony.
+          </span>
+        </div>
+
+        <RevertAllDialogTrigger
+          isPending={isPending}
+          onConfirm={handleRevertAll}
+          buttonProps={{
+            variant: "outline",
+            className:
+              "border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive sm:self-start",
+          }}
+        />
       </div>
 
-      {/* Table */}
-      <div className="rounded-lg border border-border overflow-hidden">
+      <div className="overflow-hidden rounded-lg border border-border">
         <table className="w-full border-collapse text-sm">
           <caption className="sr-only">Award category scoring overrides</caption>
 
@@ -229,124 +314,89 @@ export function ScoringOverrideTable({
             <tr className="border-b border-border">
               <th
                 scope="col"
-                className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider"
+                className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground"
               >
                 Category
               </th>
               <th
                 scope="col"
-                className="px-3 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider w-32"
+                className="w-32 px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground"
               >
                 1st Place
               </th>
               <th
                 scope="col"
-                className="px-3 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider w-32"
+                className="w-32 px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground"
               >
                 2nd Place
               </th>
-              <th scope="col" className="w-8 px-2 py-3">
-                <span className="sr-only">Reset row</span>
+              <th scope="col" className="w-14 px-2 py-3">
+                <span className="sr-only">Row actions</span>
               </th>
             </tr>
           </thead>
 
           <tbody className="divide-y divide-border">
-            {TIER_GROUPS.map((tier) => {
-              const tierRows = tier.categories
-                .map((name) => categoryByName.get(name))
-                .filter((row): row is CategoryRow => row !== undefined);
-
-              if (tierRows.length === 0) return null;
-
-              const defaultRunnerUp = Math.round(
-                tier.defaultPointValue * tier.defaultRunnerUpMultiplier
-              );
-
-              return (
-                <TierSection
-                  key={tier.tierLabel}
-                  tierLabel={tier.tierLabel}
-                  defaultPointValue={tier.defaultPointValue}
-                  defaultRunnerUp={defaultRunnerUp}
-                  rows={tierRows}
-                  edits={edits}
-                  errors={errors}
-                  getValue={getValue}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  onRowRevert={handleRowRevert}
-                />
-              );
-            })}
+            {sections.map((section) => (
+              <TierSection
+                key={section.key}
+                tierLabel={section.tierLabel}
+                defaultPointValue={section.defaultPointValue}
+                defaultRunnerUp={section.defaultRunnerUp}
+                helperText={section.helperText}
+                rows={section.rows}
+                edits={edits}
+                errors={errors}
+                getValue={getValue}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                onRowRevert={handleRowRevert}
+                onRowResetToDefaults={handleRowResetToDefaults}
+              />
+            ))}
           </tbody>
         </table>
       </div>
 
-      {/* Sticky action bar */}
-      {isDirty && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-gold-500/20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 px-4 py-3">
-          <div className="mx-auto max-w-4xl flex items-center justify-between gap-4">
+      {isDirty ? (
+        <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-gold-500/20 bg-background/95 px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+          <div className="mx-auto flex max-w-4xl items-center justify-between gap-4">
             <span className="text-sm text-muted-foreground">
               {dirtyCount} categor{dirtyCount === 1 ? "y" : "ies"} modified
             </span>
 
             <div className="flex items-center gap-2">
-              {/* Revert All — AlertDialog */}
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    disabled={isPending}
-                    className="text-destructive hover:text-destructive"
-                  >
-                    Revert All to Defaults
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Revert All to Defaults?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This will reset all categories to their tier default point
-                      values. Any unsaved changes will be lost.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={handleRevertAll}
-                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                    >
-                      Revert All
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+              <RevertAllDialogTrigger
+                isPending={isPending}
+                onConfirm={handleRevertAll}
+                buttonProps={{
+                  variant: "ghost",
+                  size: "sm",
+                  className: "text-destructive hover:text-destructive",
+                }}
+              />
 
-              {/* Save */}
               <Button
                 size="sm"
                 onClick={handleSave}
                 disabled={isPending || hasErrors}
               >
                 <Save className="size-4" />
-                {isPending ? "Saving…" : "Save Changes"}
+                {isPending ? "Saving..." : "Save Changes"}
               </Button>
             </div>
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
 
-// ── TierSection sub-component ─────────────────────────────────────────────────
-
 type TierSectionProps = {
   tierLabel: string;
-  defaultPointValue: number;
-  defaultRunnerUp: number;
+  defaultPointValue?: number;
+  defaultRunnerUp?: number;
+  helperText?: string;
   rows: CategoryRow[];
   edits: Record<string, FieldEdits>;
   errors: Record<string, FieldErrors>;
@@ -368,12 +418,17 @@ type TierSectionProps = {
     otherValue: number
   ) => void;
   onRowRevert: (categoryId: string) => void;
+  onRowResetToDefaults: (
+    categoryId: string,
+    defaults: CategoryRow["defaults"]
+  ) => void;
 };
 
 function TierSection({
   tierLabel,
   defaultPointValue,
   defaultRunnerUp,
+  helperText,
   rows,
   edits,
   errors,
@@ -381,27 +436,28 @@ function TierSection({
   onChange,
   onBlur,
   onRowRevert,
+  onRowResetToDefaults,
 }: TierSectionProps) {
   return (
     <>
-      {/* Tier header */}
-      <tr className="bg-gold-500/5 border-y border-gold-500/20">
-        <td
-          colSpan={4}
-          className="px-4 py-2 text-left"
-        >
-          <div className="flex items-center gap-3">
-            <span className="text-xs font-semibold text-gold-400 uppercase tracking-wider">
+      <tr className="border-y border-gold-500/20 bg-gold-500/5">
+        <td colSpan={4} className="px-4 py-2 text-left">
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-xs font-semibold uppercase tracking-wider text-gold-400">
               {tierLabel}
             </span>
-            <span className="inline-flex items-center gap-1 rounded-full border border-gold-500/40 bg-gold-500/15 px-2 py-0.5 text-xs text-gold-400">
-              Default: {defaultPointValue}pts / {defaultRunnerUp}pts
-            </span>
+            {defaultPointValue !== undefined && defaultRunnerUp !== undefined ? (
+              <span className="inline-flex items-center gap-1 rounded-full border border-gold-500/40 bg-gold-500/15 px-2 py-0.5 text-xs text-gold-400">
+                Default: {defaultPointValue}pts / {defaultRunnerUp}pts
+              </span>
+            ) : null}
+            {helperText ? (
+              <span className="text-xs text-muted-foreground">{helperText}</span>
+            ) : null}
           </div>
         </td>
       </tr>
 
-      {/* Category rows */}
       {rows.map((row) => (
         <CategoryDataRow
           key={row.id}
@@ -412,13 +468,12 @@ function TierSection({
           onChange={onChange}
           onBlur={onBlur}
           onRowRevert={onRowRevert}
+          onRowResetToDefaults={onRowResetToDefaults}
         />
       ))}
     </>
   );
 }
-
-// ── CategoryDataRow sub-component ─────────────────────────────────────────────
 
 type CategoryDataRowProps = {
   row: CategoryRow;
@@ -442,6 +497,10 @@ type CategoryDataRowProps = {
     otherValue: number
   ) => void;
   onRowRevert: (categoryId: string) => void;
+  onRowResetToDefaults: (
+    categoryId: string,
+    defaults: CategoryRow["defaults"]
+  ) => void;
 };
 
 function CategoryDataRow({
@@ -452,6 +511,7 @@ function CategoryDataRow({
   onChange,
   onBlur,
   onRowRevert,
+  onRowResetToDefaults,
 }: CategoryDataRowProps) {
   const isDirtyRow = edits[row.id] !== undefined;
   const rowErrors = errors[row.id];
@@ -464,10 +524,12 @@ function CategoryDataRow({
     runnerUpPoints: row.runnerUpPoints,
   };
 
+  const defaultRunnerUpPoints = getDefaultRunnerUpPoints(row.defaults);
+  const differsFromDefault =
+    pointValue !== row.defaults.pointValue || runnerUpPoints !== defaultRunnerUpPoints;
+
   const pointValueErrorId = `${row.id}-pointValue-error`;
   const runnerUpErrorId = `${row.id}-runnerUpPoints-error`;
-
-  // Compute ratio hint: show when ratio differs from 0.6 by more than 0.01
   const ratio = pointValue > 0 ? runnerUpPoints / pointValue : 0;
   const showRatioHint =
     !rowErrors?.runnerUpPoints && Math.abs(ratio - 0.6) > 0.01;
@@ -480,21 +542,16 @@ function CategoryDataRow({
           : "transition-colors hover:bg-muted/30"
       }
     >
-      {/* Category name */}
       <th
         scope="row"
-        className="px-4 py-3 text-left text-sm font-medium text-foreground align-top"
+        className="px-4 py-3 text-left text-sm font-medium align-top text-foreground"
       >
         {row.name}
       </th>
 
-      {/* 1st Place */}
-      <td className="px-3 py-3 align-top w-32">
-        <label
-          className="sr-only"
-          htmlFor={`${row.id}-pointValue`}
-        >
-          {row.name} — 1st Place Points
+      <td className="w-32 px-3 py-3 align-top">
+        <label className="sr-only" htmlFor={`${row.id}-pointValue`}>
+          {row.name} - 1st Place Points
         </label>
         <Input
           id={`${row.id}-pointValue`}
@@ -504,35 +561,29 @@ function CategoryDataRow({
           step={1}
           value={pointValue}
           aria-invalid={rowErrors?.pointValue !== undefined ? true : undefined}
-          aria-describedby={
-            rowErrors?.pointValue ? pointValueErrorId : undefined
-          }
+          aria-describedby={rowErrors?.pointValue ? pointValueErrorId : undefined}
           className="h-8 w-24 text-sm"
-          onChange={(e) =>
-            onChange(row.id, "pointValue", e.target.value, original)
+          onChange={(event) =>
+            onChange(row.id, "pointValue", event.target.value, original)
           }
           onBlur={() => onBlur(row.id, "pointValue", pointValue, runnerUpPoints)}
         />
         <div className="min-h-[1.25rem]">
-          {rowErrors?.pointValue && (
+          {rowErrors?.pointValue ? (
             <p
               id={pointValueErrorId}
               role="alert"
-              className="text-xs text-destructive mt-0.5"
+              className="mt-0.5 text-xs text-destructive"
             >
               {rowErrors.pointValue}
             </p>
-          )}
+          ) : null}
         </div>
       </td>
 
-      {/* 2nd Place */}
-      <td className="px-3 py-3 align-top w-32">
-        <label
-          className="sr-only"
-          htmlFor={`${row.id}-runnerUpPoints`}
-        >
-          {row.name} — 2nd Place Points
+      <td className="w-32 px-3 py-3 align-top">
+        <label className="sr-only" htmlFor={`${row.id}-runnerUpPoints`}>
+          {row.name} - 2nd Place Points
         </label>
         <Input
           id={`${row.id}-runnerUpPoints`}
@@ -541,52 +592,100 @@ function CategoryDataRow({
           max={500}
           step={1}
           value={runnerUpPoints}
-          aria-invalid={
-            rowErrors?.runnerUpPoints !== undefined ? true : undefined
-          }
-          aria-describedby={
-            rowErrors?.runnerUpPoints ? runnerUpErrorId : undefined
-          }
+          aria-invalid={rowErrors?.runnerUpPoints !== undefined ? true : undefined}
+          aria-describedby={rowErrors?.runnerUpPoints ? runnerUpErrorId : undefined}
           className="h-8 w-24 text-sm"
-          onChange={(e) =>
-            onChange(row.id, "runnerUpPoints", e.target.value, original)
+          onChange={(event) =>
+            onChange(row.id, "runnerUpPoints", event.target.value, original)
           }
-          onBlur={() =>
-            onBlur(row.id, "runnerUpPoints", runnerUpPoints, pointValue)
-          }
+          onBlur={() => onBlur(row.id, "runnerUpPoints", runnerUpPoints, pointValue)}
         />
         <div className="min-h-[1.25rem]">
           {rowErrors?.runnerUpPoints ? (
             <p
               id={runnerUpErrorId}
               role="alert"
-              className="text-xs text-destructive mt-0.5"
+              className="mt-0.5 text-xs text-destructive"
             >
               {rowErrors.runnerUpPoints}
             </p>
           ) : showRatioHint ? (
-            <p className="text-xs text-muted-foreground/70 mt-0.5">
-              {"\u2193"} {Math.round(ratio * 100)}% of 1st
+            <p className="mt-0.5 text-xs text-muted-foreground/70">
+              {Math.round(ratio * 100)}% of 1st
             </p>
           ) : null}
         </div>
       </td>
 
-      {/* Per-row revert */}
-      <td className="px-2 py-3 align-top w-8">
-        {isDirtyRow && (
-          <Button
-            variant="ghost"
-            size="icon-xs"
-            title="Reset to default"
-            aria-label={`Reset ${row.name} to default`}
-            onClick={() => onRowRevert(row.id)}
-            className="mt-0.5 text-muted-foreground hover:text-foreground"
-          >
-            <RotateCcw className="size-3.5" />
-          </Button>
-        )}
+      <td className="w-14 px-2 py-3 align-top">
+        <div className="flex items-center gap-1">
+          {isDirtyRow ? (
+            <Button
+              variant="ghost"
+              size="icon-xs"
+              title="Discard row changes"
+              aria-label={`Discard unsaved changes for ${row.name}`}
+              onClick={() => onRowRevert(row.id)}
+              className="mt-0.5 text-muted-foreground hover:text-foreground"
+            >
+              <Undo2 className="size-3.5" />
+            </Button>
+          ) : null}
+
+          {differsFromDefault ? (
+            <Button
+              variant="ghost"
+              size="icon-xs"
+              title="Reset to defaults"
+              aria-label={`Reset ${row.name} to defaults`}
+              onClick={() => onRowResetToDefaults(row.id, row.defaults)}
+              className="mt-0.5 text-muted-foreground hover:text-foreground"
+            >
+              <RotateCcw className="size-3.5" />
+            </Button>
+          ) : null}
+        </div>
       </td>
     </tr>
+  );
+}
+
+type RevertAllDialogTriggerProps = {
+  isPending: boolean;
+  onConfirm: () => void;
+  buttonProps?: ComponentProps<typeof Button>;
+};
+
+function RevertAllDialogTrigger({
+  isPending,
+  onConfirm,
+  buttonProps,
+}: RevertAllDialogTriggerProps) {
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button disabled={isPending} {...buttonProps}>
+          Revert All to Defaults
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Revert All to Defaults?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This will reset all categories to their tier default point values. Any
+            unsaved changes will be lost.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={onConfirm}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          >
+            Revert All
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }
