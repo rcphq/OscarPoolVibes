@@ -2,7 +2,7 @@
 
 Phased delivery plan for OscarPoolVibes. Each phase is a working, deployable increment.
 
-> **Implementation Status (as of March 2026)**: Phases 1 through 7 are **DONE**, plus substantial v0.2.0 additions and a bug-fix pass. The app has working auth, pool management, predictions, 4-tier scoring with manual override UI (`/pools/[id]/scoring`), leaderboard (with pre-results sealed view and What If? admin simulation), results entry with conflict detection, permissions management, site-level admin gating via `SITE_ADMIN_EMAILS`, HSTS + XSS security headers, accessibility, SEO, UX polish (theme toggle, toasts, invite sharing dialog with social buttons), favicon/PWA manifest, and an interactive demo pool at `/demo`. Phase 7.5 (comprehensive testing — #24, #58) and Phase 8 (stretch) remain. Remaining open infra issues: #40 (rate limiting), #42 (pin next-auth), #43 (ws cleanup).
+> **Implementation Status (as of March 2026)**: Phases 1 through 7 are **DONE**, plus substantial v0.2.0 additions and a bug-fix pass. The app has working auth, pool management, predictions, 4-tier scoring with manual override UI (`/pools/[id]/scoring`), leaderboard (with pre-results sealed view and What If? admin simulation), results entry with conflict detection, permissions management, site-level admin gating via `SITE_ADMIN_EMAILS`, HSTS + XSS security headers, accessibility, SEO, UX polish (theme toggle, toasts, invite sharing dialog with social buttons), favicon/PWA manifest, and an interactive demo pool at `/demo`. Phase 7.5 (comprehensive testing — #24, #58) and Phase 8 (stretch) remain. Remaining open infra issues: #40 (rate limiting), #43 (ws cleanup).
 
 ---
 
