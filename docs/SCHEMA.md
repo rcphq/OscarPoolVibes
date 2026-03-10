@@ -71,11 +71,13 @@ An award category within a ceremony year. Categories can differ between years (s
 | pointValue | Int | Points awarded for a correct first-choice pick |
 | runnerUpMultiplier | Float | Default 0.6 — multiplier applied to pointValue for runner-up hit |
 | winnerId | String? | FK → Nominee (set after winners announced) |
+| scoringLastChangedBy | String? | FK → User.id — userId of last admin/results-manager to override scoring |
 | createdAt | DateTime | |
+| updatedAt | DateTime | Auto-managed by Prisma (`@updatedAt`) |
 
 **Unique constraint**: `(ceremonyYearId, name)`
 
-**Design note**: `pointValue` allows different categories to be worth different amounts (e.g., Best Picture worth more than Best Short Film). `runnerUpMultiplier` is stored per-category so it can be tuned, but will default to 0.6.
+**Design note**: `pointValue` allows different categories to be worth different amounts (e.g., Best Picture worth more than Best Short Film). `runnerUpMultiplier` is stored per-category so it can be tuned; default is 0.6. ADMIN and RESULTS_MANAGER roles can override these values via `/pools/[id]/scoring`. Changes are ceremony-wide (affect all pools) and take effect immediately since scoring is computed at read time (ADR-3). `scoringLastChangedBy` provides a lightweight audit trail without a separate history table.
 
 ### Nominee
 
@@ -212,10 +214,12 @@ For each category:
   if prediction.firstChoice == category.winner:
     points += category.pointValue
   else if prediction.runnerUp == category.winner:
-    points += category.pointValue * category.runnerUpMultiplier
+    points += Math.round(category.pointValue * category.runnerUpMultiplier)
 
 Total score = sum of points across all categories
 ```
+
+> `Math.round()` on the runner-up calculation prevents floating-point imprecision (e.g. `180 * 0.6 → 107.999…`) from producing non-integer leaderboard scores.
 
 Leaderboard = all pool members sorted by total score descending.
 

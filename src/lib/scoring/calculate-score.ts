@@ -41,7 +41,8 @@ export function calculateCategoryScore(input: ScoringInput): CategoryScore {
       points = pointValue
       isFirstChoiceCorrect = true
     } else if (runnerUpId === winnerId) {
-      points = pointValue * runnerUpMultiplier
+      // Math.round prevents floating-point imprecision (e.g. 180 * 0.6 → 107.99…)
+      points = Math.round(pointValue * runnerUpMultiplier)
       isRunnerUpCorrect = true
     }
   }

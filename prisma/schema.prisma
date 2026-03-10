@@ -93,7 +93,10 @@ model Category {
   // The official winner — set via CategoryResult flow
   winnerId String?
 
-  createdAt DateTime @default(now())
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  // Lightweight audit: who last manually changed scoring for this category
+  scoringLastChangedBy String?
 
   ceremonyYear CeremonyYear     @relation(fields: [ceremonyYearId], references: [id], onDelete: Cascade)
   winner       Nominee?         @relation("CategoryWinner", fields: [winnerId], references: [id])

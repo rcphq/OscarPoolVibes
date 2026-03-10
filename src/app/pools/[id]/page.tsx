@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { redirect, notFound } from "next/navigation";
-import { Users, Crown, Settings, Trophy, BarChart3, ArrowLeft, Globe, Lock, ClipboardCheck } from "lucide-react";
+import { Users, Crown, Settings, Trophy, BarChart3, ArrowLeft, Globe, Lock, ClipboardCheck, Sliders } from "lucide-react";
 import { auth } from "@/lib/auth/auth";
 import { getPool } from "@/lib/db/pools";
 import { getMemberRole } from "@/lib/db/pool-members";
@@ -130,6 +130,15 @@ export default async function PoolDetailPage({
                   <Link href={`/results/${pool.ceremonyYear.id}`}>
                     <ClipboardCheck className="size-4" />
                     Enter Results
+                  </Link>
+                </Button>
+              )}
+              {/* Scoring override — pool-scoped ADMIN or RESULTS_MANAGER only */}
+              {(memberRole === "ADMIN" || memberRole === "RESULTS_MANAGER") && (
+                <Button variant="outline" asChild>
+                  <Link href={`/pools/${pool.id}/scoring`}>
+                    <Sliders className="size-4" />
+                    Scoring
                   </Link>
                 </Button>
               )}
