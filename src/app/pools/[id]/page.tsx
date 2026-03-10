@@ -163,6 +163,7 @@ export default async function PoolDetailPage({
               <InviteShareButtons
                 inviteUrl={inviteUrl}
                 poolName={pool.name}
+                inviteCode={pool.inviteCode}
               />
             </CardContent>
           </Card>

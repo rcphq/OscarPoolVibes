@@ -18,6 +18,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **pools:** Invite Link card buttons overflow on desktop — wrap with `flex-wrap` (#55)
+- **pools:** Restore invite code pill above share buttons in Invite Link card (#55)
+- **auth:** Admin page/actions restricted to `SITE_ADMIN_EMAILS` — pool creation no longer grants ceremony-wide admin (#54)
+- **auth:** Results and pool permissions require active membership (`leftAt IS NULL`) (#54)
+- **pools:** `maxMembers` validation enforces floor at current active member count (#54)
 - **pools:** Disabled accessType select now submits value via hidden input (#48)
 - **leaderboard:** Replace hardcoded gray tokens with semantic color tokens in LeaderboardTable (#52)
 - **leaderboard:** Derive `isSimulating` from state instead of separate setter (review fix)
