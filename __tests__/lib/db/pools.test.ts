@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest"
+﻿import { describe, it, expect, vi, beforeEach } from "vitest"
 
 const { mockPool, mockPoolMember, mockTransaction } = vi.hoisted(() => ({
   mockPool: {
@@ -22,7 +22,6 @@ vi.mock("@/lib/db/client", () => ({
   },
 }))
 
-// Mock nanoid to return a predictable value
 vi.mock("nanoid", () => ({
   nanoid: () => "testcode",
 }))
@@ -41,7 +40,7 @@ beforeEach(() => {
 
 describe("createPool", () => {
   it("creates a pool and an ADMIN member in a transaction", async () => {
-    const txPool = { create: vi.fn(), findUnique: vi.fn() }
+    const txPool = { create: vi.fn() }
     const txPoolMember = { create: vi.fn() }
 
     const createdPool = {
@@ -69,14 +68,14 @@ describe("createPool", () => {
 
     expect(result).toEqual(createdPool)
     expect(txPool.create).toHaveBeenCalledWith({
-      data: expect.objectContaining({
+      data: {
         name: "Test Pool",
         ceremonyYearId: "cy-1",
         accessType: "OPEN",
         inviteCode: "testcode",
         createdById: "user-1",
         maxMembers: null,
-      }),
+      },
     })
     expect(txPoolMember.create).toHaveBeenCalledWith({
       data: {
@@ -204,7 +203,7 @@ describe("updatePool", () => {
   })
 
   it("throws when trying to change OPEN to INVITE_ONLY", async () => {
-    mockPool.findUnique.mockResolvedValue({ accessType: "OPEN" })
+    mockPool.findUnique.mockResolvedValue({ accessType: "OPEN", _count: { members: 3 } })
 
     await expect(
       updatePool("pool-1", { accessType: "INVITE_ONLY" as const })
@@ -212,7 +211,7 @@ describe("updatePool", () => {
   })
 
   it("allows changing INVITE_ONLY to INVITE_ONLY (no-op)", async () => {
-    mockPool.findUnique.mockResolvedValue({ accessType: "INVITE_ONLY" })
+    mockPool.findUnique.mockResolvedValue({ accessType: "INVITE_ONLY", _count: { members: 3 } })
     mockPool.update.mockResolvedValue({ id: "pool-1", accessType: "INVITE_ONLY" })
 
     const result = await updatePool("pool-1", { accessType: "INVITE_ONLY" as const })
@@ -222,13 +221,42 @@ describe("updatePool", () => {
   })
 
   it("allows changing to OPEN without restriction", async () => {
+    mockPool.findUnique.mockResolvedValue({ accessType: "INVITE_ONLY", _count: { members: 3 } })
     mockPool.update.mockResolvedValue({ id: "pool-1", accessType: "OPEN" })
 
     const result = await updatePool("pool-1", { accessType: "OPEN" as const })
 
     expect(result).toBeDefined()
-    // Should NOT have called findUnique since we're not setting INVITE_ONLY
-    expect(mockPool.findUnique).not.toHaveBeenCalled()
+    expect(mockPool.findUnique).toHaveBeenCalled()
+  })
+
+  it("rejects maxMembers below 2", async () => {
+    mockPool.findUnique.mockResolvedValue({ accessType: "INVITE_ONLY", _count: { members: 1 } })
+
+    await expect(updatePool("pool-1", { maxMembers: 1 })).rejects.toThrow(
+      "Pool must allow at least 2 members"
+    )
+  })
+
+  it("rejects maxMembers below the active membership count", async () => {
+    mockPool.findUnique.mockResolvedValue({ accessType: "INVITE_ONLY", _count: { members: 4 } })
+
+    await expect(updatePool("pool-1", { maxMembers: 3 })).rejects.toThrow(
+      "Max members cannot be less than the current active membership (4)"
+    )
+  })
+
+  it("allows clearing maxMembers", async () => {
+    mockPool.findUnique.mockResolvedValue({ accessType: "INVITE_ONLY", _count: { members: 4 } })
+    mockPool.update.mockResolvedValue({ id: "pool-1", maxMembers: null })
+
+    const result = await updatePool("pool-1", { maxMembers: null })
+
+    expect(result).toEqual({ id: "pool-1", maxMembers: null })
+    expect(mockPool.update).toHaveBeenCalledWith({
+      where: { id: "pool-1" },
+      data: { maxMembers: null },
+    })
   })
 })
 
@@ -250,3 +278,4 @@ describe("archivePool", () => {
     vi.useRealTimers()
   })
 })
+

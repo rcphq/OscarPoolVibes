@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useCallback } from "react";
 import { Copy, Check } from "lucide-react";
@@ -38,7 +38,7 @@ export function CopyInviteLink({ inviteCode, poolId }: CopyInviteLinkProps) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
-  }, [inviteUrl, posthog]);
+  }, [inviteUrl, poolId, posthog]);
 
   return (
     <div className="flex items-center gap-3">
@@ -66,3 +66,5 @@ export function CopyInviteLink({ inviteCode, poolId }: CopyInviteLinkProps) {
     </div>
   );
 }
+
+

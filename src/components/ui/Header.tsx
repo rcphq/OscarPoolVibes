@@ -1,11 +1,18 @@
-import Link from "next/link"
-import Image from "next/image"
-import { auth } from "@/lib/auth/auth"
-import { SkipLink } from "@/components/ui/SkipLink"
-import { ThemeToggle } from "@/components/ui/theme-toggle"
+﻿import Link from "next/link";
+import Image from "next/image";
+import { signOut } from "@/lib/auth/auth";
+import { SkipLink } from "@/components/ui/SkipLink";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { Button } from "@/components/ui/button";
+import { getCachedSession } from "@/lib/auth/session";
 
 export async function Header() {
-  const session = await auth()
+  const session = await getCachedSession();
+
+  async function handleSignOut() {
+    "use server";
+    await signOut({ redirectTo: "/" });
+  }
 
   return (
     <header className="border-b border-border bg-card">
@@ -18,16 +25,16 @@ export async function Header() {
           {!session?.user && (
             <Link
               href="/demo"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
             >
               Demo
             </Link>
           )}
           <Link
-            href="/pools"
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            href={session?.user ? "/pools" : "/pools/join"}
+            className="text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
-            Pools
+            {session?.user ? "Pools" : "Join Pool"}
           </Link>
           <ThemeToggle />
           {session?.user ? (
@@ -44,21 +51,20 @@ export async function Header() {
               <span className="text-sm font-medium">
                 {session.user.name ?? session.user.email}
               </span>
-              <Link href="/api/auth/signout">
-                <span className="inline-flex items-center rounded-md bg-muted px-3 py-1.5 text-sm font-medium text-muted-foreground hover:bg-muted/80 transition-colors">
+              <form action={handleSignOut}>
+                <Button type="submit" variant="secondary" size="sm">
                   Sign Out
-                </span>
-              </Link>
+                </Button>
+              </form>
             </div>
           ) : (
-            <Link href="/auth/signin">
-              <span className="inline-flex items-center rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors">
-                Sign In
-              </span>
-            </Link>
+            <Button asChild size="sm">
+              <Link href="/auth/signin">Sign In</Link>
+            </Button>
           )}
         </nav>
       </div>
     </header>
-  )
+  );
 }
+

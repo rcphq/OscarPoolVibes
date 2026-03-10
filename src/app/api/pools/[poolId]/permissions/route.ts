@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { auth } from "@/lib/auth/auth";
 import { prisma } from "@/lib/db/client";
@@ -13,49 +13,39 @@ type RouteContext = {
   params: Promise<{ poolId: string }>;
 };
 
-/**
- * GET /api/pools/[poolId]/permissions
- * List pool members with their roles (to show who can manage results).
- */
 export async function GET(
   _request: NextRequest,
   context: RouteContext
 ) {
   const session = await auth();
-  if (!session?.user?.email) {
+  if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const { poolId } = await context.params;
 
-  // Verify caller is an ADMIN of this pool
-  const caller = await prisma.user.findUnique({
-    where: { email: session.user.email },
-    select: { id: true },
-  });
-
-  if (!caller) {
-    return NextResponse.json({ error: "User not found" }, { status: 401 });
-  }
-
   const callerMembership = await prisma.poolMember.findUnique({
     where: {
-      poolId_userId: { poolId, userId: caller.id },
+      poolId_userId: { poolId, userId: session.user.id },
     },
-    select: { role: true },
+    select: { role: true, leftAt: true },
   });
 
-  if (!callerMembership || callerMembership.role !== "ADMIN") {
+  if (
+    !callerMembership ||
+    callerMembership.leftAt !== null ||
+    callerMembership.role !== "ADMIN"
+  ) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   const members = await prisma.poolMember.findMany({
-    where: { poolId },
+    where: { poolId, leftAt: null },
     include: {
       user: { select: { id: true, name: true, email: true, image: true } },
     },
     orderBy: [
-      { role: "asc" }, // ADMIN first
+      { role: "asc" },
       { joinedAt: "asc" },
     ],
   });
@@ -72,31 +62,16 @@ export async function GET(
   );
 }
 
-/**
- * POST /api/pools/[poolId]/permissions
- * Grant or revoke RESULTS_MANAGER role.
- *
- * Body: { targetUserId: string, action: "grant" | "revoke" }
- */
 export async function POST(
   request: NextRequest,
   context: RouteContext
 ) {
   const session = await auth();
-  if (!session?.user?.email) {
+  if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const { poolId } = await context.params;
-
-  const user = await prisma.user.findUnique({
-    where: { email: session.user.email },
-    select: { id: true },
-  });
-
-  if (!user) {
-    return NextResponse.json({ error: "User not found" }, { status: 401 });
-  }
 
   let body: z.infer<typeof permissionActionSchema>;
   try {
@@ -112,8 +87,8 @@ export async function POST(
 
   const result =
     action === "grant"
-      ? await grantResultsPermission(user.id, poolId, targetUserId)
-      : await revokeResultsPermission(user.id, poolId, targetUserId);
+      ? await grantResultsPermission(session.user.id, poolId, targetUserId)
+      : await revokeResultsPermission(session.user.id, poolId, targetUserId);
 
   if (!result.success) {
     return NextResponse.json({ error: result.error }, { status: 403 });
@@ -121,3 +96,4 @@ export async function POST(
 
   return NextResponse.json({ success: true });
 }
+

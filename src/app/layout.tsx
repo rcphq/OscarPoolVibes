@@ -1,13 +1,13 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Playfair_Display, Inter } from "next/font/google";
-import { auth } from "@/lib/auth/auth";
 import { Header } from "@/components/ui/Header";
 import { PostHogProvider } from "@/lib/analytics/posthog-provider";
 import { PostHogPageView } from "@/lib/analytics/posthog-pageview";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { SonnerToaster } from "@/components/ui/sonner";
 import { JsonLd } from "@/lib/seo/json-ld";
+import { getCachedSession } from "@/lib/auth/session";
 import "./globals.css";
 
 const playfairDisplay = Playfair_Display({
@@ -43,7 +43,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await auth();
+  const session = await getCachedSession();
 
   return (
     <html lang="en" suppressHydrationWarning className={`${playfairDisplay.variable} ${inter.variable}`}>
@@ -65,3 +65,4 @@ export default async function RootLayout({
     </html>
   );
 }
+

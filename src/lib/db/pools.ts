@@ -1,4 +1,4 @@
-import { nanoid } from "nanoid";
+﻿import { nanoid } from "nanoid";
 import { AccessType } from "@prisma/client";
 import { prisma } from "@/lib/db/client";
 
@@ -82,18 +82,47 @@ export async function getUserPools(userId: string) {
 
 export async function updatePool(
   poolId: string,
-  data: { name?: string; accessType?: AccessType; maxMembers?: number }
+  data: { name?: string; accessType?: AccessType; maxMembers?: number | null }
 ) {
-  // Enforce: can only change INVITE_ONLY -> OPEN, not reverse
-  if (data.accessType === "INVITE_ONLY") {
-    const existing = await prisma.pool.findUnique({
+  if (data.accessType === undefined && data.maxMembers === undefined) {
+    return prisma.pool.update({
       where: { id: poolId },
-      select: { accessType: true },
+      data: {
+        ...(data.name !== undefined && { name: data.name }),
+      },
     });
+  }
 
-    if (existing?.accessType === "OPEN") {
+  const existing = await prisma.pool.findUnique({
+    where: { id: poolId },
+    select: {
+      accessType: true,
+      _count: {
+        select: {
+          members: {
+            where: { leftAt: null },
+          },
+        },
+      },
+    },
+  });
+
+  if (!existing) {
+    throw new Error("Pool not found");
+  }
+
+  if (data.accessType === "INVITE_ONLY" && existing.accessType === "OPEN") {
+    throw new Error("Cannot change access type from OPEN to INVITE_ONLY");
+  }
+
+  if (data.maxMembers !== undefined && data.maxMembers !== null) {
+    if (data.maxMembers < 2) {
+      throw new Error("Pool must allow at least 2 members");
+    }
+
+    if (data.maxMembers < existing._count.members) {
       throw new Error(
-        "Cannot change access type from OPEN to INVITE_ONLY"
+        `Max members cannot be less than the current active membership (${existing._count.members})`
       );
     }
   }
@@ -133,3 +162,4 @@ export async function getPoolByInviteCode(inviteCode: string) {
     },
   });
 }
+

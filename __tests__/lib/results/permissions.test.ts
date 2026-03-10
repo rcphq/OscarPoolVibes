@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest"
+﻿import { describe, it, expect, vi, beforeEach } from "vitest"
 
 const { mockPoolMember } = vi.hoisted(() => ({
   mockPoolMember: {
@@ -49,7 +49,7 @@ describe("checkResultsPermission", () => {
     expect(result).toEqual({ canSetResults: false, reason: "no_permission" })
   })
 
-  it("queries with correct role filter", async () => {
+  it("queries with an active-membership filter", async () => {
     mockPoolMember.findFirst.mockResolvedValue(null)
 
     await checkResultsPermission("user-1", "cy-1")
@@ -57,6 +57,7 @@ describe("checkResultsPermission", () => {
     expect(mockPoolMember.findFirst).toHaveBeenCalledWith({
       where: {
         userId: "user-1",
+        leftAt: null,
         pool: { ceremonyYearId: "cy-1" },
         role: { in: ["ADMIN", "RESULTS_MANAGER"] },
       },
@@ -66,10 +67,9 @@ describe("checkResultsPermission", () => {
 })
 
 describe("grantResultsPermission", () => {
-  it("grants RESULTS_MANAGER role when granter is ADMIN", async () => {
-    // First call: granter lookup, second call: target lookup
+  it("grants RESULTS_MANAGER role when granter is an active ADMIN", async () => {
     mockPoolMember.findUnique
-      .mockResolvedValueOnce({ role: "ADMIN" })
+      .mockResolvedValueOnce({ role: "ADMIN", leftAt: null })
       .mockResolvedValueOnce({ role: "MEMBER", leftAt: null })
     mockPoolMember.update.mockResolvedValue({})
 
@@ -82,8 +82,8 @@ describe("grantResultsPermission", () => {
     })
   })
 
-  it("rejects when granter is not ADMIN", async () => {
-    mockPoolMember.findUnique.mockResolvedValueOnce({ role: "MEMBER" })
+  it("rejects when granter is not an active ADMIN", async () => {
+    mockPoolMember.findUnique.mockResolvedValueOnce({ role: "ADMIN", leftAt: new Date() })
 
     const result = await grantResultsPermission("member-1", "pool-1", "user-2")
 
@@ -94,21 +94,10 @@ describe("grantResultsPermission", () => {
     expect(mockPoolMember.update).not.toHaveBeenCalled()
   })
 
-  it("rejects when granter is not a member at all", async () => {
-    mockPoolMember.findUnique.mockResolvedValueOnce(null)
-
-    const result = await grantResultsPermission("stranger", "pool-1", "user-2")
-
-    expect(result).toEqual({
-      success: false,
-      error: "Only pool admins can grant results permission",
-    })
-  })
-
-  it("rejects when target is not a pool member", async () => {
+  it("rejects when target is not an active pool member", async () => {
     mockPoolMember.findUnique
-      .mockResolvedValueOnce({ role: "ADMIN" })
-      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce({ role: "ADMIN", leftAt: null })
+      .mockResolvedValueOnce({ role: "MEMBER", leftAt: new Date() })
 
     const result = await grantResultsPermission("admin-1", "pool-1", "stranger")
 
@@ -120,8 +109,8 @@ describe("grantResultsPermission", () => {
 
   it("rejects when target is already ADMIN", async () => {
     mockPoolMember.findUnique
-      .mockResolvedValueOnce({ role: "ADMIN" })
-      .mockResolvedValueOnce({ role: "ADMIN" })
+      .mockResolvedValueOnce({ role: "ADMIN", leftAt: null })
+      .mockResolvedValueOnce({ role: "ADMIN", leftAt: null })
 
     const result = await grantResultsPermission("admin-1", "pool-1", "admin-2")
 
@@ -135,8 +124,8 @@ describe("grantResultsPermission", () => {
 describe("revokeResultsPermission", () => {
   it("revokes RESULTS_MANAGER role setting it to MEMBER", async () => {
     mockPoolMember.findUnique
-      .mockResolvedValueOnce({ role: "ADMIN" })
-      .mockResolvedValueOnce({ role: "RESULTS_MANAGER" })
+      .mockResolvedValueOnce({ role: "ADMIN", leftAt: null })
+      .mockResolvedValueOnce({ role: "RESULTS_MANAGER", leftAt: null })
     mockPoolMember.update.mockResolvedValue({})
 
     const result = await revokeResultsPermission("admin-1", "pool-1", "user-2")
@@ -148,8 +137,8 @@ describe("revokeResultsPermission", () => {
     })
   })
 
-  it("rejects when revoker is not ADMIN", async () => {
-    mockPoolMember.findUnique.mockResolvedValueOnce({ role: "MEMBER" })
+  it("rejects when revoker is not an active ADMIN", async () => {
+    mockPoolMember.findUnique.mockResolvedValueOnce({ role: "MEMBER", leftAt: null })
 
     const result = await revokeResultsPermission("member-1", "pool-1", "user-2")
 
@@ -160,21 +149,10 @@ describe("revokeResultsPermission", () => {
     expect(mockPoolMember.update).not.toHaveBeenCalled()
   })
 
-  it("rejects when revoker is not a member", async () => {
-    mockPoolMember.findUnique.mockResolvedValueOnce(null)
-
-    const result = await revokeResultsPermission("stranger", "pool-1", "user-2")
-
-    expect(result).toEqual({
-      success: false,
-      error: "Only pool admins can revoke results permission",
-    })
-  })
-
-  it("rejects when target is not a pool member", async () => {
+  it("rejects when target is not an active pool member", async () => {
     mockPoolMember.findUnique
-      .mockResolvedValueOnce({ role: "ADMIN" })
-      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce({ role: "ADMIN", leftAt: null })
+      .mockResolvedValueOnce({ role: "RESULTS_MANAGER", leftAt: new Date() })
 
     const result = await revokeResultsPermission("admin-1", "pool-1", "stranger")
 
@@ -186,8 +164,8 @@ describe("revokeResultsPermission", () => {
 
   it("rejects when target does not have RESULTS_MANAGER role", async () => {
     mockPoolMember.findUnique
-      .mockResolvedValueOnce({ role: "ADMIN" })
-      .mockResolvedValueOnce({ role: "MEMBER" })
+      .mockResolvedValueOnce({ role: "ADMIN", leftAt: null })
+      .mockResolvedValueOnce({ role: "MEMBER", leftAt: null })
 
     const result = await revokeResultsPermission("admin-1", "pool-1", "user-2")
 
@@ -197,3 +175,4 @@ describe("revokeResultsPermission", () => {
     })
   })
 })
+

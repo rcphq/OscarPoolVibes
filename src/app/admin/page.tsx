@@ -1,8 +1,9 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { Settings } from "lucide-react";
-import { auth } from "@/lib/auth/auth";
 import { prisma } from "@/lib/db/client";
+import { isSiteAdmin, isSiteAdminConfigured } from "@/lib/auth/admin";
+import { getCachedSession } from "@/lib/auth/session";
 import { CeremonyManagement } from "./ceremony-management";
 
 export const metadata: Metadata = {
@@ -11,36 +12,28 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminPage() {
-  const session = await auth();
+  const session = await getCachedSession();
 
   if (!session?.user?.id) {
     redirect("/auth/signin");
   }
 
-  // Check if user is ADMIN in at least one pool
-  const adminMembership = await prisma.poolMember.findFirst({
-    where: {
-      userId: session.user.id,
-      role: "ADMIN",
-      leftAt: null,
-    },
-  });
+  if (!isSiteAdmin(session.user.email)) {
+    const description = isSiteAdminConfigured()
+      ? "Your email is not configured for site administration."
+      : "No site admin emails are configured yet. Add SITE_ADMIN_EMAILS to enable this area.";
 
-  if (!adminMembership) {
     return (
       <div className="min-h-[calc(100vh-4rem)] bg-background">
         <div className="mx-auto max-w-3xl px-4 py-20 text-center">
           <Settings className="mx-auto mb-4 size-12 text-muted-foreground opacity-50" />
           <h1 className="text-2xl font-heading font-bold">Access Denied</h1>
-          <p className="mt-2 text-muted-foreground">
-            You must be an admin of at least one pool to access this page.
-          </p>
+          <p className="mt-2 text-muted-foreground">{description}</p>
         </div>
       </div>
     );
   }
 
-  // Fetch all ceremony years with counts and full category/nominee data
   const ceremonyYears = await prisma.ceremonyYear.findMany({
     orderBy: { year: "desc" },
     include: {
@@ -58,7 +51,6 @@ export default async function AdminPage() {
     },
   });
 
-  // Serialize dates to strings for the client component
   const serialized = ceremonyYears.map((cy) => ({
     id: cy.id,
     year: cy.year,
@@ -83,7 +75,6 @@ export default async function AdminPage() {
 
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-background">
-      {/* Navy header bar */}
       <div className="bg-[#0C1445] py-6">
         <div className="mx-auto flex max-w-4xl items-center gap-3 px-4">
           <Settings className="size-6 text-[#C9A84C]" />
@@ -99,3 +90,4 @@ export default async function AdminPage() {
     </div>
   );
 }
+

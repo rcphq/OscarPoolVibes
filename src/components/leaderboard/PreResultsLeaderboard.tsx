@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import { Lock, Users } from "lucide-react";
@@ -54,15 +54,16 @@ export function PreResultsLeaderboard({
 
   return (
     <div className="mx-auto max-w-lg space-y-6">
-      {/* Status Banner */}
       <div className="animate-shimmer relative overflow-hidden rounded-lg border border-gold-500/20 bg-gold-500/5 px-4 py-3 text-center">
         <div className="flex items-center justify-center gap-2 text-sm font-medium text-gold-300">
           <Lock className="size-4" />
           Predictions locked &mdash; awaiting ceremony results
         </div>
+        <p className="mt-1 text-xs text-gold-200/80">
+          {poolName} • {ceremonyName}
+        </p>
       </div>
 
-      {/* Your Stats Card */}
       <div className="rounded-lg border border-border bg-card p-5">
         <div className="flex items-center gap-4">
           <Avatar image={currentUserImage} name={currentUserName} />
@@ -91,13 +92,11 @@ export function PreResultsLeaderboard({
         </div>
       </div>
 
-      {/* Pool Stats */}
       <div className="flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-4 py-3 text-sm text-muted-foreground">
         <Users className="size-4" />
         {memberCount} {memberCount === 1 ? "member" : "members"} competing
       </div>
 
-      {/* Sealed Categories */}
       <div className="rounded-lg border border-border bg-card p-5 text-center">
         <div className="flex items-center justify-center gap-2 text-muted-foreground">
           <Lock className="size-4 text-muted-foreground/60" />

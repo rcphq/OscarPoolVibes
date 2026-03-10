@@ -1,12 +1,12 @@
-import { prisma } from "@/lib/db/client";
+﻿import { prisma } from "@/lib/db/client";
 import type { ResultsPermission } from "@/types/results";
 
 /**
  * Check if a user has permission to set results for a given ceremony.
  *
  * Permission is granted if the user is:
- * 1. A pool ADMIN (creator) of any pool for that ceremony, OR
- * 2. A RESULTS_MANAGER in any pool for that ceremony
+ * 1. A pool ADMIN (creator) of any active pool membership for that ceremony, OR
+ * 2. A RESULTS_MANAGER in any active pool membership for that ceremony
  *
  * Results are global per ceremony, so having the permission in *any* pool
  * for the ceremony is sufficient.
@@ -15,10 +15,10 @@ export async function checkResultsPermission(
   userId: string,
   ceremonyYearId: string
 ): Promise<ResultsPermission> {
-  // Find any pool membership for this ceremony where user has ADMIN or RESULTS_MANAGER role
   const membership = await prisma.poolMember.findFirst({
     where: {
       userId,
+      leftAt: null,
       pool: {
         ceremonyYearId,
       },
@@ -43,33 +43,36 @@ export async function checkResultsPermission(
 
 /**
  * Grant RESULTS_MANAGER role to a pool member.
- * Only pool ADMINs can grant this.
+ * Only active pool ADMINs can grant this.
  */
 export async function grantResultsPermission(
   granterId: string,
   poolId: string,
   targetUserId: string
 ): Promise<{ success: boolean; error?: string }> {
-  // Verify granter is ADMIN of this pool
   const granterMembership = await prisma.poolMember.findUnique({
     where: {
       poolId_userId: { poolId, userId: granterId },
     },
-    select: { role: true },
+    select: { role: true, leftAt: true },
   });
 
-  if (!granterMembership || granterMembership.role !== "ADMIN") {
+  if (
+    !granterMembership ||
+    granterMembership.leftAt !== null ||
+    granterMembership.role !== "ADMIN"
+  ) {
     return { success: false, error: "Only pool admins can grant results permission" };
   }
 
-  // Verify target is a member of the pool
   const targetMembership = await prisma.poolMember.findUnique({
     where: {
       poolId_userId: { poolId, userId: targetUserId },
     },
+    select: { role: true, leftAt: true },
   });
 
-  if (!targetMembership) {
+  if (!targetMembership || targetMembership.leftAt !== null) {
     return { success: false, error: "User is not a member of this pool" };
   }
 
@@ -89,7 +92,7 @@ export async function grantResultsPermission(
 
 /**
  * Revoke RESULTS_MANAGER role from a pool member (set back to MEMBER).
- * Only pool ADMINs can revoke this.
+ * Only active pool ADMINs can revoke this.
  */
 export async function revokeResultsPermission(
   revokerId: string,
@@ -100,10 +103,14 @@ export async function revokeResultsPermission(
     where: {
       poolId_userId: { poolId, userId: revokerId },
     },
-    select: { role: true },
+    select: { role: true, leftAt: true },
   });
 
-  if (!revokerMembership || revokerMembership.role !== "ADMIN") {
+  if (
+    !revokerMembership ||
+    revokerMembership.leftAt !== null ||
+    revokerMembership.role !== "ADMIN"
+  ) {
     return { success: false, error: "Only pool admins can revoke results permission" };
   }
 
@@ -111,10 +118,10 @@ export async function revokeResultsPermission(
     where: {
       poolId_userId: { poolId, userId: targetUserId },
     },
-    select: { role: true },
+    select: { role: true, leftAt: true },
   });
 
-  if (!targetMembership) {
+  if (!targetMembership || targetMembership.leftAt !== null) {
     return { success: false, error: "User is not a member of this pool" };
   }
 
@@ -131,3 +138,4 @@ export async function revokeResultsPermission(
 
   return { success: true };
 }
+

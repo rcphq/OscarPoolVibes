@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
 import { ArrowLeft, Lock, EyeOff } from "lucide-react";
 import { auth } from "@/lib/auth/auth";
@@ -6,13 +6,6 @@ import { getPool } from "@/lib/db/pools";
 import { getMemberRole } from "@/lib/db/pool-members";
 import { getPredictionsByPool } from "@/lib/db/predictions";
 import { prisma } from "@/lib/db/client";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card";
 
 export async function generateMetadata({
   params,
@@ -44,7 +37,7 @@ export default async function AllPicksPage({
     redirect("/auth/signin");
   }
 
-  const userId = session.user!.id;
+  const userId = session.user.id;
 
   const pool = await getPool(id);
 
@@ -52,19 +45,15 @@ export default async function AllPicksPage({
     notFound();
   }
 
-  // Verify pool membership
   const memberRole = await getMemberRole(pool.id, userId);
 
   if (!memberRole) {
     redirect("/pools");
   }
 
-  // Fetch predictions with server-side visibility enforcement
-  // getPredictionsByPool only returns other members' data when locked
   const { predictions, predictionsLocked, members } =
     await getPredictionsByPool(pool.id, userId);
 
-  // Fetch all categories for the ceremony
   const categories = await prisma.category.findMany({
     where: { ceremonyYearId: pool.ceremonyYearId },
     select: {
@@ -76,7 +65,6 @@ export default async function AllPicksPage({
     orderBy: { displayOrder: "asc" },
   });
 
-  // Build a lookup: categoryId -> poolMemberId -> prediction
   const predictionGrid = new Map<
     string,
     Map<
@@ -98,14 +86,12 @@ export default async function AllPicksPage({
     });
   }
 
-  // Determine visible members: all members if locked, only current user if not
   const visibleMembers = predictionsLocked
     ? members
     : members.filter((m) => m.userId === userId);
 
   return (
     <main className="min-h-screen">
-      {/* Header Section */}
       <section className="bg-navy px-4 py-12 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
           <Link
@@ -124,7 +110,7 @@ export default async function AllPicksPage({
           {predictionsLocked ? (
             <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-gold-500/15 px-3 py-1 text-sm font-medium text-gold-400">
               <Lock className="size-3.5" />
-              Predictions locked — all picks visible
+              Predictions locked â€” all picks visible
             </div>
           ) : (
             <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-sm text-gold-100/60">
@@ -136,7 +122,6 @@ export default async function AllPicksPage({
         </div>
       </section>
 
-      {/* Content */}
       <section className="px-4 py-8 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
           {categories.length === 0 ? (

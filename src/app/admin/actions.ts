@@ -1,12 +1,11 @@
-"use server";
+﻿"use server";
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { auth } from "@/lib/auth/auth";
+import { isSiteAdmin } from "@/lib/auth/admin";
 import { prisma } from "@/lib/db/client";
 import { trackServerEvent } from "@/lib/analytics/posthog-server";
-
-// ─── Zod Schemas ────────────────────────────────────────────────────────────
 
 const createCeremonySchema = z.object({
   year: z.number().int().min(2020).max(2099),
@@ -28,30 +27,18 @@ const addNomineeSchema = z.object({
   subtitle: z.string().optional(),
 });
 
-// ─── Helpers ────────────────────────────────────────────────────────────────
-
 async function requireAdmin(): Promise<string> {
   const session = await auth();
   if (!session?.user?.id) {
     throw new Error("Not authenticated");
   }
 
-  const adminMembership = await prisma.poolMember.findFirst({
-    where: {
-      userId: session.user.id,
-      role: "ADMIN",
-      leftAt: null,
-    },
-  });
-
-  if (!adminMembership) {
-    throw new Error("Access denied: admin role required");
+  if (!isSiteAdmin(session.user.email)) {
+    throw new Error("Access denied: site admin access required");
   }
 
   return session.user.id;
 }
-
-// ─── Actions ────────────────────────────────────────────────────────────────
 
 export type ActionResult = {
   success: boolean;
@@ -299,3 +286,4 @@ export async function addNominee(formData: FormData): Promise<ActionResult> {
     };
   }
 }
+

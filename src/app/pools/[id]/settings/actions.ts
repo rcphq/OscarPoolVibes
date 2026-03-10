@@ -1,4 +1,4 @@
-"use server";
+﻿"use server";
 
 import { z } from "zod";
 import { auth } from "@/lib/auth/auth";
@@ -25,7 +25,7 @@ const updatePoolSchema = z.object({
       if (isNaN(num)) return null;
       return num;
     })
-    .pipe(z.number().int().positive().nullable()),
+    .pipe(z.number().int().min(2, "Pool must allow at least 2 members").nullable()),
 });
 
 async function requireAdmin(poolId: string) {
@@ -60,7 +60,7 @@ export async function updatePoolSettings(poolId: string, formData: FormData) {
     await updatePool(poolId, {
       name: result.data.name,
       accessType: result.data.accessType as "OPEN" | "INVITE_ONLY",
-      maxMembers: result.data.maxMembers ?? undefined,
+      maxMembers: result.data.maxMembers,
     });
   } catch (e) {
     const message = e instanceof Error ? e.message : "Failed to update pool";
@@ -110,7 +110,6 @@ export async function changeMemberRoleAction(
 ) {
   const adminId = await requireAdmin(poolId);
 
-  // Only MEMBER and RESULTS_MANAGER are assignable — prevent privilege escalation to ADMIN
   const allowedRoles: PoolMemberRole[] = ["MEMBER", "RESULTS_MANAGER"];
   if (!allowedRoles.includes(role)) {
     return { error: `Role must be one of: ${allowedRoles.join(", ")}` };
@@ -142,3 +141,4 @@ export async function leavePoolAction(poolId: string) {
 
   redirect("/pools");
 }
+

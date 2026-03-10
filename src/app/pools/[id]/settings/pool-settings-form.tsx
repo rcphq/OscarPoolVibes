@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useTransition, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -101,7 +101,7 @@ export function PoolSettingsForm({
           id="maxMembers"
           name="maxMembers"
           type="number"
-          min={1}
+          min={2}
           defaultValue={maxMembers ?? ""}
           placeholder="No limit"
         />
@@ -125,3 +125,4 @@ export function PoolSettingsForm({
     </form>
   );
 }
+
