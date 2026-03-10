@@ -25,6 +25,13 @@ const nextConfig: NextConfig = {
             key: "Permissions-Policy",
             value: "camera=(), microphone=(), geolocation=()",
           },
+          // HSTS: tell browsers to always use HTTPS for 2 years (#39)
+          {
+            key: "Strict-Transport-Security",
+            value: "max-age=63072000; includeSubDomains; preload",
+          },
+          // Legacy XSS filter — belt-and-suspenders for older browsers (#39)
+          { key: "X-XSS-Protection", value: "1; mode=block" },
         ],
       },
     ];
