@@ -77,7 +77,7 @@ export default async function PoolDetailPage({
     <main className="min-h-screen">
       {showCreatedDialog && (
         <InviteShareDialog
-          open={showCreatedDialog}
+          defaultOpen={showCreatedDialog}
           inviteUrl={inviteUrl}
           poolName={pool.name}
           inviteCode={pool.inviteCode}

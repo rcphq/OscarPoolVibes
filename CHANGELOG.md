@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-03-10
+
 ### Added
 
 - **pools:** Invite sharing — WhatsApp, X/Twitter, and Copy Link buttons inline + post-create dialog (#50)
@@ -30,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **results:** `ConflictDialog` focus restore and `dialog.close()` are now owned by the cleanup function — prevents a stuck modal backdrop on unmount-while-open and eliminates the double-restoration when closing normally (#34)
 - **auth:** Removed `signin/layout.tsx` server-side redirect to `/pools` — it ignored `callbackUrl`, breaking pool invite link flows; middleware already handles the redirect correctly (#46)
 - **pools:** `InviteShareDialog` was not passing `inviteCode` through to `InviteShareButtons`, causing a TypeScript build error (#50)
+- **pools:** `InviteShareDialog` prop renamed `open` → `defaultOpen` to clarify uncontrolled initial state
 
 ### Security
 
