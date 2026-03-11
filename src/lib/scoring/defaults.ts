@@ -8,7 +8,7 @@
  * Tier structure:
  *   Tier 1 (180 / 0.6x): Major acting & directing categories
  *   Tier 2 (90  / 0.6x): Craft, screenplay, and animated feature
- *   Tier 3 (30  / 0.6x): Design, sound, and song categories
+ *   Tier 3 (30  / 0.6x): Design, sound, song, and casting categories
  *   Tier 4 (15  / 0.6x): Shorts, documentaries, international, and score
  */
 
@@ -51,6 +51,8 @@ export const CATEGORY_POINT_DEFAULTS: Record<string, CategoryDefaults> = {
   "Best Makeup and Hairstyling": { pointValue: 30, runnerUpMultiplier: 0.6 },
   "Best Original Song": { pointValue: 30, runnerUpMultiplier: 0.6 },
   "Best Sound": { pointValue: 30, runnerUpMultiplier: 0.6 },
+  // 2026+ ceremony: Best Casting added as a new category
+  "Best Casting": { pointValue: 30, runnerUpMultiplier: 0.6 },
 
   // Tier 4 - 15 pts (runner-up: 9 pts)
   "Best Animated Short": { pointValue: 15, runnerUpMultiplier: 0.6 },
@@ -60,8 +62,6 @@ export const CATEGORY_POINT_DEFAULTS: Record<string, CategoryDefaults> = {
   "Best International Feature": { pointValue: 15, runnerUpMultiplier: 0.6 },
   "Best International Feature Film": { pointValue: 15, runnerUpMultiplier: 0.6 },
   "Best Original Score": { pointValue: 15, runnerUpMultiplier: 0.6 },
-  // 2026+ ceremony: Best Casting added as a new category
-  "Best Casting": { pointValue: 15, runnerUpMultiplier: 0.6 },
 };
 
 /**
@@ -116,7 +116,7 @@ export const TIER_GROUPS: TierGroup[] = [
     ],
   },
   {
-    tierLabel: "Tier 3 - Design & Sound",
+    tierLabel: "Tier 3 - Design, Sound & Casting",
     defaultPointValue: 30,
     defaultRunnerUpMultiplier: 0.6,
     categories: [
@@ -125,6 +125,8 @@ export const TIER_GROUPS: TierGroup[] = [
       "Best Makeup and Hairstyling",
       "Best Original Song",
       "Best Sound",
+      // 2026+ only; gracefully absent from earlier ceremonies
+      "Best Casting",
     ],
   },
   {
@@ -139,8 +141,6 @@ export const TIER_GROUPS: TierGroup[] = [
       "Best International Feature",
       "Best International Feature Film",
       "Best Original Score",
-      // 2026+ only; gracefully absent from earlier ceremonies
-      "Best Casting",
     ],
   },
 ];
