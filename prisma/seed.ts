@@ -160,34 +160,8 @@ const ceremony2025: CeremonyInput = {
       ],
     },
     {
-      name: 'Best International Feature',
-      displayOrder: 10,
-      pointValue: 15,
-      runnerUpMultiplier: 0.6,
-      nominees: [
-        { name: "I'm Still Here", subtitle: 'Brazil' },
-        { name: 'The Girl with the Needle', subtitle: 'Denmark' },
-        { name: 'Emilia Pérez', subtitle: 'France' },
-        { name: 'The Seed of the Sacred Fig', subtitle: 'Germany' },
-        { name: 'Flow', subtitle: 'Latvia' },
-      ],
-    },
-    {
-      name: 'Best Documentary Feature',
-      displayOrder: 11,
-      pointValue: 15,
-      runnerUpMultiplier: 0.6,
-      nominees: [
-        { name: 'Black Box Diaries' },
-        { name: 'No Other Land' },
-        { name: 'Porcelain War' },
-        { name: "Soundtrack to a Coup d'État" },
-        { name: 'Sugarcane' },
-      ],
-    },
-    {
       name: 'Best Film Editing',
-      displayOrder: 12,
+      displayOrder: 10,
       pointValue: 90,
       runnerUpMultiplier: 0.6,
       nominees: [
@@ -200,7 +174,7 @@ const ceremony2025: CeremonyInput = {
     },
     {
       name: 'Best Cinematography',
-      displayOrder: 13,
+      displayOrder: 11,
       pointValue: 90,
       runnerUpMultiplier: 0.6,
       nominees: [
@@ -209,6 +183,32 @@ const ceremony2025: CeremonyInput = {
         { name: 'Emilia Pérez' },
         { name: 'Maria' },
         { name: 'Nosferatu' },
+      ],
+    },
+    {
+      name: 'Best Visual Effects',
+      displayOrder: 12,
+      pointValue: 90,
+      runnerUpMultiplier: 0.6,
+      nominees: [
+        { name: 'Alien: Romulus' },
+        { name: 'Better Man' },
+        { name: 'Dune: Part Two' },
+        { name: 'Kingdom of the Planet of the Apes' },
+        { name: 'Wicked' },
+      ],
+    },
+    {
+      name: 'Best Costume Design',
+      displayOrder: 13,
+      pointValue: 30,
+      runnerUpMultiplier: 0.6,
+      nominees: [
+        { name: 'A Complete Unknown' },
+        { name: 'Conclave' },
+        { name: 'Gladiator II' },
+        { name: 'Nosferatu' },
+        { name: 'Wicked' },
       ],
     },
     {
@@ -225,21 +225,8 @@ const ceremony2025: CeremonyInput = {
       ],
     },
     {
-      name: 'Best Costume Design',
-      displayOrder: 15,
-      pointValue: 30,
-      runnerUpMultiplier: 0.6,
-      nominees: [
-        { name: 'A Complete Unknown' },
-        { name: 'Conclave' },
-        { name: 'Gladiator II' },
-        { name: 'Nosferatu' },
-        { name: 'Wicked' },
-      ],
-    },
-    {
       name: 'Best Makeup and Hairstyling',
-      displayOrder: 16,
+      displayOrder: 15,
       pointValue: 30,
       runnerUpMultiplier: 0.6,
       nominees: [
@@ -251,21 +238,8 @@ const ceremony2025: CeremonyInput = {
       ],
     },
     {
-      name: 'Best Original Score',
-      displayOrder: 17,
-      pointValue: 15,
-      runnerUpMultiplier: 0.6,
-      nominees: [
-        { name: 'The Brutalist' },
-        { name: 'Conclave' },
-        { name: 'Emilia Pérez' },
-        { name: 'Wicked' },
-        { name: 'The Wild Robot' },
-      ],
-    },
-    {
       name: 'Best Original Song',
-      displayOrder: 18,
+      displayOrder: 16,
       pointValue: 30,
       runnerUpMultiplier: 0.6,
       nominees: [
@@ -278,7 +252,7 @@ const ceremony2025: CeremonyInput = {
     },
     {
       name: 'Best Sound',
-      displayOrder: 19,
+      displayOrder: 17,
       pointValue: 30,
       runnerUpMultiplier: 0.6,
       nominees: [
@@ -290,21 +264,8 @@ const ceremony2025: CeremonyInput = {
       ],
     },
     {
-      name: 'Best Visual Effects',
-      displayOrder: 20,
-      pointValue: 90,
-      runnerUpMultiplier: 0.6,
-      nominees: [
-        { name: 'Alien: Romulus' },
-        { name: 'Better Man' },
-        { name: 'Dune: Part Two' },
-        { name: 'Kingdom of the Planet of the Apes' },
-        { name: 'Wicked' },
-      ],
-    },
-    {
       name: 'Best Animated Short',
-      displayOrder: 21,
+      displayOrder: 18,
       pointValue: 15,
       runnerUpMultiplier: 0.6,
       nominees: [
@@ -317,7 +278,7 @@ const ceremony2025: CeremonyInput = {
     },
     {
       name: 'Best Live Action Short',
-      displayOrder: 22,
+      displayOrder: 19,
       pointValue: 15,
       runnerUpMultiplier: 0.6,
       nominees: [
@@ -330,7 +291,7 @@ const ceremony2025: CeremonyInput = {
     },
     {
       name: 'Best Documentary Short',
-      displayOrder: 23,
+      displayOrder: 20,
       pointValue: 15,
       runnerUpMultiplier: 0.6,
       nominees: [
@@ -339,6 +300,45 @@ const ceremony2025: CeremonyInput = {
         { name: 'Incident' },
         { name: 'The Only Girl in the Orchestra' },
         { name: 'Instruments of a Beating Heart' },
+      ],
+    },
+    {
+      name: 'Best Documentary Feature',
+      displayOrder: 21,
+      pointValue: 15,
+      runnerUpMultiplier: 0.6,
+      nominees: [
+        { name: 'Black Box Diaries' },
+        { name: 'No Other Land' },
+        { name: 'Porcelain War' },
+        { name: "Soundtrack to a Coup d'État" },
+        { name: 'Sugarcane' },
+      ],
+    },
+    {
+      name: 'Best International Feature',
+      displayOrder: 22,
+      pointValue: 15,
+      runnerUpMultiplier: 0.6,
+      nominees: [
+        { name: "I'm Still Here", subtitle: 'Brazil' },
+        { name: 'The Girl with the Needle', subtitle: 'Denmark' },
+        { name: 'Emilia Pérez', subtitle: 'France' },
+        { name: 'The Seed of the Sacred Fig', subtitle: 'Germany' },
+        { name: 'Flow', subtitle: 'Latvia' },
+      ],
+    },
+    {
+      name: 'Best Original Score',
+      displayOrder: 23,
+      pointValue: 15,
+      runnerUpMultiplier: 0.6,
+      nominees: [
+        { name: 'The Brutalist' },
+        { name: 'Conclave' },
+        { name: 'Emilia Pérez' },
+        { name: 'Wicked' },
+        { name: 'The Wild Robot' },
       ],
     },
   ],
@@ -474,34 +474,8 @@ const ceremony2026: CeremonyInput = {
       ],
     },
     {
-      name: 'Best International Feature',
-      displayOrder: 10,
-      pointValue: 15,
-      runnerUpMultiplier: 0.6,
-      nominees: [
-        { name: 'The Secret Agent', subtitle: 'Brazil' },
-        { name: 'It Was Just an Accident', subtitle: 'France' },
-        { name: 'Sentimental Value', subtitle: 'Norway' },
-        { name: 'Sirāt', subtitle: 'Spain' },
-        { name: 'The Voice of Hind Rajab', subtitle: 'Tunisia' },
-      ],
-    },
-    {
-      name: 'Best Documentary Feature',
-      displayOrder: 11,
-      pointValue: 15,
-      runnerUpMultiplier: 0.6,
-      nominees: [
-        { name: 'The Alabama Solution' },
-        { name: 'Come See Me in the Good Light' },
-        { name: 'Cutting Through Rocks' },
-        { name: 'Mr. Nobody Against Putin' },
-        { name: 'The Perfect Neighbor' },
-      ],
-    },
-    {
       name: 'Best Film Editing',
-      displayOrder: 12,
+      displayOrder: 10,
       pointValue: 90,
       runnerUpMultiplier: 0.6,
       nominees: [
@@ -514,7 +488,7 @@ const ceremony2026: CeremonyInput = {
     },
     {
       name: 'Best Cinematography',
-      displayOrder: 13,
+      displayOrder: 11,
       pointValue: 90,
       runnerUpMultiplier: 0.6,
       nominees: [
@@ -523,6 +497,32 @@ const ceremony2026: CeremonyInput = {
         { name: 'One Battle after Another', subtitle: 'Michael Bauman' },
         { name: 'Sinners', subtitle: 'Autumn Durald Arkapaw' },
         { name: 'Train Dreams', subtitle: 'Adolpho Veloso' },
+      ],
+    },
+    {
+      name: 'Best Visual Effects',
+      displayOrder: 12,
+      pointValue: 90,
+      runnerUpMultiplier: 0.6,
+      nominees: [
+        { name: 'Avatar: Fire and Ash' },
+        { name: 'F1' },
+        { name: 'Jurassic World Rebirth' },
+        { name: 'The Lost Bus' },
+        { name: 'Sinners' },
+      ],
+    },
+    {
+      name: 'Best Costume Design',
+      displayOrder: 13,
+      pointValue: 30,
+      runnerUpMultiplier: 0.6,
+      nominees: [
+        { name: 'Avatar: Fire and Ash' },
+        { name: 'Frankenstein' },
+        { name: 'Hamnet' },
+        { name: 'Marty Supreme' },
+        { name: 'Sinners' },
       ],
     },
     {
@@ -539,21 +539,8 @@ const ceremony2026: CeremonyInput = {
       ],
     },
     {
-      name: 'Best Costume Design',
-      displayOrder: 15,
-      pointValue: 30,
-      runnerUpMultiplier: 0.6,
-      nominees: [
-        { name: 'Avatar: Fire and Ash' },
-        { name: 'Frankenstein' },
-        { name: 'Hamnet' },
-        { name: 'Marty Supreme' },
-        { name: 'Sinners' },
-      ],
-    },
-    {
       name: 'Best Makeup and Hairstyling',
-      displayOrder: 16,
+      displayOrder: 15,
       pointValue: 30,
       runnerUpMultiplier: 0.6,
       nominees: [
@@ -565,21 +552,8 @@ const ceremony2026: CeremonyInput = {
       ],
     },
     {
-      name: 'Best Original Score',
-      displayOrder: 17,
-      pointValue: 15,
-      runnerUpMultiplier: 0.6,
-      nominees: [
-        { name: 'Bugonia', subtitle: 'Jerskin Fendrix' },
-        { name: 'Frankenstein', subtitle: 'Alexandre Desplat' },
-        { name: 'Hamnet', subtitle: 'Max Richter' },
-        { name: 'One Battle after Another', subtitle: 'Jonny Greenwood' },
-        { name: 'Sinners', subtitle: 'Ludwig Goransson' },
-      ],
-    },
-    {
       name: 'Best Original Song',
-      displayOrder: 18,
+      displayOrder: 16,
       pointValue: 30,
       runnerUpMultiplier: 0.6,
       nominees: [
@@ -592,7 +566,7 @@ const ceremony2026: CeremonyInput = {
     },
     {
       name: 'Best Sound',
-      displayOrder: 19,
+      displayOrder: 17,
       pointValue: 30,
       runnerUpMultiplier: 0.6,
       nominees: [
@@ -604,21 +578,21 @@ const ceremony2026: CeremonyInput = {
       ],
     },
     {
-      name: 'Best Visual Effects',
-      displayOrder: 20,
-      pointValue: 90,
+      name: 'Best Casting',
+      displayOrder: 18,
+      pointValue: 30,
       runnerUpMultiplier: 0.6,
       nominees: [
-        { name: 'Avatar: Fire and Ash' },
-        { name: 'F1' },
-        { name: 'Jurassic World Rebirth' },
-        { name: 'The Lost Bus' },
-        { name: 'Sinners' },
+        { name: 'Hamnet', subtitle: 'Nina Gold' },
+        { name: 'Marty Supreme', subtitle: 'Jennifer Venditti' },
+        { name: 'One Battle after Another', subtitle: 'Cassandra Kulukundis' },
+        { name: 'The Secret Agent', subtitle: 'Gabriel Domingues' },
+        { name: 'Sinners', subtitle: 'Francine Maisler' },
       ],
     },
     {
       name: 'Best Animated Short',
-      displayOrder: 21,
+      displayOrder: 19,
       pointValue: 15,
       runnerUpMultiplier: 0.6,
       nominees: [
@@ -631,7 +605,7 @@ const ceremony2026: CeremonyInput = {
     },
     {
       name: 'Best Live Action Short',
-      displayOrder: 22,
+      displayOrder: 20,
       pointValue: 15,
       runnerUpMultiplier: 0.6,
       nominees: [
@@ -644,7 +618,7 @@ const ceremony2026: CeremonyInput = {
     },
     {
       name: 'Best Documentary Short',
-      displayOrder: 23,
+      displayOrder: 21,
       pointValue: 15,
       runnerUpMultiplier: 0.6,
       nominees: [
@@ -656,16 +630,42 @@ const ceremony2026: CeremonyInput = {
       ],
     },
     {
-      name: 'Best Casting',
+      name: 'Best Documentary Feature',
+      displayOrder: 22,
+      pointValue: 15,
+      runnerUpMultiplier: 0.6,
+      nominees: [
+        { name: 'The Alabama Solution' },
+        { name: 'Come See Me in the Good Light' },
+        { name: 'Cutting Through Rocks' },
+        { name: 'Mr. Nobody Against Putin' },
+        { name: 'The Perfect Neighbor' },
+      ],
+    },
+    {
+      name: 'Best International Feature',
+      displayOrder: 23,
+      pointValue: 15,
+      runnerUpMultiplier: 0.6,
+      nominees: [
+        { name: 'The Secret Agent', subtitle: 'Brazil' },
+        { name: 'It Was Just an Accident', subtitle: 'France' },
+        { name: 'Sentimental Value', subtitle: 'Norway' },
+        { name: 'Sirāt', subtitle: 'Spain' },
+        { name: 'The Voice of Hind Rajab', subtitle: 'Tunisia' },
+      ],
+    },
+    {
+      name: 'Best Original Score',
       displayOrder: 24,
       pointValue: 15,
       runnerUpMultiplier: 0.6,
       nominees: [
-        { name: 'Hamnet', subtitle: 'Nina Gold' },
-        { name: 'Marty Supreme', subtitle: 'Jennifer Venditti' },
-        { name: 'One Battle after Another', subtitle: 'Cassandra Kulukundis' },
-        { name: 'The Secret Agent', subtitle: 'Gabriel Domingues' },
-        { name: 'Sinners', subtitle: 'Francine Maisler' },
+        { name: 'Bugonia', subtitle: 'Jerskin Fendrix' },
+        { name: 'Frankenstein', subtitle: 'Alexandre Desplat' },
+        { name: 'Hamnet', subtitle: 'Max Richter' },
+        { name: 'One Battle after Another', subtitle: 'Jonny Greenwood' },
+        { name: 'Sinners', subtitle: 'Ludwig Goransson' },
       ],
     },
   ],
