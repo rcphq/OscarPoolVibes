@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **pools:** Ballot completion status card on pool detail page — tri-segment progress bar (complete / in-progress / not started) with stagger animation and stat chips (#62)
+- **pools:** Share/copy ballot status as PNG — Web Share API on mobile, clipboard on desktop, anchor download fallback (#62)
+
+### Fixed
+
+- **pools:** `getPoolCompletionStats` — short-circuit when `totalCategories === 0` to avoid classifying all members as "complete" (#62)
+- **pools:** Ballot completion wrapper div conditionally rendered to avoid phantom `mb-6` margin when card returns null (#62)
+- **pools:** `PoolCompletionCard` share guard uses `useRef` instead of `useState` in `useCallback` deps — prevents stale-closure double-invocation (#62)
+- **pools:** Share fallback uses `atob()` base64 decode instead of `fetch(data:)` for CSP compatibility (#62)
+- **pools:** Share download anchor appended/removed from DOM before `.click()` for Firefox compatibility (#62)
+
 ## [0.1.3] - 2026-03-10
 
 ### Added
