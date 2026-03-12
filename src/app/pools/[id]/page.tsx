@@ -166,10 +166,14 @@ export default async function PoolDetailPage({
 
       {/* Content */}
       <section className="px-4 py-8 sm:px-6 lg:px-8">
-        {/* Ballot completion card — full-width, sits above the members grid */}
-        <div className="mx-auto mb-6 max-w-4xl">
-          <PoolCompletionCard {...completionStats} poolName={pool.name} />
-        </div>
+        {/* Ballot completion card — full-width, sits above the members grid.
+            Only render the wrapper when there are members to avoid a phantom
+            bottom-margin when the card returns null (total === 0). */}
+        {completionStats.total > 0 && (
+          <div className="mx-auto mb-6 max-w-4xl">
+            <PoolCompletionCard {...completionStats} poolName={pool.name} />
+          </div>
+        )}
 
         <div className="mx-auto grid max-w-4xl gap-6 lg:grid-cols-3">
           {/* Invite Section */}

@@ -190,6 +190,13 @@ export async function getPoolCompletionStats(
   ]);
 
   const total = members.length;
+
+  // Edge case: if no categories exist yet, avoid classifying every member as
+  // "complete" (0 === 0). Treat all members as not-started instead.
+  if (totalCategories === 0) {
+    return { total, complete: 0, incomplete: 0, notStarted: total, totalCategories: 0 };
+  }
+
   let complete = 0;
   let incomplete = 0;
   let notStarted = 0;

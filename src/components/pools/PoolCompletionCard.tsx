@@ -75,12 +75,17 @@ export function PoolCompletionCard({
   }, []);
 
   const [sharing, setSharing] = useState(false);
+  // Ref-based guard prevents double-invocation without adding `sharing` to
+  // the useCallback dep array (which would recreate the function on every
+  // state change and cause stale-closure bugs).
+  const sharingRef = useRef(false);
 
   // All hooks must be declared before any early return (Rules of Hooks).
   const handleShare = useCallback(async () => {
     const el = cardRef.current;
-    if (!el || sharing) return;
+    if (!el || sharingRef.current) return;
 
+    sharingRef.current = true;
     setSharing(true);
     try {
       // Capture the card as a PNG with an explicit opaque background so the
@@ -91,9 +96,11 @@ export function PoolCompletionCard({
         pixelRatio: 2,
       });
 
-      // Convert data-URL → Blob for sharing/clipboard.
-      const res = await fetch(dataUrl);
-      const blob = await res.blob();
+      // CSP-safe base64 → Blob conversion (avoids fetch() on a data: URL,
+      // which some Content-Security-Policy configurations block).
+      const [, b64] = dataUrl.split(",");
+      const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+      const blob = new Blob([bytes], { type: "image/png" });
       const file = new File([blob], "ballot-status.png", { type: "image/png" });
 
       // Mobile — use native share sheet if the platform supports file sharing.
@@ -119,10 +126,14 @@ export function PoolCompletionCard({
       }
 
       // Fallback — trigger a file download when neither API is available.
+      // The anchor must be in the DOM before .click() for Firefox to honour
+      // the download attribute.
       const anchor = document.createElement("a");
       anchor.href = dataUrl;
       anchor.download = "ballot-status.png";
+      document.body.appendChild(anchor);
       anchor.click();
+      document.body.removeChild(anchor);
       toast.success("Image downloaded!");
     } catch (err) {
       // User cancellation (e.g., dismissing the share sheet) is not an error.
@@ -133,9 +144,10 @@ export function PoolCompletionCard({
         toast.error("Could not capture image.");
       }
     } finally {
+      sharingRef.current = false;
       setSharing(false);
     }
-  }, [sharing, poolName]);
+  }, [poolName]);
 
   // No members yet — nothing meaningful to show (must come after all hooks).
   if (total === 0) return null;
