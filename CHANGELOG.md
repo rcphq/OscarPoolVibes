@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **testing:** Playwright e2e test suite — `playwright.config.ts`, `test:e2e` npm script, auth fixture scaffold, and 6 spec files covering auth, pools, predictions, results, leaderboard, and invites
+- **testing:** Vitest unit/integration tests for all major server actions and API routes: `createPoolAction`, `joinOpenPool`, `joinViaInvite`, `savePredictions`, `togglePredictionsLocked`, `updatePoolSettings`, `archivePoolAction`, `removeMemberAction`, `changeMemberRoleAction`, `leavePoolAction`
+- **testing:** `setResult` unit tests — first-creation, update, optimistic-concurrency CONFLICT, UNAUTHORIZED, INVALID_NOMINEE error paths
+- **testing:** `getResultsByCeremony` / `getResultByCategory` unit tests — empty state, display order, winner fields
+- **testing:** `GET /api/results` and `POST /api/results` route tests — auth, validation, success, 409 CONFLICT, 403 UNAUTHORIZED, 400 INVALID_NOMINEE, null-user 401
+- **testing:** `GET /api/pools/[poolId]/permissions` and `POST` route tests — auth, role enforcement, grant/revoke
+- **leaderboard:** What If? simulator now available before predictions lock — ADMIN and RESULTS_MANAGER can simulate outcomes at any time (#80)
 - **pools:** Ballot completion status card on pool detail page — tri-segment progress bar (complete / in-progress / not started) with stagger animation and stat chips (#62)
 - **pools:** Share/copy ballot status as PNG — Web Share API on mobile, clipboard on desktop, anchor download fallback (#62)
 
