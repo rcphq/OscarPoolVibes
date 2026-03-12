@@ -295,13 +295,17 @@ This document records key architectural choices for OscarPoolVibes and the reaso
 
 ## ADR-15: Zod for Input Validation
 
-**Decision**: Use Zod schemas for all user input validation at system boundaries.
+**Decision**: Use Zod v4 (`^4.3.6`) schemas for all user input validation at system boundaries.
+
+**Context**: Zod v4 was released as a major version upgrade with performance improvements and some API changes. As a greenfield project we adopted v4 from the start.
 
 **Rationale**:
 - Type-safe validation with TypeScript inference
 - Shared schemas between client and server
 - Clear error messages for form validation
 - Pairs well with server actions and API routes
+- Significant performance improvements over Zod v3
+- No migration burden — greenfield project started directly on v4
 
 ---
 
@@ -358,18 +362,6 @@ This document records key architectural choices for OscarPoolVibes and the reaso
 
 ---
 
-## ADR-19: Zod v4 for Input Validation
-
-**Decision**: Use Zod v4 (^4.3.6) instead of Zod v3.
-
-**Context**: Zod v4 was released as a major version upgrade with performance improvements and API changes.
-
-**Rationale**:
-- Significant performance improvements over v3
-- Greenfield project with no v3 migration burden
-- Same core API surface for schema definition and validation
-
----
 
 ## Component Architecture
 
