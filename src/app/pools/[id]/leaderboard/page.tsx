@@ -61,12 +61,71 @@ export default async function LeaderboardPage({
   }
 
   const isAdmin = memberRole === "ADMIN";
+  // RESULTS_MANAGER can also use the What If? simulator
+  const canSimulate = isAdmin || memberRole === "RESULTS_MANAGER";
 
   const categories = await getCategoriesWithNominees(pool.ceremonyYearId);
 
   // Fetch all predictions for the pool (visibility handled by getPredictionsByPool)
   const { predictions, predictionsLocked, members } =
     await getPredictionsByPool(pool.id, userId);
+
+  // Build a category lookup map — needed both pre- and post-lock for the simulator
+  const categoryMap = new Map(categories.map((c) => [c.id, c]));
+
+  // Group predictions by pool member
+  const predictionsByMember = new Map<
+    string,
+    {
+      userId: string;
+      userName: string | null;
+      userImage: string | null;
+      predictions: ScoringInput[];
+    }
+  >();
+
+  // Initialize all members (even those without predictions)
+  for (const member of members) {
+    predictionsByMember.set(member.id, {
+      userId: member.userId,
+      userName: member.user.name,
+      userImage: member.user.image,
+      predictions: [],
+    });
+  }
+
+  // Fill in predictions. Pre-lock, getPredictionsByPool only returns the
+  // current user's own predictions (others' picks are sealed), so other
+  // members will appear with 0 points in the simulator — intentional.
+  for (const pred of predictions) {
+    const cat = categoryMap.get(pred.categoryId);
+    if (!cat) continue;
+
+    const memberData = predictionsByMember.get(pred.poolMember.id);
+    if (!memberData) continue;
+
+    memberData.predictions.push({
+      categoryId: cat.id,
+      categoryName: cat.name,
+      pointValue: cat.pointValue,
+      runnerUpMultiplier: cat.runnerUpMultiplier,
+      winnerId: cat.winnerId,
+      firstChoiceId: pred.firstChoice.id,
+      runnerUpId: pred.runnerUp.id,
+    });
+  }
+
+  // Build leaderboard inputs — used by WhatIfSimulator in both pre- and post-lock views
+  const leaderboardInputs: LeaderboardInput[] = [];
+  for (const [poolMemberId, data] of predictionsByMember) {
+    leaderboardInputs.push({
+      poolMemberId,
+      userId: data.userId,
+      userName: data.userName,
+      userImage: data.userImage,
+      predictions: data.predictions,
+    });
+  }
 
   // Check if any winners have been announced
   const hasAnyWinners = categories.some((c) => c.winnerId !== null);
@@ -93,6 +152,16 @@ export default async function LeaderboardPage({
             <p className="mt-2 text-gold-100/70">
               {pool.name} &mdash; {pool.ceremonyYear.name}
             </p>
+
+            {canSimulate && (
+              <div className="mt-4 block">
+                <WhatIfSimulator
+                  categories={categories}
+                  leaderboardInputs={leaderboardInputs}
+                  currentUserId={userId}
+                />
+              </div>
+            )}
           </div>
         </section>
 
@@ -109,61 +178,6 @@ export default async function LeaderboardPage({
         </section>
       </main>
     );
-  }
-
-  // Build a category lookup map
-  const categoryMap = new Map(categories.map((c) => [c.id, c]));
-
-  // Group predictions by pool member
-  const predictionsByMember = new Map<
-    string,
-    {
-      userId: string;
-      userName: string | null;
-      userImage: string | null;
-      predictions: ScoringInput[];
-    }
-  >();
-
-  // Initialize all members (even those without predictions)
-  for (const member of members) {
-    predictionsByMember.set(member.id, {
-      userId: member.userId,
-      userName: member.user.name,
-      userImage: member.user.image,
-      predictions: [],
-    });
-  }
-
-  // Fill in predictions
-  for (const pred of predictions) {
-    const cat = categoryMap.get(pred.categoryId);
-    if (!cat) continue;
-
-    const memberData = predictionsByMember.get(pred.poolMember.id);
-    if (!memberData) continue;
-
-    memberData.predictions.push({
-      categoryId: cat.id,
-      categoryName: cat.name,
-      pointValue: cat.pointValue,
-      runnerUpMultiplier: cat.runnerUpMultiplier,
-      winnerId: cat.winnerId,
-      firstChoiceId: pred.firstChoice.id,
-      runnerUpId: pred.runnerUp.id,
-    });
-  }
-
-  // Build leaderboard inputs
-  const leaderboardInputs: LeaderboardInput[] = [];
-  for (const [poolMemberId, data] of predictionsByMember) {
-    leaderboardInputs.push({
-      poolMemberId,
-      userId: data.userId,
-      userName: data.userName,
-      userImage: data.userImage,
-      predictions: data.predictions,
-    });
   }
 
   const entries = calculateLeaderboard(leaderboardInputs);
@@ -213,7 +227,7 @@ export default async function LeaderboardPage({
             </div>
           )}
 
-          {isAdmin && (
+          {canSimulate && (
             <div className="mt-4 block">
               <WhatIfSimulator
                 categories={categories}
