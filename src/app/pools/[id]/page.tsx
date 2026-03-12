@@ -3,7 +3,7 @@ import Image from "next/image";
 import { redirect, notFound } from "next/navigation";
 import { Users, Crown, Settings, Trophy, BarChart3, ArrowLeft, Globe, Lock, ClipboardCheck, Sliders } from "lucide-react";
 import { auth } from "@/lib/auth/auth";
-import { getPool } from "@/lib/db/pools";
+import { getPool, getPoolCompletionStats } from "@/lib/db/pools";
 import { getMemberRole } from "@/lib/db/pool-members";
 import { checkResultsPermission } from "@/lib/results/permissions";
 import {
@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { InviteShareButtons } from "@/components/pools/InviteShareButtons";
 import { InviteShareDialog } from "@/components/pools/InviteShareDialog";
+import { PoolCompletionCard } from "@/components/pools/PoolCompletionCard";
 
 export async function generateMetadata({
   params,
@@ -68,7 +69,14 @@ export default async function PoolDetailPage({
   }
 
   const isAdmin = memberRole === "ADMIN";
-  const { canSetResults } = await checkResultsPermission(session.user.id, pool.ceremonyYearId);
+
+  // Fetch completion stats in parallel with the permissions check — membership
+  // is already verified above, satisfying the function's auth precondition.
+  const [{ canSetResults }, completionStats] = await Promise.all([
+    checkResultsPermission(session.user.id, pool.ceremonyYearId),
+    getPoolCompletionStats(pool.id, pool.ceremonyYearId),
+  ]);
+
   const showCreatedDialog =
     resolvedSearchParams.created === "1" && isAdmin;
   const inviteUrl = `${process.env.AUTH_URL || ""}/pools/join?code=${pool.inviteCode}`;
@@ -158,6 +166,11 @@ export default async function PoolDetailPage({
 
       {/* Content */}
       <section className="px-4 py-8 sm:px-6 lg:px-8">
+        {/* Ballot completion card — full-width, sits above the members grid */}
+        <div className="mx-auto mb-6 max-w-4xl">
+          <PoolCompletionCard {...completionStats} poolName={pool.name} />
+        </div>
+
         <div className="mx-auto grid max-w-4xl gap-6 lg:grid-cols-3">
           {/* Invite Section */}
           <Card className="lg:col-span-1">

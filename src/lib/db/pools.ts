@@ -163,3 +163,44 @@ export async function getPoolByInviteCode(inviteCode: string) {
   });
 }
 
+/**
+ * Returns aggregate ballot-completion stats for all active members of a pool.
+ *
+ * "Complete"   — member has a prediction for every active category.
+ * "Incomplete" — member has at least one prediction but not all categories.
+ * "Not started"— member has zero predictions.
+ *
+ * IMPORTANT: Caller must verify the requesting user is an active pool member
+ * before invoking — this function does not perform auth/membership checks.
+ */
+export async function getPoolCompletionStats(
+  poolId: string,
+  ceremonyYearId: string
+) {
+  // Run both queries in parallel — neither depends on the other's result.
+  const [totalCategories, members] = await Promise.all([
+    prisma.category.count({ where: { ceremonyYearId } }),
+    prisma.poolMember.findMany({
+      where: { poolId, leftAt: null },
+      select: {
+        id: true,
+        _count: { select: { predictions: true } },
+      },
+    }),
+  ]);
+
+  const total = members.length;
+  let complete = 0;
+  let incomplete = 0;
+  let notStarted = 0;
+
+  for (const member of members) {
+    const count = member._count.predictions;
+    if (count === totalCategories) complete++;
+    else if (count > 0) incomplete++;
+    else notStarted++;
+  }
+
+  return { total, complete, incomplete, notStarted, totalCategories };
+}
+
