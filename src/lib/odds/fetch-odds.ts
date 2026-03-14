@@ -20,12 +20,13 @@ export function normalizeNomineeName(name: string): string {
 
 /**
  * Fetches odds from Polymarket's Gamma API.
- * 
- * @param tag e.g. "oscars-2026"
+ * NOTE: Polymarket uses event tags that may not align with the current Oscar season.
+ * If the tag returns no Oscar-related events, this gracefully returns [].
  */
 export async function fetchPolymarketOdds(tag: string = 'oscars-2026'): Promise<RawOdds[]> {
-  const url = `https://gamma-api.polymarket.com/events?tag=${tag}&closed=false`;
-  
+  // Fetch both open and closed events so we get locked/final odds too
+  const url = `https://gamma-api.polymarket.com/events?tag=${tag}`;
+
   try {
     const res = await fetch(url, { next: { revalidate: 900 } }); // 15 min cache
     if (!res.ok) {
@@ -35,14 +36,12 @@ export async function fetchPolymarketOdds(tag: string = 'oscars-2026'): Promise<
     const data = await res.json();
     const results: RawOdds[] = [];
 
-    // Polymarket returns an array of events, each with an array of markets
     if (Array.isArray(data)) {
       for (const event of data) {
         if (Array.isArray(event.markets)) {
           for (const market of event.markets) {
-            // outcomePrices is a JSON-stringified array in some versions, or an array of strings
             let prices: number[] = [];
-            
+
             try {
               if (typeof market.outcomePrices === 'string') {
                 prices = JSON.parse(market.outcomePrices).map(Number);
@@ -54,12 +53,12 @@ export async function fetchPolymarketOdds(tag: string = 'oscars-2026'): Promise<
             }
 
             const outcomes: string[] = market.outcomes || [];
-            
+
             for (let i = 0; i < outcomes.length; i++) {
               if (prices[i] !== undefined && !isNaN(prices[i])) {
                 results.push({
                   nomineeName: outcomes[i],
-                  probability: Math.round(prices[i] * 100) // Convert 0.24 to 24
+                  probability: Math.round(prices[i] * 100), // Convert 0.24 → 24
                 });
               }
             }
@@ -76,47 +75,81 @@ export async function fetchPolymarketOdds(tag: string = 'oscars-2026'): Promise<
 }
 
 /**
- * Fetches odds from Kalshi API.
- * 
- * @param seriesTicker e.g. "KXOSCAR"
+ * Kalshi 2026 Oscar event tickers, keyed by our canonical category name.
+ * Each event_ticker maps to all nominee markets for that category.
+ * Tickers verified against live Kalshi API on 2026-03-14.
  */
-export async function fetchKalshiOdds(seriesTicker: string = 'KXOSCAR'): Promise<RawOdds[]> {
-  const url = `https://api.elections.kalshi.com/trade-api/v2/markets?series_ticker=${seriesTicker}&status=open`;
-  
-  try {
-    const res = await fetch(url, { next: { revalidate: 900 } }); // 15 min cache
-    if (!res.ok) {
-      throw new Error(`Kalshi API returned ${res.status}`);
-    }
+const KALSHI_2026_EVENT_TICKERS: Record<string, string> = {
+  'Best Picture': 'KXOSCARPIC-26',
+  'Best Director': 'KXOSCARDIR-26',
+  'Best Actor': 'KXOSCARACTO-26',
+  'Best Actress': 'KXOSCARACTR-26',
+  'Best Supporting Actor': 'KXOSCARSUPACTO-26',
+  'Best Supporting Actress': 'KXOSCARSUPACTR-26',
+  'Best Original Score': 'KXOSCARSCORE-26',
+  'Best Film Editing': 'KXOSCAREDIT-26',
+  'Best Costume Design': 'KXOSCARCOSTUME-26',
+  'Best Sound': 'KXOSCARSOUND-26',
+  'Best Makeup and Hairstyling': 'KXOSCARMAH-26',
+  'Best Original Screenplay': 'KXOSCARSPLAY-26',
+  'Best International Feature Film': 'KXOSCARINTLFILM-26',
+  'Best Production Design': 'KXOSCARPROD-26',
+};
+
+/**
+ * Fetches odds from Kalshi for all known Oscar 2026 categories.
+ * Fetches all markets regardless of status so locked/closed odds are included.
+ * Price field: last_price_dollars (0.0–1.0) × 100 = percentage probability.
+ * Nominee name: Kalshi subtitle format is "Name:: Movie" — we take the first part.
+ */
+export async function fetchKalshiOdds(): Promise<RawOdds[]> {
+  const eventTickers = Object.values(KALSHI_2026_EVENT_TICKERS);
+
+  const fetchEvent = async (eventTicker: string): Promise<RawOdds[]> => {
+    const url = `https://api.elections.kalshi.com/trade-api/v2/markets?event_ticker=${eventTicker}&limit=100`;
+    const res = await fetch(url, { next: { revalidate: 900 } });
+    if (!res.ok) throw new Error(`Kalshi API returned ${res.status} for ${eventTicker}`);
 
     const data = await res.json();
     const results: RawOdds[] = [];
 
-    if (data && Array.isArray(data.markets)) {
+    if (Array.isArray(data.markets)) {
       for (const market of data.markets) {
-        // Kalshi typically puts the outcome in the ticker or title.
-        // E.g., title: "Will Oppenheimer win Best Picture?" or subtitle: "Oppenheimer"
-        // Let's use the subtitle if it exists, otherwise pull from title
-        const nameRaw = market.subtitle || market.title || '';
-        
-        // yes_bid / yes_ask are in cents (0-100)
-        // Last price is also available
-        const price = market.last_price || (market.yes_bid || 0);
-        
-        if (nameRaw && price > 0) {
-          results.push({
-            nomineeName: nameRaw,
-            probability: price // already 0-100 format in Kalshi
-          });
+        // subtitle format: "Nominee Name:: Movie Title" or just "Movie Title"
+        // Take the part before "::" as the matchable nominee name
+        const rawSubtitle: string = market.subtitle || market.title || '';
+        const nomineeName = rawSubtitle.includes('::')
+          ? rawSubtitle.split('::')[0].trim()
+          : rawSubtitle.trim();
+
+        // Skip "Tie" markets — not a real nominee
+        if (!nomineeName || nomineeName.toLowerCase() === 'tie') continue;
+
+        // last_price_dollars is 0.0–1.0; multiply by 100 for percentage
+        const priceDollars: number = market.last_price_dollars ?? market.yes_bid_dollars ?? 0;
+        const probability = Math.round(priceDollars * 100);
+
+        if (probability > 0) {
+          results.push({ nomineeName, probability });
         }
       }
     }
 
     return results;
-  } catch (error) {
-    console.error('Failed to fetch Kalshi odds:', error);
-    throw error;
+  };
+
+  const settled = await Promise.allSettled(eventTickers.map(fetchEvent));
+  const results: RawOdds[] = [];
+
+  for (const result of settled) {
+    if (result.status === 'fulfilled') {
+      results.push(...result.value);
+    } else {
+      console.error('Kalshi event fetch failed:', result.reason);
+    }
   }
+
+  return results;
 }
 
 /**
@@ -126,28 +159,19 @@ export async function fetchKalshiOdds(seriesTicker: string = 'KXOSCAR'): Promise
 export function mergeOdds(poly: RawOdds[], kalshi: RawOdds[]): OddsMap {
   const map: OddsMap = {};
 
-  // Helper to add or update an entry
   const addEntry = (rawName: string, source: 'polymarket' | 'kalshi', probability: number) => {
     const norm = normalizeNomineeName(rawName);
     if (!norm) return;
 
-    // Check if we need to do substring matching for slight variations instead of exact
-    // For simplicity, we stick to exact substring after normalization first.
-    // If not in map yet, we can check if it contains or is contained by an existing key
-    
     let matchedKey = norm;
     const existingKeys = Object.keys(map);
-    
-    // Attempt relaxed matching
+
+    // Attempt relaxed substring matching for slight name variations
     const fuzzyMatch = existingKeys.find(k => k.includes(norm) || norm.includes(k));
     if (fuzzyMatch) {
       matchedKey = fuzzyMatch;
     } else {
-      // Create new entry
-      map[matchedKey] = {
-        polymarket: null,
-        kalshi: null,
-      };
+      map[matchedKey] = { polymarket: null, kalshi: null };
     }
 
     map[matchedKey][source] = probability;
