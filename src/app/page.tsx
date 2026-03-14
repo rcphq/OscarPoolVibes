@@ -3,8 +3,10 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { getCachedSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/client";
+import { getCategoriesWithNominees } from "@/lib/db/categories";
 import { HeroBackground } from "@/components/home/hero-background";
 import { Countdown } from "@/components/home/countdown";
+import { NomineesCarousel } from "@/components/home/nominees-carousel";
 
 export const metadata: Metadata = {
   title: { absolute: "OscarPoolVibes - Predict the Oscars with Friends" },
@@ -29,8 +31,17 @@ export default async function Home() {
 
   const activeCeremony = await prisma.ceremonyYear.findFirst({
     where: { isActive: true },
-    select: { ceremonyDate: true, name: true },
+    select: { id: true, ceremonyDate: true, name: true },
   });
+
+  // Fetch categories+nominees for the active ceremony to power the carousel.
+  // Falls back to an empty array if no active ceremony exists.
+  const carouselCategories = activeCeremony
+    ? (await getCategoriesWithNominees(activeCeremony.id)).map((cat) => ({
+        name: cat.name,
+        nominees: cat.nominees,
+      }))
+    : [];
 
   return (
     <div className="relative flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center bg-background px-4">
@@ -51,6 +62,13 @@ export default async function Home() {
               {activeCeremony.name} Countdown
             </h2>
             <Countdown targetDate={activeCeremony.ceremonyDate} />
+          </div>
+        )}
+
+        {/* Nominees carousel — only rendered when there are categories to show */}
+        {carouselCategories.length > 0 && (
+          <div className="border-t border-gold-500/20 pt-4 text-center">
+            <NomineesCarousel categories={carouselCategories} />
           </div>
         )}
 
