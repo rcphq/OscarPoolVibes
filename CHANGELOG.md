@@ -7,13 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-03-14
+
 ### Added
 
+- **predictions:** "Never Tell Me the Odds" toggle on the prediction form — off by default; when enabled, fetches Polymarket and Kalshi prediction market odds and displays them inline next to each nominee in the selectors. Preference persisted in `localStorage`. API route at `/api/odds` cached 15 minutes.
 - **admin:** Edit ceremony date/time inline from the admin panel — admins can update `ceremonyDate` on existing ceremonies without recreating them
 - **admin:** Ceremony cards now display full date, time, and timezone so the auto-lock hour is visible at a glance
 - **ui:** Cinematic home page — animated gold particle background (`HeroBackground`) and live countdown clock when an active ceremony has a date set
 - **ui:** Leaderboard post-lock view — gold-bordered card wrapper with backdrop blur, ambient glow, and rank badges (Crown / Medal)
 - **predictions:** Auto-lock — predictions are blocked 1 hour before `ceremonyDate` (server-enforced in action + page render); works alongside the existing manual `predictionsLocked` flag
+
+### Changed
+
+- **scoring:** Best Original Score moved to Tier 3 (30 pts), Best Sound moved to Tier 4 (15 pts) — corrects tier assignments in defaults, seed data, and demo data
 
 ### Fixed
 
@@ -26,9 +33,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **leaderboard:** What If? simulator now available before predictions lock — ADMIN and RESULTS_MANAGER can simulate outcomes at any time (#80)
 - **pools:** Ballot completion status card on pool detail page — tri-segment progress bar (complete / in-progress / not started) with stagger animation and stat chips (#62)
 - **pools:** Share/copy ballot status as PNG — Web Share API on mobile, clipboard on desktop, anchor download fallback (#62)
-
-### Fixed
-
 - **pools:** `getPoolCompletionStats` — short-circuit when `totalCategories === 0` to avoid classifying all members as "complete" (#62)
 - **pools:** Ballot completion wrapper div conditionally rendered to avoid phantom `mb-6` margin when card returns null (#62)
 - **pools:** `PoolCompletionCard` share guard uses `useRef` instead of `useState` in `useCallback` deps — prevents stale-closure double-invocation (#62)

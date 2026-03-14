@@ -49,7 +49,7 @@ export async function fetchPolymarketOdds(tag: string = 'oscars-2026'): Promise<
               } else if (Array.isArray(market.outcomePrices)) {
                 prices = market.outcomePrices.map(Number);
               }
-            } catch (e) {
+            } catch {
               console.error('Failed to parse outcome prices for market', market.id);
             }
 
