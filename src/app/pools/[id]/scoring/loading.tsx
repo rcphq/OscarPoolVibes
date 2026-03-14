@@ -5,8 +5,8 @@ import { Skeleton } from "@/components/ui/skeleton";
  * Matches the tier-grouped table layout so there's no layout shift on hydration.
  */
 export default function ScoringLoading() {
-  // Row counts per tier: Tier 1 = 6, Tier 2 = 6, Tier 3 = 5, Tier 4 = 6
-  const tierRowCounts = [6, 6, 5, 6];
+  // Row counts per tier: Tier 1 = 6, Tier 2 = 6, Tier 3 = 6, Tier 4 = 7
+  const tierRowCounts = [6, 6, 6, 7];
 
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-background">
