@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **ui:** Compact ceremony countdown badge in site header — responsive (days+hours on mobile, +minutes on tablet, +name and seconds on desktop); hidden on home page which has its own full countdown. Only shown when active ceremony has a date set and it hasn't passed.
+- **ui:** `getActiveCeremony()` DB helper in `src/lib/db/ceremonies.ts` — centralises the `isActive` ceremony lookup used by both the header and home page
+
 ## [0.2.0] - 2026-03-14
 
 ### Added

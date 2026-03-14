@@ -5,9 +5,12 @@ import { SkipLink } from "@/components/ui/SkipLink";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { getCachedSession } from "@/lib/auth/session";
+import { getActiveCeremony } from "@/lib/db/ceremonies";
+import { HeaderCountdown } from "@/components/ui/HeaderCountdown";
 
 export async function Header() {
   const session = await getCachedSession();
+  const activeCeremony = await getActiveCeremony();
 
   async function handleSignOut() {
     "use server";
@@ -22,6 +25,12 @@ export async function Header() {
           OscarPoolVibes
         </Link>
         <nav className="flex items-center gap-4">
+          {activeCeremony?.ceremonyDate && (
+            <HeaderCountdown
+              targetDate={activeCeremony.ceremonyDate}
+              ceremonyName={activeCeremony.name}
+            />
+          )}
           {!session?.user && (
             <Link
               href="/demo"

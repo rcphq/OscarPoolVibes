@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { getCachedSession } from "@/lib/auth/session";
-import { prisma } from "@/lib/db/client";
+import { getActiveCeremony } from "@/lib/db/ceremonies";
 import { getCategoriesWithNominees } from "@/lib/db/categories";
 import { HeroBackground } from "@/components/home/hero-background";
 import { Countdown } from "@/components/home/countdown";
@@ -29,10 +29,7 @@ export const metadata: Metadata = {
 export default async function Home() {
   const session = await getCachedSession();
 
-  const activeCeremony = await prisma.ceremonyYear.findFirst({
-    where: { isActive: true },
-    select: { id: true, ceremonyDate: true, name: true },
-  });
+  const activeCeremony = await getActiveCeremony();
 
   // Fetch categories+nominees for the active ceremony to power the carousel.
   // Falls back to an empty array if no active ceremony exists.
