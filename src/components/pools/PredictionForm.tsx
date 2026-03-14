@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState, useTransition } from "react";
+import { useCallback, useState, useTransition, useEffect } from "react";
 import { Lock, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,8 +17,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { savePredictions } from "@/app/pools/[id]/predict/actions";
+import { useOdds } from "@/hooks/use-odds";
+import { OddsBadge } from "@/components/pools/OddsBadge";
+import { normalizeNomineeName } from "@/lib/odds/fetch-odds";
 
 type Nominee = {
   id: string;
@@ -73,6 +77,23 @@ export function PredictionForm({
     type: "success" | "error";
     message: string;
   } | null>(null);
+
+  const [hideOdds, setHideOdds] = useState(true);
+
+  // Initialize from localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem("hideOdds");
+    if (stored !== null) {
+      setHideOdds(stored === "true");
+    }
+  }, []);
+
+  const handleToggleOdds = (checked: boolean) => {
+    setHideOdds(checked);
+    localStorage.setItem("hideOdds", String(checked));
+  };
+
+  const { odds } = useOdds(!hideOdds);
 
   const handleFirstChoiceChange = useCallback(
     (categoryId: string, nomineeId: string) => {
@@ -145,10 +166,23 @@ export function PredictionForm({
 
   return (
     <div className="space-y-6">
-      {/* Progress indicator */}
-      <p className="text-sm text-muted-foreground">
-        {filledCount} of {categories.length} categories completed
-      </p>
+      {/* Progress and Odds Toggle */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-sm text-muted-foreground">
+          {filledCount} of {categories.length} categories completed
+        </p>
+
+        <div className="flex items-center gap-2 rounded-lg border border-border/50 bg-background/50 px-3 py-2 shadow-sm backdrop-blur">
+          <Switch
+            id="never-tell-me"
+            checked={hideOdds}
+            onCheckedChange={handleToggleOdds}
+          />
+          <Label htmlFor="never-tell-me" className="cursor-pointer text-sm font-medium text-foreground">
+            Never tell me the odds
+          </Label>
+        </div>
+      </div>
 
       {/* Category cards */}
       {categories.map((category) => {
@@ -192,21 +226,42 @@ export function PredictionForm({
                       <SelectValue placeholder="Select nominee..." />
                     </SelectTrigger>
                     <SelectContent>
-                      {category.nominees.map((nominee) => (
-                        <SelectItem key={nominee.id} value={nominee.id}>
-                          <span>
-                            {nominee.name}
-                            {nominee.subtitle && (
-                              <span className="text-muted-foreground">
-                                {" "}
-                                — {nominee.subtitle}
+                      {category.nominees.map((nominee) => {
+                        const normName = normalizeNomineeName(nominee.name);
+                        const nomineeOdds = odds?.[normName];
+                        
+                        return (
+                          <SelectItem key={nominee.id} value={nominee.id} className="w-full">
+                            <div className="flex w-full items-center justify-between gap-4">
+                              <span className="truncate">
+                                {nominee.name}
+                                {nominee.subtitle && (
+                                  <span className="text-muted-foreground">
+                                    {" "}
+                                    — {nominee.subtitle}
+                                  </span>
+                                )}
                               </span>
-                            )}
-                          </span>
-                        </SelectItem>
-                      ))}
+                              {!hideOdds && (
+                                <OddsBadge 
+                                  polymarket={nomineeOdds?.polymarket ?? null} 
+                                  kalshi={nomineeOdds?.kalshi ?? null} 
+                                />
+                              )}
+                            </div>
+                          </SelectItem>
+                        );
+                      })}
                     </SelectContent>
                   </Select>
+                  {!hideOdds && firstChoiceId && odds?.[normalizeNomineeName(category.nominees.find(n => n.id === firstChoiceId)?.name || '')] && (
+                    <div className="mt-1 flex justify-end">
+                      <OddsBadge 
+                        polymarket={odds[normalizeNomineeName(category.nominees.find(n => n.id === firstChoiceId)?.name || '')]?.polymarket ?? null}
+                        kalshi={odds[normalizeNomineeName(category.nominees.find(n => n.id === firstChoiceId)?.name || '')]?.kalshi ?? null}
+                      />
+                    </div>
+                  )}
                 </div>
 
                 {/* Runner-Up */}
@@ -232,21 +287,42 @@ export function PredictionForm({
                       />
                     </SelectTrigger>
                     <SelectContent>
-                      {runnerUpNominees.map((nominee) => (
-                        <SelectItem key={nominee.id} value={nominee.id}>
-                          <span>
-                            {nominee.name}
-                            {nominee.subtitle && (
-                              <span className="text-muted-foreground">
-                                {" "}
-                                — {nominee.subtitle}
+                      {runnerUpNominees.map((nominee) => {
+                        const normName = normalizeNomineeName(nominee.name);
+                        const nomineeOdds = odds?.[normName];
+
+                        return (
+                          <SelectItem key={nominee.id} value={nominee.id} className="w-full">
+                            <div className="flex w-full items-center justify-between gap-4">
+                              <span className="truncate">
+                                {nominee.name}
+                                {nominee.subtitle && (
+                                  <span className="text-muted-foreground">
+                                    {" "}
+                                    — {nominee.subtitle}
+                                  </span>
+                                )}
                               </span>
-                            )}
-                          </span>
-                        </SelectItem>
-                      ))}
+                              {!hideOdds && (
+                                <OddsBadge 
+                                  polymarket={nomineeOdds?.polymarket ?? null} 
+                                  kalshi={nomineeOdds?.kalshi ?? null} 
+                                />
+                              )}
+                            </div>
+                          </SelectItem>
+                        );
+                      })}
                     </SelectContent>
                   </Select>
+                  {!hideOdds && runnerUpId && odds?.[normalizeNomineeName(category.nominees.find(n => n.id === runnerUpId)?.name || '')] && (
+                    <div className="mt-1 flex justify-end">
+                      <OddsBadge 
+                        polymarket={odds[normalizeNomineeName(category.nominees.find(n => n.id === runnerUpId)?.name || '')]?.polymarket ?? null}
+                        kalshi={odds[normalizeNomineeName(category.nominees.find(n => n.id === runnerUpId)?.name || '')]?.kalshi ?? null}
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
             </CardContent>

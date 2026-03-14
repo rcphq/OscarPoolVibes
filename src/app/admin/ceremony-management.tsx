@@ -10,6 +10,7 @@ import {
   ChevronDown,
   ChevronRight,
   AlertTriangle,
+  Pencil,
 } from "lucide-react";
 import {
   Card,
@@ -27,6 +28,7 @@ import {
   togglePredictionsLocked,
   toggleCeremonyActive,
   createCeremonyYear,
+  updateCeremonyDate,
   addCategory,
   addNominee,
   type ActionResult,
@@ -113,6 +115,7 @@ function CeremonyYearCard({ ceremony }: { ceremony: CeremonyYearData }) {
   const [isPending, startTransition] = useTransition();
   const [lockWarning, setLockWarning] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showEditDate, setShowEditDate] = useState(false);
 
   function handleToggleActive() {
     setError(null);
@@ -164,15 +167,27 @@ function CeremonyYearCard({ ceremony }: { ceremony: CeremonyYearData }) {
               {ceremony.name}
             </CardTitle>
             <CardDescription className="flex items-center gap-4">
-              <span className="flex items-center gap-1">
+              <span className="flex items-center gap-1.5">
                 <Calendar className="size-3.5" />
                 {ceremony.ceremonyDate
-                  ? new Date(ceremony.ceremonyDate).toLocaleDateString("en-US", {
+                  ? new Date(ceremony.ceremonyDate).toLocaleString("en-US", {
                       year: "numeric",
                       month: "long",
                       day: "numeric",
+                      hour: "numeric",
+                      minute: "2-digit",
+                      timeZoneName: "short",
                     })
                   : "Date TBD"}
+                <button
+                  type="button"
+                  onClick={() => setShowEditDate(!showEditDate)}
+                  className="inline-flex items-center gap-1 rounded px-1 py-0.5 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"
+                  aria-label="Edit ceremony date"
+                >
+                  <Pencil className="size-3" />
+                  Edit
+                </button>
               </span>
               <span>
                 {ceremony._count.categories} categor
@@ -255,6 +270,14 @@ function CeremonyYearCard({ ceremony }: { ceremony: CeremonyYearData }) {
 
         {error && (
           <p className="mt-2 text-sm text-destructive">{error}</p>
+        )}
+
+        {showEditDate && (
+          <EditDateForm
+            ceremonyYearId={ceremony.id}
+            currentDate={ceremony.ceremonyDate}
+            onClose={() => setShowEditDate(false)}
+          />
         )}
       </CardHeader>
 
@@ -461,8 +484,8 @@ function CreateCeremonyForm({ onClose }: { onClose: () => void }) {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="cy-date">Ceremony Date</Label>
-              <Input id="cy-date" name="ceremonyDate" type="date" />
+              <Label htmlFor="cy-date">Ceremony Date & Time</Label>
+              <Input id="cy-date" name="ceremonyDate" type="datetime-local" />
             </div>
           </div>
           <div className="space-y-2">
@@ -493,6 +516,75 @@ function CreateCeremonyForm({ onClose }: { onClose: () => void }) {
         </form>
       </CardContent>
     </Card>
+  );
+}
+
+// ─── Edit Date Form ─────────────────────────────────────────────────────────
+
+function EditDateForm({
+  ceremonyYearId,
+  currentDate,
+  onClose,
+}: {
+  ceremonyYearId: string;
+  currentDate: string | null;
+  onClose: () => void;
+}) {
+  const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+
+  // Convert stored date string to datetime-local input format (YYYY-MM-DDTHH:mm)
+  const defaultValue = currentDate
+    ? new Date(currentDate).toISOString().slice(0, 16)
+    : "";
+
+  function handleSubmit(formData: FormData) {
+    setError(null);
+    const raw = formData.get("ceremonyDate");
+    const value = raw && String(raw).trim() !== "" ? String(raw) : null;
+    startTransition(async () => {
+      const result = await updateCeremonyDate(ceremonyYearId, value);
+      if (result.success) {
+        toast.success("Ceremony date updated");
+        onClose();
+      } else {
+        setError(result.error ?? "Failed to update date");
+      }
+    });
+  }
+
+  return (
+    <div className="mt-3 rounded-md border border-border bg-muted/20 p-3">
+      <form action={handleSubmit} className="flex flex-wrap items-end gap-3">
+        <div className="space-y-1">
+          <Label htmlFor={`edit-date-${ceremonyYearId}`} className="text-xs">
+            Ceremony Date &amp; Time
+          </Label>
+          <Input
+            id={`edit-date-${ceremonyYearId}`}
+            name="ceremonyDate"
+            type="datetime-local"
+            defaultValue={defaultValue}
+            className="w-56"
+          />
+        </div>
+        {error && <p className="w-full text-xs text-destructive">{error}</p>}
+        <div className="flex gap-2">
+          <Button type="submit" size="sm" disabled={isPending}>
+            {isPending ? "Saving..." : "Save"}
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            disabled={isPending}
+          >
+            Cancel
+          </Button>
+        </div>
+      </form>
+    </div>
   );
 }
 

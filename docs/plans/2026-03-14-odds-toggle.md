@@ -45,7 +45,7 @@ type OddsResponse = {
 
 **Matching strategy**: The tricky part is matching Polymarket/Kalshi outcome labels to our `Nominee.name` values. We'll need a fuzzy/normalized string match (lowercase, strip punctuation, handle "The" prefix). If a match isn't confident, skip that nominee — better to show no odds than wrong odds.
 
-**Caching**: Use Next.js `revalidate` or in-memory cache with a **5-minute TTL**. Odds don't change second-by-second and we don't want to hammer external APIs on every page load.
+**Caching**: Use Next.js `revalidate` or in-memory cache with a **15-minute TTL** (`revalidate: 900`). Odds don't change second-by-second and we don't want to hammer external APIs on every page load. This guarantees maximum 4 requests per hour.
 
 ### New file: `src/lib/odds/fetch-odds.ts`
 

@@ -55,6 +55,7 @@ export default async function PredictPage({
           id: true,
           name: true,
           predictionsLocked: true,
+          ceremonyDate: true,
         },
       },
     },
@@ -98,7 +99,11 @@ export default async function PredictPage({
     runnerUpId: p.runnerUp.id,
   }));
 
-  const isLocked = pool.ceremonyYear.predictionsLocked;
+  const isLocked = Boolean(
+    pool.ceremonyYear.predictionsLocked ||
+      (pool.ceremonyYear.ceremonyDate &&
+        new Date() >= new Date(pool.ceremonyYear.ceremonyDate.getTime() - 60 * 60 * 1000))
+  );
 
   return (
     <main className="min-h-screen">

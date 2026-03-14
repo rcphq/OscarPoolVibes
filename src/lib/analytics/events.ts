@@ -30,6 +30,7 @@ export type EventMap = {
   // Admin
   admin_predictions_locked: { ceremonyYearId: string; locked: boolean }
   admin_ceremony_created: { ceremonyYearId: string }
+  admin_ceremony_date_updated: { ceremonyYearId: string }
   member_role_changed: { poolId: string; newRole: string }
   member_removed: { poolId: string }
 

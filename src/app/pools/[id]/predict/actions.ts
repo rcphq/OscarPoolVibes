@@ -36,18 +36,28 @@ export async function savePredictions(
     return { error: "You are not an active member of this pool" };
   }
 
-  // 4. Check predictions are not locked
+  // 4. Check predictions are not locked (manually or automatically within 1 hour of ceremony)
   const pool = await prisma.pool.findUniqueOrThrow({
     where: { id: poolId },
     select: {
       ceremonyYear: {
-        select: { predictionsLocked: true },
+        select: {
+          predictionsLocked: true,
+          ceremonyDate: true,
+        },
       },
     },
   });
 
   if (pool.ceremonyYear.predictionsLocked) {
     return { error: "Predictions are locked for this ceremony" };
+  }
+
+  if (
+    pool.ceremonyYear.ceremonyDate &&
+    new Date() >= new Date(pool.ceremonyYear.ceremonyDate.getTime() - 60 * 60 * 1000)
+  ) {
+    return { error: "Predictions are automatically locked 1 hour before the ceremony." };
   }
 
   // 5. Validate each nominee belongs to its category and firstChoice !== runnerUp
