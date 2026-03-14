@@ -8,8 +8,8 @@
  * Tier structure:
  *   Tier 1 (180 / 0.6x): Major acting & directing categories
  *   Tier 2 (90  / 0.6x): Craft, screenplay, and animated feature
- *   Tier 3 (30  / 0.6x): Design, sound, song, and casting categories
- *   Tier 4 (15  / 0.6x): Shorts, documentaries, international, and score
+ *   Tier 3 (30  / 0.6x): Design, score, song, and casting categories
+ *   Tier 4 (15  / 0.6x): Shorts, documentaries, international, and sound
  */
 
 export type CategoryDefaults = {
@@ -50,7 +50,7 @@ export const CATEGORY_POINT_DEFAULTS: Record<string, CategoryDefaults> = {
   "Best Production Design": { pointValue: 30, runnerUpMultiplier: 0.6 },
   "Best Makeup and Hairstyling": { pointValue: 30, runnerUpMultiplier: 0.6 },
   "Best Original Song": { pointValue: 30, runnerUpMultiplier: 0.6 },
-  "Best Sound": { pointValue: 30, runnerUpMultiplier: 0.6 },
+  "Best Original Score": { pointValue: 30, runnerUpMultiplier: 0.6 },
   // 2026+ ceremony: Best Casting added as a new category
   "Best Casting": { pointValue: 30, runnerUpMultiplier: 0.6 },
 
@@ -61,7 +61,7 @@ export const CATEGORY_POINT_DEFAULTS: Record<string, CategoryDefaults> = {
   "Best Documentary Feature": { pointValue: 15, runnerUpMultiplier: 0.6 },
   "Best International Feature": { pointValue: 15, runnerUpMultiplier: 0.6 },
   "Best International Feature Film": { pointValue: 15, runnerUpMultiplier: 0.6 },
-  "Best Original Score": { pointValue: 15, runnerUpMultiplier: 0.6 },
+  "Best Sound": { pointValue: 15, runnerUpMultiplier: 0.6 },
 };
 
 /**
@@ -116,7 +116,7 @@ export const TIER_GROUPS: TierGroup[] = [
     ],
   },
   {
-    tierLabel: "Tier 3 - Design, Sound & Casting",
+    tierLabel: "Tier 3 - Design, Score & Casting",
     defaultPointValue: 30,
     defaultRunnerUpMultiplier: 0.6,
     categories: [
@@ -124,13 +124,13 @@ export const TIER_GROUPS: TierGroup[] = [
       "Best Production Design",
       "Best Makeup and Hairstyling",
       "Best Original Song",
-      "Best Sound",
+      "Best Original Score",
       // 2026+ only; gracefully absent from earlier ceremonies
       "Best Casting",
     ],
   },
   {
-    tierLabel: "Tier 4 - Shorts, Docs & Score",
+    tierLabel: "Tier 4 - Shorts, Docs & Sound",
     defaultPointValue: 15,
     defaultRunnerUpMultiplier: 0.6,
     categories: [
@@ -140,7 +140,7 @@ export const TIER_GROUPS: TierGroup[] = [
       "Best Documentary Feature",
       "Best International Feature",
       "Best International Feature Film",
-      "Best Original Score",
+      "Best Sound",
     ],
   },
 ];

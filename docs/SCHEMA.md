@@ -231,8 +231,8 @@ Categories are assigned point values based on a 4-tier system reflecting their p
 |------|--------|-----------|------------|
 | 1 | 180 | 108 | Best Picture, Best Director, Best Actor, Best Actress, Best Supporting Actor, Best Supporting Actress |
 | 2 | 90 | 54 | Best Film Editing, Best Cinematography, Best Visual Effects, Best Original Screenplay, Best Adapted Screenplay, Best Animated Feature |
-| 3 | 30 | 18 | Best Costume Design, Best Production Design, Best Makeup and Hairstyling, Best Original Song, Best Sound, Best Casting (2026+) |
-| 4 | 15 | 9 | Best Animated Short, Best Live Action Short, Best Documentary Short, Best Documentary Feature, Best International Feature Film, Best Original Score |
+| 3 | 30 | 18 | Best Costume Design, Best Production Design, Best Makeup and Hairstyling, Best Original Song, Best Original Score, Best Casting (2026+) |
+| 4 | 15 | 9 | Best Animated Short, Best Live Action Short, Best Documentary Short, Best Documentary Feature, Best International Feature Film, Best Sound |
 
 ### Runner-Up Multiplier (0.6x)
 
