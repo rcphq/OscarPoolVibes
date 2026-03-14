@@ -240,8 +240,11 @@ export default async function LeaderboardPage({
       </section>
 
       {/* Content */}
-      <section className="px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-5xl">
+      <section className="px-4 py-8 sm:px-6 lg:px-8 relative backdrop-blur-xs">
+        {/* Subtle glow behind the leaderboard table */}
+        <div className="absolute inset-x-0 top-0 -z-10 h-64 bg-gradient-to-b from-gold-500/5 to-transparent blur-3xl" />
+        
+        <div className="mx-auto max-w-5xl rounded-xl border border-gold-500/20 bg-background/60 shadow-2xl backdrop-blur-md p-1 sm:p-2">
           {entries.length === 0 ? (
             <p className="py-12 text-center text-muted-foreground">
               No predictions have been submitted yet.

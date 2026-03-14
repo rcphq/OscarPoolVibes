@@ -227,6 +227,39 @@ export async function addCategory(formData: FormData): Promise<ActionResult> {
   }
 }
 
+export async function updateCeremonyDate(
+  ceremonyYearId: string,
+  ceremonyDate: string | null
+): Promise<ActionResult> {
+  try {
+    const userId = await requireAdmin();
+
+    const ceremony = await prisma.ceremonyYear.findUnique({
+      where: { id: ceremonyYearId },
+    });
+
+    if (!ceremony) {
+      return { success: false, error: "Ceremony year not found" };
+    }
+
+    await prisma.ceremonyYear.update({
+      where: { id: ceremonyYearId },
+      data: {
+        ceremonyDate: ceremonyDate ? new Date(ceremonyDate) : null,
+      },
+    });
+
+    trackServerEvent(userId, "admin_ceremony_date_updated", { ceremonyYearId });
+    revalidatePath("/admin");
+    return { success: true };
+  } catch (e) {
+    return {
+      success: false,
+      error: e instanceof Error ? e.message : "Unknown error",
+    };
+  }
+}
+
 export async function addNominee(formData: FormData): Promise<ActionResult> {
   try {
     await requireAdmin();
