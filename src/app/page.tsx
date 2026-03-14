@@ -4,18 +4,18 @@ import { Button } from "@/components/ui/button";
 import { getCachedSession } from "@/lib/auth/session";
 
 export const metadata: Metadata = {
-  title: { absolute: "OscarPoolVibes â€” Predict the Oscars with Friends" },
+  title: { absolute: "OscarPoolVibes - Predict the Oscars with Friends" },
   description:
     "Create a pool, invite your friends, and see who can predict the most winners on Hollywood's biggest night.",
   openGraph: {
-    title: "OscarPoolVibes â€” Predict the Oscars with Friends",
+    title: "OscarPoolVibes - Predict the Oscars with Friends",
     description:
       "Create a pool, invite your friends, and see who can predict the most winners on Hollywood's biggest night.",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "OscarPoolVibes â€” Predict the Oscars with Friends",
+    title: "OscarPoolVibes - Predict the Oscars with Friends",
     description:
       "Create a pool, invite your friends, and compete on Oscar night.",
   },
