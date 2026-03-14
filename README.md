@@ -94,16 +94,15 @@ npm run dev
 | Variable | Description |
 |----------|-------------|
 | `DATABASE_URL` | PostgreSQL connection string (Neon recommended) |
-| `NEXTAUTH_URL` | Base URL of the app (e.g. `http://localhost:3000`) |
-| `NEXTAUTH_SECRET` | Random secret for session encryption |
+| `AUTH_URL` | Base URL of the app (e.g. `http://localhost:3000`) |
+| `AUTH_SECRET` | Random secret for session encryption (`openssl rand -base64 32`) |
 | `GOOGLE_CLIENT_ID` | Google OAuth client ID (from Google Cloud Console) |
 | `GOOGLE_CLIENT_SECRET` | Google OAuth client secret |
 | `GITHUB_ID` | (Optional) GitHub OAuth app client ID |
 | `GITHUB_SECRET` | (Optional) GitHub OAuth app client secret |
 | `RESEND_API_KEY` | Resend API key for email magic-link auth and pool invites |
-| EMAIL_FROM | Sender email address for transactional emails (e.g. 
-oreply@oscarpoolvibes.com) |
-| SITE_ADMIN_EMAILS | Comma-separated email allowlist for the global admin area |
+| `EMAIL_FROM` | Sender email address for transactional emails (e.g. `noreply@oscarpoolvibes.com`) |
+| `SITE_ADMIN_EMAILS` | Comma-separated email allowlist for the global admin area |
 
 ## Scripts
 
@@ -117,6 +116,18 @@ oreply@oscarpoolvibes.com) |
 | `npm run seed` | Seed database with Oscar data |
 | `npm run test:e2e` | Run end-to-end tests (Playwright) |
 | `npm run test:a11y` | Run accessibility audit |
+
+## Design System
+
+OscarPoolVibes uses a "Black Tie" design aesthetic — Gold + Deep Navy, dark-mode-first, with an elegant ceremony feel.
+
+- **Component library**: shadcn/ui (Radix UI + Tailwind CSS v4)
+- **Fonts**: Playfair Display (headings) + Inter (body) via `next/font`
+- **Icons**: Lucide React
+- **Theme**: Dark default, light mode available; respects `prefers-color-scheme` on first visit
+- **Motion**: All animations respect `prefers-reduced-motion`
+
+See [docs/plans/2026-03-05-design-system.md](docs/plans/2026-03-05-design-system.md) for the full specification.
 
 ## Accessibility
 
@@ -162,6 +173,7 @@ See [docs/TESTING.md](docs/TESTING.md) for the full testing strategy.
 | Document | Description |
 |----------|-------------|
 | [CLAUDE.md](CLAUDE.md) | Agentic coding guidelines and conventions |
+| [CHANGELOG.md](CHANGELOG.md) | Release history and notable changes |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Architecture Decision Records (ADRs) |
 | [docs/SCHEMA.md](docs/SCHEMA.md) | Database schema reference and rationale |
 | [docs/PLAN.md](docs/PLAN.md) | Phased implementation plan with progress |
@@ -169,6 +181,7 @@ See [docs/TESTING.md](docs/TESTING.md) for the full testing strategy.
 | [docs/TESTING.md](docs/TESTING.md) | Testing strategy and coverage requirements |
 | [docs/MONETIZATION.md](docs/MONETIZATION.md) | Monetization strategy and tier design |
 | [docs/DATABASE_ALTERNATIVES.md](docs/DATABASE_ALTERNATIVES.md) | Database options comparison |
+| [docs/plans/2026-03-05-design-system.md](docs/plans/2026-03-05-design-system.md) | Design system specification (Black Tie) |
 
 ## License
 
