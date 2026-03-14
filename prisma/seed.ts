@@ -349,7 +349,7 @@ const ceremony2025: CeremonyInput = {
 const ceremony2026: CeremonyInput = {
   year: 2026,
   name: '98th Academy Awards',
-  ceremonyDate: new Date('2026-03-15T00:00:00Z'),
+  ceremonyDate: new Date('2026-03-15T22:00:00Z'),
   categories: [
     {
       name: 'Best Picture',

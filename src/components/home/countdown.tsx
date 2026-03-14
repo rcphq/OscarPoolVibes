@@ -11,13 +11,11 @@ export function Countdown({ targetDate }: { targetDate: Date }) {
   }>({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
   const [mounted, setMounted] = useState(false);
+  const [isPast, setIsPast] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
-    const interval = setInterval(() => {
-      const now = new Date();
-      const difference = targetDate.getTime() - now.getTime();
-
+    const tick = () => {
+      const difference = targetDate.getTime() - new Date().getTime();
       if (difference > 0) {
         setTimeLeft({
           days: Math.floor(difference / (1000 * 60 * 60 * 24)),
@@ -27,22 +25,29 @@ export function Countdown({ targetDate }: { targetDate: Date }) {
         });
       } else {
         setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+        setIsPast(true);
         clearInterval(interval);
       }
-    }, 1000);
+    };
+
+    tick();
+    setMounted(true);
+    const interval = setInterval(tick, 1000);
 
     return () => clearInterval(interval);
   }, [targetDate]);
 
   if (!mounted) return null;
 
-  const isZero =
-    timeLeft.days === 0 &&
-    timeLeft.hours === 0 &&
-    timeLeft.minutes === 0 &&
-    timeLeft.seconds === 0;
-
-  if (isZero) return null;
+  if (isPast) {
+    return (
+      <div className="mx-auto mt-6 flex justify-center">
+        <div className="flex flex-col rounded-md border border-gold-500/20 bg-background/50 px-8 py-3 shadow-lg backdrop-blur-md">
+          <span className="font-heading text-3xl font-bold text-gold-300 sm:text-4xl">TBD!</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto mt-6 flex justify-center gap-4 text-center">

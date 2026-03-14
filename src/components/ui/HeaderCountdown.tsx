@@ -115,7 +115,16 @@ export function HeaderCountdown({ targetDate, ceremonyName }: HeaderCountdownPro
     timeLeft.minutes === 0 &&
     timeLeft.seconds === 0;
 
-  if (isZero) return null;
+  if (isZero) {
+    return (
+      <span
+        className="border border-gold-700/30 dark:border-gold-500/30 rounded-full px-2.5 py-0.5 text-xs font-medium text-gold-700 dark:text-gold-400"
+        aria-label={`${ceremonyName}: ceremony has started`}
+      >
+        TBD!
+      </span>
+    );
+  }
 
   const { mobile: mobileText, tablet: tabletText } = formatCompact(timeLeft);
   const desktopText = `${ceremonyName} · ${timeLeft.days}d ${timeLeft.hours}h ${timeLeft.minutes}m ${timeLeft.seconds}s`;
