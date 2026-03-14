@@ -242,11 +242,14 @@ export async function updateCeremonyDate(
       return { success: false, error: "Ceremony year not found" };
     }
 
+    const parsedDate = ceremonyDate ? new Date(ceremonyDate) : null;
+    if (parsedDate !== null && isNaN(parsedDate.getTime())) {
+      return { success: false, error: "Invalid ceremony date format" };
+    }
+
     await prisma.ceremonyYear.update({
       where: { id: ceremonyYearId },
-      data: {
-        ceremonyDate: ceremonyDate ? new Date(ceremonyDate) : null,
-      },
+      data: { ceremonyDate: parsedDate },
     });
 
     trackServerEvent(userId, "admin_ceremony_date_updated", { ceremonyYearId });

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState, useTransition, useEffect } from "react";
+import { useCallback, useState, useTransition, useEffect, useId } from "react";
 import { Lock, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -62,16 +62,16 @@ export function PredictionForm({
   poolId,
   isLocked,
 }: PredictionFormProps) {
-  // Build initial state from existing predictions
-  const initialSelections: Selections = {};
-  for (const pred of existingPredictions) {
-    initialSelections[pred.categoryId] = {
-      firstChoiceId: pred.firstChoiceId,
-      runnerUpId: pred.runnerUpId,
-    };
-  }
-
-  const [selections, setSelections] = useState<Selections>(initialSelections);
+  const [selections, setSelections] = useState<Selections>(() => {
+    const init: Selections = {};
+    for (const pred of existingPredictions) {
+      init[pred.categoryId] = {
+        firstChoiceId: pred.firstChoiceId,
+        runnerUpId: pred.runnerUpId,
+      };
+    }
+    return init;
+  });
   const [isPending, startTransition] = useTransition();
   const [feedback, setFeedback] = useState<{
     type: "success" | "error";
@@ -79,18 +79,25 @@ export function PredictionForm({
   } | null>(null);
 
   const [hideOdds, setHideOdds] = useState(true);
+  const oddsSwitchId = useId();
 
-  // Initialize from localStorage
+  // Initialize from localStorage — wrapped in try/catch for browsers with storage disabled.
   useEffect(() => {
-    const stored = localStorage.getItem("hideOdds");
-    if (stored !== null) {
-      setHideOdds(stored === "true");
+    try {
+      const stored = localStorage.getItem("hideOdds");
+      if (stored !== null) setHideOdds(stored === "true");
+    } catch {
+      // localStorage unavailable; keep default
     }
   }, []);
 
   const handleToggleOdds = (checked: boolean) => {
     setHideOdds(checked);
-    localStorage.setItem("hideOdds", String(checked));
+    try {
+      localStorage.setItem("hideOdds", String(checked));
+    } catch {
+      // localStorage unavailable; preference won't persist
+    }
   };
 
   const { odds } = useOdds(!hideOdds);
@@ -174,11 +181,11 @@ export function PredictionForm({
 
         <div className="flex items-center gap-2 rounded-lg border border-border/50 bg-background/50 px-3 py-2 shadow-sm backdrop-blur">
           <Switch
-            id="never-tell-me"
+            id={oddsSwitchId}
             checked={hideOdds}
             onCheckedChange={handleToggleOdds}
           />
-          <Label htmlFor="never-tell-me" className="cursor-pointer text-sm font-medium text-foreground">
+          <Label htmlFor={oddsSwitchId} className="cursor-pointer text-sm font-medium text-foreground">
             Never tell me the odds
           </Label>
         </div>
@@ -189,6 +196,9 @@ export function PredictionForm({
         const sel = selections[category.id];
         const firstChoiceId = sel?.firstChoiceId ?? "";
         const runnerUpId = sel?.runnerUpId ?? "";
+
+        // O(1) nominee lookup by ID — avoids repeated .find() calls during render
+        const nomineeById = new Map(category.nominees.map((n) => [n.id, n]));
 
         // Filter runner-up options to exclude first choice
         const runnerUpNominees = category.nominees.filter(
@@ -254,14 +264,15 @@ export function PredictionForm({
                       })}
                     </SelectContent>
                   </Select>
-                  {!hideOdds && firstChoiceId && odds?.[normalizeNomineeName(category.nominees.find(n => n.id === firstChoiceId)?.name || '')] && (
-                    <div className="mt-1 flex justify-end">
-                      <OddsBadge 
-                        polymarket={odds[normalizeNomineeName(category.nominees.find(n => n.id === firstChoiceId)?.name || '')]?.polymarket ?? null}
-                        kalshi={odds[normalizeNomineeName(category.nominees.find(n => n.id === firstChoiceId)?.name || '')]?.kalshi ?? null}
-                      />
-                    </div>
-                  )}
+                  {!hideOdds && firstChoiceId && (() => {
+                    const key = normalizeNomineeName(nomineeById.get(firstChoiceId)?.name ?? '');
+                    const o = key ? odds?.[key] : undefined;
+                    return o ? (
+                      <div className="mt-1 flex justify-end">
+                        <OddsBadge polymarket={o.polymarket} kalshi={o.kalshi} />
+                      </div>
+                    ) : null;
+                  })()}
                 </div>
 
                 {/* Runner-Up */}
@@ -315,14 +326,15 @@ export function PredictionForm({
                       })}
                     </SelectContent>
                   </Select>
-                  {!hideOdds && runnerUpId && odds?.[normalizeNomineeName(category.nominees.find(n => n.id === runnerUpId)?.name || '')] && (
-                    <div className="mt-1 flex justify-end">
-                      <OddsBadge 
-                        polymarket={odds[normalizeNomineeName(category.nominees.find(n => n.id === runnerUpId)?.name || '')]?.polymarket ?? null}
-                        kalshi={odds[normalizeNomineeName(category.nominees.find(n => n.id === runnerUpId)?.name || '')]?.kalshi ?? null}
-                      />
-                    </div>
-                  )}
+                  {!hideOdds && runnerUpId && (() => {
+                    const key = normalizeNomineeName(nomineeById.get(runnerUpId)?.name ?? '');
+                    const o = key ? odds?.[key] : undefined;
+                    return o ? (
+                      <div className="mt-1 flex justify-end">
+                        <OddsBadge polymarket={o.polymarket} kalshi={o.kalshi} />
+                      </div>
+                    ) : null;
+                  })()}
                 </div>
               </div>
             </CardContent>

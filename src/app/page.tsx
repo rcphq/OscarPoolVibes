@@ -44,11 +44,11 @@ export default async function Home() {
     <div className="relative flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center bg-background px-4">
       <HeroBackground />
       <div className="relative mx-auto max-w-2xl space-y-8 text-center backdrop-blur-sm rounded-xl p-8 shadow-2xl bg-black/40 border border-gold-500/20">
-        <h1 className="font-heading text-5xl font-bold tracking-tight sm:text-7xl drop-shadow-lg text-white">
+        <h1 className="font-heading text-5xl font-bold tracking-tight sm:text-7xl drop-shadow-lg text-foreground">
           Predict the Oscars
           <span className="block text-gold-400 mt-2">with Friends</span>
         </h1>
-        <p className="mx-auto max-w-lg text-lg leading-relaxed text-zinc-300 drop-shadow-md">
+        <p className="mx-auto max-w-lg text-lg leading-relaxed text-foreground/80 drop-shadow-md">
           Create a pool, invite your friends, and see who can predict the most
           winners on Hollywood&apos;s biggest night.
         </p>

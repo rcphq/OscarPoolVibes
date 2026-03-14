@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **ui:** Home page heading and body text used hardcoded `text-white` / `text-zinc-300` — replaced with semantic tokens (`text-foreground`, `text-foreground/80`) so they render correctly in light mode
+- **a11y:** `OddsBadge` now has `aria-label` (e.g. "Polymarket: 55%, Kalshi: 52%") so screen readers announce odds meaningfully; separator dot marked `aria-hidden`
+- **a11y:** Admin "Edit date" button restores focus when the inline edit form closes
+- **predictions:** `PredictionForm` localStorage access wrapped in `try/catch` — prevents crash in browsers with storage disabled or in restricted incognito mode
+- **predictions:** `PredictionForm` initial selections now built inside the `useState` initializer — avoids unnecessary object reconstruction on every re-render
+- **predictions:** Trigger-badge odds lookup uses a pre-built `Map<id, nominee>` instead of repeated `.find()` calls — O(1) per lookup across all categories
+- **predictions:** Switch `id` for "Never tell me the odds" toggle now uses React `useId()` — safe if the component is ever rendered more than once per page
+- **admin:** `updateCeremonyDate` server action validates the date string before `new Date()` — returns a clear error instead of an opaque Prisma failure on malformed input
+- **admin:** Categories table in `CeremonyYearCard` now sorts a shallow copy (`[...categories].sort(...)`) instead of mutating the prop array in place
+- **ui:** `HeroBackground` re-randomizes particle positions on window resize — particles were previously stuck outside the new canvas bounds after resize or mobile rotation
+- **odds:** Polymarket probability calculation now clamps to `[0, 100]` before storing — defensive guard against markets that return pre-scaled values
+- **odds:** Fuzzy nominee name matching now requires a minimum 5-char token and limits word-count difference to ≤ 3 — prevents short names (e.g. "lily") from incorrectly merging with unrelated nominees
+- **leaderboard:** Uses `getCachedSession()` instead of `auth()` directly — consistent with the rest of the app, avoids a redundant session store round-trip
+
 ### Added
 
 - **ui:** Compact ceremony countdown badge in site header — responsive (days+hours on mobile, +minutes on tablet, +name and seconds on desktop); hidden on home page which has its own full countdown. Only shown when active ceremony has a date set and it hasn't passed.

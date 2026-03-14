@@ -14,23 +14,27 @@ export function HeroBackground() {
 
     let animationFrameId: number;
 
+    const makeParticles = () =>
+      Array.from({ length: 40 }).map(() => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        radius: Math.random() * 2 + 0.5,
+        alpha: Math.random(),
+        velocity: (Math.random() - 0.5) * 0.2,
+        pulse: Math.random() * 0.02,
+      }));
+
+    let particles = makeParticles();
+
     const resize = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
+      // Re-randomize positions so particles are distributed across the new canvas size.
+      particles = makeParticles();
     };
 
     window.addEventListener("resize", resize);
     resize();
-
-    // Cinematic particle effect resembling flashbulbs / subtle star field
-    const particles = Array.from({ length: 40 }).map(() => ({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      radius: Math.random() * 2 + 0.5,
-      alpha: Math.random(),
-      velocity: (Math.random() - 0.5) * 0.2,
-      pulse: Math.random() * 0.02,
-    }));
 
     const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -43,7 +47,9 @@ export function HeroBackground() {
         
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(212, 175, 55, ${p.alpha})`; // Gold tone
+        // Hardcoded gold value (#D4AF37) — CSS custom properties are not available
+        // in Canvas 2D context, so this intentionally diverges from the CSS token.
+        ctx.fillStyle = `rgba(212, 175, 55, ${p.alpha})`;
         ctx.fill();
       });
 

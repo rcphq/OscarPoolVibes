@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useRef } from "react";
 import {
   Lock,
   Unlock,
@@ -116,6 +116,7 @@ function CeremonyYearCard({ ceremony }: { ceremony: CeremonyYearData }) {
   const [lockWarning, setLockWarning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showEditDate, setShowEditDate] = useState(false);
+  const editDateBtnRef = useRef<HTMLButtonElement>(null);
 
   function handleToggleActive() {
     setError(null);
@@ -181,6 +182,7 @@ function CeremonyYearCard({ ceremony }: { ceremony: CeremonyYearData }) {
                   : "Date TBD"}
                 <button
                   type="button"
+                  ref={editDateBtnRef}
                   onClick={() => setShowEditDate(!showEditDate)}
                   className="inline-flex items-center gap-1 rounded px-1 py-0.5 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"
                   aria-label="Edit ceremony date"
@@ -276,7 +278,10 @@ function CeremonyYearCard({ ceremony }: { ceremony: CeremonyYearData }) {
           <EditDateForm
             ceremonyYearId={ceremony.id}
             currentDate={ceremony.ceremonyDate}
-            onClose={() => setShowEditDate(false)}
+            onClose={() => {
+              setShowEditDate(false);
+              editDateBtnRef.current?.focus();
+            }}
           />
         )}
       </CardHeader>
@@ -336,7 +341,7 @@ function CategoriesSection({
               </tr>
             </thead>
             <tbody>
-              {categories
+              {[...categories]
                 .sort((a, b) => a.displayOrder - b.displayOrder)
                 .map((cat) => (
                   <CategoryRow key={cat.id} category={cat} />

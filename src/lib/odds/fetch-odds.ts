@@ -56,10 +56,10 @@ export async function fetchPolymarketOdds(tag: string = 'oscars-2026'): Promise<
 
             for (let i = 0; i < outcomes.length; i++) {
               if (prices[i] !== undefined && !isNaN(prices[i])) {
-                results.push({
-                  nomineeName: outcomes[i],
-                  probability: Math.round(prices[i] * 100), // Convert 0.24 → 24
-                });
+                // Polymarket prices are 0.0–1.0 decimals; multiply by 100 for percentage.
+                // Clamp to [0, 100] in case a market ever returns pre-scaled values.
+                const probability = Math.round(Math.min(1, Math.max(0, prices[i])) * 100);
+                results.push({ nomineeName: outcomes[i], probability });
               }
             }
           }
@@ -166,8 +166,16 @@ export function mergeOdds(poly: RawOdds[], kalshi: RawOdds[]): OddsMap {
     let matchedKey = norm;
     const existingKeys = Object.keys(map);
 
-    // Attempt relaxed substring matching for slight name variations
-    const fuzzyMatch = existingKeys.find(k => k.includes(norm) || norm.includes(k));
+    // Attempt relaxed substring matching for slight name variations.
+    // Require the shorter string to be at least 5 chars and the longer to be at most
+    // 3 words longer — prevents short tokens like "lily" matching "lily gladstone".
+    const fuzzyMatch = norm.length >= 5
+      ? existingKeys.find(k => {
+          const [shorter, longer] = norm.length < k.length ? [norm, k] : [k, norm];
+          const wordDiff = longer.split(' ').length - shorter.split(' ').length;
+          return wordDiff <= 3 && (longer.includes(shorter));
+        })
+      : undefined;
     if (fuzzyMatch) {
       matchedKey = fuzzyMatch;
     } else {
