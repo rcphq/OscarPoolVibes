@@ -172,7 +172,7 @@ export const DEMO_CATEGORIES: DemoCategory[] = [
   {
     id: "best-score",
     name: "Best Original Score",
-    pointValue: 15,
+    pointValue: 30,
     nominees: [
       { id: "bsc-brutalist", name: "The Brutalist", subtitle: "Daniel Blumberg", isWinner: true },
       { id: "bsc-conclave", name: "Conclave", subtitle: "Volker Bertelmann", isWinner: false },
@@ -232,7 +232,7 @@ export const DEMO_CATEGORIES: DemoCategory[] = [
   {
     id: "best-sound",
     name: "Best Sound",
-    pointValue: 30,
+    pointValue: 15,
     nominees: [
       { id: "bso-complete-unknown", name: "A Complete Unknown", isWinner: false },
       { id: "bso-dune2", name: "Dune: Part Two", isWinner: true },

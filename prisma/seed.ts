@@ -253,7 +253,7 @@ const ceremony2025: CeremonyInput = {
     {
       name: 'Best Sound',
       displayOrder: 17,
-      pointValue: 30,
+      pointValue: 15,
       runnerUpMultiplier: 0.6,
       nominees: [
         { name: 'A Complete Unknown' },
@@ -331,7 +331,7 @@ const ceremony2025: CeremonyInput = {
     {
       name: 'Best Original Score',
       displayOrder: 23,
-      pointValue: 15,
+      pointValue: 30,
       runnerUpMultiplier: 0.6,
       nominees: [
         { name: 'The Brutalist' },
@@ -567,7 +567,7 @@ const ceremony2026: CeremonyInput = {
     {
       name: 'Best Sound',
       displayOrder: 17,
-      pointValue: 30,
+      pointValue: 15,
       runnerUpMultiplier: 0.6,
       nominees: [
         { name: 'F1' },
@@ -658,7 +658,7 @@ const ceremony2026: CeremonyInput = {
     {
       name: 'Best Original Score',
       displayOrder: 24,
-      pointValue: 15,
+      pointValue: 30,
       runnerUpMultiplier: 0.6,
       nominees: [
         { name: 'Bugonia', subtitle: 'Jerskin Fendrix' },

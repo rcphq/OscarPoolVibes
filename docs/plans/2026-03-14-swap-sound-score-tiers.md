@@ -46,7 +46,7 @@
 
 ## Migration Note
 
-This is a **seed data / defaults change only**. No Prisma schema migration is needed — `pointValue` is already a mutable integer column on `Category`. For any existing database data, a re-seed or manual update query would be needed to apply the new point values.
+This is a **code-only change** (defaults, seed data, demo data, docs). No Prisma schema migration or data migration is included — the point values for Best Sound and Best Original Score were already corrected manually in the live database. The code changes ensure new ceremonies, the demo, and the scoring override UI all reflect the correct tier assignments going forward.
 
 ## Testing
 
