@@ -8,6 +8,7 @@ import { prisma } from "@/lib/db/client";
 export async function getActiveCeremony() {
   return prisma.ceremonyYear.findFirst({
     where: { isActive: true },
+    orderBy: { year: "desc" },
     select: { id: true, ceremonyDate: true, name: true },
   });
 }

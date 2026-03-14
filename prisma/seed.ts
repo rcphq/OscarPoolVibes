@@ -673,7 +673,7 @@ const ceremony2026: CeremonyInput = {
 
 // ─── Seed logic ────────────────────────────────────────────────────────────────
 
-async function seedCeremony(ceremony: CeremonyInput) {
+async function seedCeremony(ceremony: CeremonyInput, isActive = false) {
   console.log(`Seeding ${ceremony.name} data...`)
 
   const ceremonyYear = await prisma.ceremonyYear.upsert({
@@ -681,13 +681,13 @@ async function seedCeremony(ceremony: CeremonyInput) {
     update: {
       name: ceremony.name,
       ceremonyDate: ceremony.ceremonyDate,
-      isActive: true,
+      isActive,
     },
     create: {
       year: ceremony.year,
       name: ceremony.name,
       ceremonyDate: ceremony.ceremonyDate,
-      isActive: true,
+      isActive,
     },
   })
 
@@ -739,8 +739,8 @@ async function seedCeremony(ceremony: CeremonyInput) {
 }
 
 async function main() {
-  await seedCeremony(ceremony2025)
-  await seedCeremony(ceremony2026)
+  await seedCeremony(ceremony2025, false)
+  await seedCeremony(ceremony2026, true)
   console.log('Seed complete!')
 }
 
