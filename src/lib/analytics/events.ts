@@ -25,6 +25,7 @@ export type EventMap = {
 
   // Results
   result_set: { ceremonyYearId: string; categoryId: string }
+  result_unset: { ceremonyYearId: string; categoryId: string }
   result_conflict: { ceremonyYearId: string; categoryId: string }
 
   // Admin

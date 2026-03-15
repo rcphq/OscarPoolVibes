@@ -182,8 +182,10 @@ describe("setResult", () => {
       expect(result.success).toBe(false)
       if (!result.success) {
         expect(result.error.code).toBe("CONFLICT")
-        expect(result.error.currentResult?.winnerId).toBe(NOMINEE_A)
-        expect(result.error.currentResult?.version).toBe(1)
+        if (result.error.code === "CONFLICT") {
+          expect(result.error.currentResult.winnerId).toBe(NOMINEE_A)
+          expect(result.error.currentResult.version).toBe(1)
+        }
       }
     })
   })
