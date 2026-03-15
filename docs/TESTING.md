@@ -136,7 +136,7 @@ Each API route tested for:
 5. **Not found**: Invalid resource ID returns 404
 6. **Edge cases**: Concurrent requests, empty datasets, boundary values
 
-#### Results API (`POST /api/results`)
+#### Results API (`POST /api/results`, `DELETE /api/results`)
 
 | Test Case | Setup | Expected |
 |-----------|-------|----------|
@@ -145,6 +145,10 @@ Each API route tested for:
 | Wrong nominee category | winnerId from different category | 400 error |
 | No permission | User with MEMBER role only | 403 error |
 | Invalid ceremony | Non-existent ceremonyYearId | 404 error |
+| Clear winner successfully | Valid permission, correct version | 200, result deleted, Category.winnerId cleared |
+| Clear version conflict | Version mismatch on clear | 409 with current result details |
+| Clear no permission | MEMBER tries to clear | 403 error |
+| Clear nonexistent result | No result for category | 404 error |
 
 #### Permissions API (`POST /api/pools/[poolId]/permissions`)
 

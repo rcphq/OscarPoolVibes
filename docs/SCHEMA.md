@@ -197,9 +197,11 @@ Tracks who set the winner for each category, with optimistic concurrency control
 
 **Unique constraint**: `categoryId` — one result per category globally
 
-**Design note**: The `version` field enables optimistic concurrency control. When updating a result, the client sends the `version` it last saw. If the server's version differs, it means someone else updated the result in the meantime, and a conflict error is returned with details about who changed it and what they set. This prevents two authorized users from unknowingly overwriting each other's result entries.
+**Design note**: The `version` field enables optimistic concurrency control. When updating or clearing a result, the client sends the `version` it last saw. If the server's version differs, it means someone else updated the result in the meantime, and a conflict error is returned with details about who changed it and what they set. This prevents two authorized users from unknowingly overwriting each other's result entries.
 
-**Permission model**: Users with `ADMIN` or `RESULTS_MANAGER` role in *any* pool for the ceremony can set results. Pool creators (ADMIN) can grant/revoke the `RESULTS_MANAGER` role to other pool members.
+**Clearing results**: A result can be deleted via `DELETE /api/results` (with `expectedVersion` for conflict safety). This removes the `CategoryResult` row, clears `Category.winnerId`, and resets `Nominee.isWinner` — all atomically in a transaction. This is for correcting results entered in error. See `src/lib/results/unset-result.ts`.
+
+**Permission model**: Users with `ADMIN` or `RESULTS_MANAGER` role in *any* pool for the ceremony can set or clear results. Pool creators (ADMIN) can grant/revoke the `RESULTS_MANAGER` role to other pool members.
 
 **Cross-entity validation** (enforced in application logic):
 - `winnerId` must reference a Nominee where `nominee.categoryId == categoryResult.categoryId`
@@ -278,6 +280,7 @@ These constraints cannot be expressed in the Prisma schema and must be enforced 
 | `firstChoiceId != runnerUpId` | Prediction | Prediction save server action |
 | Nominee belongs to prediction's category | Prediction | Prediction save server action |
 | Winner belongs to result's category | CategoryResult | `src/lib/results/set-result.ts` |
+| Version match on result clear | CategoryResult | `src/lib/results/unset-result.ts` |
 | Pool access: INVITE_ONLY → OPEN only | Pool | Pool settings server action |
 | No predictions when `predictionsLocked = true` | Prediction | Prediction save server action |
 | Results permission: ADMIN or RESULTS_MANAGER in any ceremony pool | CategoryResult | `src/lib/results/permissions.ts` |

@@ -109,8 +109,9 @@ A pool member trusted to enter ceremony results. Can set winners for any categor
 | R-1 | View results entry form | See all categories with current winner (if set) and who set it | `/results/[ceremonyYearId]` |
 | R-2 | Set a category winner | Select the winning nominee for a category | `POST /api/results` |
 | R-3 | Update a category winner | Change a previously set winner (e.g., correction) | `POST /api/results` (with `expectedVersion`) |
-| R-4 | Handle result conflict | When another user already changed the result, see who changed it, what they set, and decide whether to override | Client-side conflict resolution UI |
-| R-5 | View result audit trail | See who set each result and when it was last updated | `/results/[ceremonyYearId]` |
+| R-4 | Clear a category winner | Remove a winner entered in error, reverting the category to "not yet announced" | `DELETE /api/results` (with `expectedVersion`) |
+| R-5 | Handle result conflict | When another user already changed the result, see who changed it, what they set, and decide whether to override | Client-side conflict resolution UI |
+| R-6 | View result audit trail | See who set each result and when it was last updated | `/results/[ceremonyYearId]` |
 
 **Conflict prevention flow**:
 1. Client loads results, receives `version` for each category
@@ -239,6 +240,7 @@ Summary of what each role can do. ✓ = allowed, — = not allowed.
 | Share pool link | — | — | ✓ | ✓ | ✓ |
 | Set category winners | — | — | — | ✓ | ✓ |
 | Update category winners | — | — | — | ✓ | ✓ |
+| Clear category winners | — | — | — | ✓ | ✓ |
 | Handle result conflicts | — | — | — | ✓ | ✓ |
 | View result audit trail | — | — | — | ✓ | ✓ |
 | Edit pool settings | — | — | — | — | ✓ |
@@ -343,9 +345,10 @@ User-facing error states that must be handled gracefully. Each scenario needs a 
 
 | Scenario | Trigger | Expected Behavior |
 |----------|---------|-------------------|
-| Version conflict | Two users set different winners simultaneously | Show conflict dialog: "User X set [nominee] as winner at [time]. Override or accept?" |
-| Permission denied | Non-authorized user tries to set results | 403 response; UI hides results-entry controls for unauthorized users |
+| Version conflict | Two users set/clear different winners simultaneously | Show conflict dialog: "User X set [nominee] as winner at [time]. Override or accept?" |
+| Permission denied | Non-authorized user tries to set/clear results | 403 response; UI hides results-entry controls for unauthorized users |
 | Invalid winner | Winner nominee doesn't belong to the category | Server rejects with 400 |
+| Clear conflict | User tries to clear a result that was updated since page load | 409 response with current result details; user must refresh |
 
 ### General Errors
 

@@ -2,8 +2,28 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth/auth";
-import { setResult, getResultsByCeremony } from "@/lib/results";
+import { setResult, unsetResult, getResultsByCeremony } from "@/lib/results";
 import { trackServerEvent } from "@/lib/analytics/posthog-server";
+
+const ERROR_STATUS_MAP = {
+  CONFLICT: 409,
+  UNAUTHORIZED: 403,
+  INVALID_NOMINEE: 400,
+  CATEGORY_NOT_FOUND: 404,
+} as const;
+
+async function revalidateCeremonyPools(ceremonyYearId: string) {
+  if (!ceremonyYearId) return;
+  const { prisma } = await import("@/lib/db/client");
+  const pools = await prisma.pool.findMany({
+    where: { ceremonyYearId },
+    select: { id: true },
+  });
+  for (const pool of pools) {
+    revalidatePath(`/pools/${pool.id}/leaderboard`);
+    revalidatePath(`/pools/${pool.id}`);
+  }
+}
 
 const setResultSchema = z.object({
   categoryId: z.string(),
@@ -93,37 +113,94 @@ export async function POST(request: NextRequest) {
         trackServerEvent(user.id, "result_conflict", { ceremonyYearId, categoryId });
       }
 
-      const statusMap = {
-        CONFLICT: 409,
-        UNAUTHORIZED: 403,
-        INVALID_NOMINEE: 400,
-        CATEGORY_NOT_FOUND: 404,
-      } as const;
-
       return NextResponse.json(result, {
-        status: statusMap[result.error.code] ?? 500,
+        status: ERROR_STATUS_MAP[result.error.code] ?? 500,
       });
     }
 
     trackServerEvent(user.id, "result_set", { ceremonyYearId, categoryId });
-
-    // Revalidate leaderboard pages for all pools in this ceremony so
-    // scores reflect the newly-announced winner immediately.
-    if (ceremonyYearId) {
-      const pools = await prisma.pool.findMany({
-        where: { ceremonyYearId },
-        select: { id: true },
-      });
-      for (const pool of pools) {
-        revalidatePath(`/pools/${pool.id}/leaderboard`);
-        revalidatePath(`/pools/${pool.id}`);
-      }
-    }
+    await revalidateCeremonyPools(ceremonyYearId);
 
     return NextResponse.json(result);
   } catch {
     return NextResponse.json(
       { error: "Failed to set result. Please retry." },
+      { status: 500 }
+    );
+  }
+}
+
+const unsetResultSchema = z.object({
+  categoryId: z.string(),
+  expectedVersion: z.number().int(),
+});
+
+/**
+ * DELETE /api/results
+ * Remove the winner for a category (undo a result entered in error).
+ *
+ * Body: { categoryId, expectedVersion }
+ *
+ * Returns:
+ * - 200 { success: true } on success
+ * - 409 on version conflict
+ * - 403 on no permission
+ * - 400 for validation errors
+ */
+export async function DELETE(request: NextRequest) {
+  const session = await auth();
+  if (!session?.user?.email) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  let body: z.infer<typeof unsetResultSchema>;
+  try {
+    body = unsetResultSchema.parse(await request.json());
+  } catch {
+    return NextResponse.json(
+      { error: "categoryId and expectedVersion are required" },
+      { status: 400 }
+    );
+  }
+
+  const { categoryId, expectedVersion } = body;
+
+  const { prisma } = await import("@/lib/db/client");
+  const user = await prisma.user.findUnique({
+    where: { email: session.user.email },
+    select: { id: true },
+  });
+
+  if (!user) {
+    return NextResponse.json({ error: "User not found" }, { status: 401 });
+  }
+
+  const category = await prisma.category.findUnique({
+    where: { id: categoryId },
+    select: { ceremonyYearId: true },
+  });
+  const ceremonyYearId = category?.ceremonyYearId ?? "";
+
+  try {
+    const result = await unsetResult(user.id, { categoryId, expectedVersion });
+
+    if (!result.success) {
+      if (result.error.code === "CONFLICT") {
+        trackServerEvent(user.id, "result_conflict", { ceremonyYearId, categoryId });
+      }
+
+      return NextResponse.json(result, {
+        status: ERROR_STATUS_MAP[result.error.code] ?? 500,
+      });
+    }
+
+    trackServerEvent(user.id, "result_unset", { ceremonyYearId, categoryId });
+    await revalidateCeremonyPools(ceremonyYearId);
+
+    return NextResponse.json(result);
+  } catch {
+    return NextResponse.json(
+      { error: "Failed to clear result. Please retry." },
       { status: 500 }
     );
   }

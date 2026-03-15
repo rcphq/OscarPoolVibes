@@ -35,6 +35,16 @@ export type ConflictDetail = {
   updatedAt: string;
 };
 
+export type UnsetResultRequest = {
+  categoryId: string;
+  /** Current version the client last saw. Required to prevent accidental overwrites. */
+  expectedVersion: number;
+};
+
+export type UnsetResultResponse =
+  | { success: true }
+  | { success: false; error: ResultError };
+
 export type CategoryResultView = {
   categoryId: string;
   categoryName: string;

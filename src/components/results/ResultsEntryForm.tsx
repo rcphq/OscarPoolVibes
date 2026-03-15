@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { Trophy, Check, AlertTriangle, Loader2 } from "lucide-react";
+import { Trophy, Check, AlertTriangle, Loader2, Undo2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -206,6 +206,109 @@ export function ResultsEntryForm({
     [selections, results, categories]
   );
 
+  const handleClearWinner = useCallback(
+    async (categoryId: string) => {
+      const existing = results[categoryId];
+      if (!existing) return;
+
+      setStatuses((prev) => ({
+        ...prev,
+        [categoryId]: { loading: true, feedback: null },
+      }));
+
+      try {
+        const response = await fetch("/api/results", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            categoryId,
+            expectedVersion: existing.version,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          setResults((prev) => {
+            const next = { ...prev };
+            delete next[categoryId];
+            return next;
+          });
+          setSelections((prev) => {
+            const next = { ...prev };
+            delete next[categoryId];
+            return next;
+          });
+          setStatuses((prev) => ({
+            ...prev,
+            [categoryId]: {
+              loading: false,
+              feedback: { type: "success", message: "Winner cleared" },
+            },
+          }));
+          toast.success("Winner cleared");
+        } else if (response.status === 409) {
+          const conflict = data.error?.currentResult;
+          if (conflict) {
+            setResults((prev) => ({
+              ...prev,
+              [categoryId]: {
+                categoryId,
+                winnerId: conflict.winnerId,
+                version: conflict.version,
+                setBy: { name: conflict.setByName },
+                updatedAt:
+                  typeof conflict.updatedAt === "string"
+                    ? conflict.updatedAt
+                    : new Date(conflict.updatedAt).toISOString(),
+              },
+            }));
+            setSelections((prev) => ({
+              ...prev,
+              [categoryId]: conflict.winnerId,
+            }));
+          }
+          setStatuses((prev) => ({
+            ...prev,
+            [categoryId]: {
+              loading: false,
+              feedback: {
+                type: "error",
+                message:
+                  data.error?.message ??
+                  "Conflict: the result was updated. Please refresh and try again.",
+              },
+            },
+          }));
+        } else {
+          setStatuses((prev) => ({
+            ...prev,
+            [categoryId]: {
+              loading: false,
+              feedback: {
+                type: "error",
+                message:
+                  data.error?.message ?? data.error ?? "Failed to clear winner.",
+              },
+            },
+          }));
+        }
+      } catch {
+        setStatuses((prev) => ({
+          ...prev,
+          [categoryId]: {
+            loading: false,
+            feedback: {
+              type: "error",
+              message: "Network error. Please try again.",
+            },
+          },
+        }));
+      }
+    },
+    [results]
+  );
+
   return (
     <div className="space-y-6">
       {/* Progress indicator */}
@@ -260,21 +363,35 @@ export function ResultsEntryForm({
               {/* Current winner display */}
               {result && winnerNominee ? (
                 <div className="rounded-lg border border-gold-500/30 bg-gold-500/10 px-4 py-3">
-                  <div className="flex items-center gap-2">
-                    <Trophy className="size-4 text-gold-400" />
-                    <span className="font-semibold text-gold-300">
-                      {winnerNominee.name}
-                    </span>
-                    {winnerNominee.subtitle && (
-                      <span className="text-sm text-gold-400/70">
-                        &mdash; {winnerNominee.subtitle}
-                      </span>
-                    )}
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <Trophy className="size-4 text-gold-400" />
+                        <span className="font-semibold text-gold-300">
+                          {winnerNominee.name}
+                        </span>
+                        {winnerNominee.subtitle && (
+                          <span className="text-sm text-gold-400/70">
+                            &mdash; {winnerNominee.subtitle}
+                          </span>
+                        )}
+                      </div>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Set by {result.setBy.name ?? "Unknown"} &middot;{" "}
+                        {formatDate(result.updatedAt)}
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleClearWinner(category.id)}
+                      disabled={isLoading}
+                      className="shrink-0 text-muted-foreground hover:text-destructive"
+                    >
+                      <Undo2 className="size-3.5" />
+                      Clear
+                    </Button>
                   </div>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Set by {result.setBy.name ?? "Unknown"} &middot;{" "}
-                    {formatDate(result.updatedAt)}
-                  </p>
                 </div>
               ) : (
                 <div className="rounded-lg border border-border/50 bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
