@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth/auth";
 import { setResult, getResultsByCeremony } from "@/lib/results";
 import { trackServerEvent } from "@/lib/analytics/posthog-server";
@@ -105,6 +106,20 @@ export async function POST(request: NextRequest) {
     }
 
     trackServerEvent(user.id, "result_set", { ceremonyYearId, categoryId });
+
+    // Revalidate leaderboard pages for all pools in this ceremony so
+    // scores reflect the newly-announced winner immediately.
+    if (ceremonyYearId) {
+      const pools = await prisma.pool.findMany({
+        where: { ceremonyYearId },
+        select: { id: true },
+      });
+      for (const pool of pools) {
+        revalidatePath(`/pools/${pool.id}/leaderboard`);
+        revalidatePath(`/pools/${pool.id}`);
+      }
+    }
+
     return NextResponse.json(result);
   } catch {
     return NextResponse.json(
