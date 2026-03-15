@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-03-15
+
+### Added
+
+- **results:** Clear/unset a category winner â€" `DELETE /api/results` endpoint with optimistic concurrency control (`expectedVersion` required) to safely remove a result entered in error. Deletes the `CategoryResult` row, clears `Category.winnerId`, and resets `Nominee.isWinner` atomically in a transaction.
+- **results:** â€œClearâ€ button in the results entry form next to each decided category â€" allows results managers and admins to undo a winner without leaving the page.
+- **results:** `unsetResult()` library function in `src/lib/results/unset-result.ts` with permission checks, version conflict handling, and atomic cleanup.
+- **results:** Types `UnsetResultRequest` and `UnsetResultResponse` in `src/types/results.ts`.
+- **testing:** Unit tests for `unsetResult` â€" permission denied, version conflict, category not found, successful clear with DB cleanup assertions.
+- **testing:** Route-level tests for `DELETE /api/results` â€" auth, validation, success, 409 CONFLICT, 403 UNAUTHORIZED, revalidation verification.
+
+### Fixed
+
+- **leaderboard:** Leaderboard page showed stale data after a results manager set a winner â€" `POST /api/results` was not calling `revalidatePath` after successful result writes. Now revalidates all pool leaderboard and detail pages for the ceremony.
+- **results:** Extracted shared `revalidateCeremonyPools()` helper and `ERROR_STATUS_MAP` in the results API route to reduce duplication between POST and DELETE handlers.
+
+### Changed
+
+- **docs:** Updated `USE_CASES.md` â€" added R-4 (clear category winner), renumbered R-5/R-6, added â€œClear category winnersâ€ row to permission matrix, added â€œClear conflictâ€ to Results Errors table.
+- **docs:** Updated `SCHEMA.md` â€" documented result clearing behavior, added version-match-on-clear to cross-entity validation table.
+- **docs:** Updated `TESTING.md` â€" added clear/unset test cases to the Results API test matrix.
+
 ## [0.2.2] - 2026-03-14
 
 ### Fixed

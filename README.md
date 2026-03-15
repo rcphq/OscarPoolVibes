@@ -12,6 +12,7 @@ A web app for running Oscar prediction pools with friends. Pick your winners and
 - **Weighted Scoring** â€” Each category has a configurable point value; first-choice and runner-up hits score differently
 - **Leaderboard** â€” Real-time rankings showing total points for every participant
 - **Multi-Year Support** â€” Historical data for nominees, categories, and winners across ceremony years
+- **Results Management** â€” Set or clear category winners with optimistic concurrency control; undo results entered in error
 - **Admin Tools** â€” Manage categories, nominees, and lock/reveal winners
 
 ## Tech Stack
@@ -44,7 +45,8 @@ OscarPoolVibes/
 â”‚   â”œâ”€â”€ components/          # React components
 â”‚   â”‚   â”œâ”€â”€ ui/              # Generic UI primitives (buttons, cards, modals)
 â”‚   â”‚   â”œâ”€â”€ pools/           # Pool-specific components (prediction form, pool card)
-â”‚   â”‚   â””â”€â”€ leaderboard/     # Leaderboard table, score cards
+â”‚   â”‚   â”œâ”€â”€ leaderboard/     # Leaderboard table, score cards
+â”‚   â”‚   â””â”€â”€ results/         # Results entry form, live polling
 â”‚   â”œâ”€â”€ lib/                 # Shared utilities
 â”‚   â”‚   â”œâ”€â”€ db/              # Prisma client & query helpers
 â”‚   â”‚   â”œâ”€â”€ results/         # Results management & permissions (implemented)
