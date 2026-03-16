@@ -74,7 +74,7 @@ A regular participant in a specific pool. Can make predictions and view results.
 
 | # | Use Case | Description | Route |
 |---|----------|-------------|-------|
-| M-5 | View leaderboard | See all pool members ranked by total score (descending) | `/pools/[id]/leaderboard` |
+| M-5 | View leaderboard | See all pool members ranked by total score (descending). Post-lock: leaderboard auto-updates every 15 seconds as results are entered — no manual refresh needed. | `/pools/[id]/leaderboard` |
 | M-6 | View score breakdown | See per-category detail: which picks were correct, points earned | `/pools/[id]/leaderboard` (expanded view) |
 | M-7 | View other members' picks | After predictions lock, see what everyone else picked | `/pools/[id]/leaderboard` |
 
@@ -82,7 +82,7 @@ A regular participant in a specific pool. Can make predictions and view results.
 
 **Scoring rules**:
 - First-choice correct: full `pointValue` for the category
-- Runner-up correct (first-choice wrong): `pointValue * runnerUpMultiplier` (default 0.5)
+- Runner-up correct (first-choice wrong): `pointValue * runnerUpMultiplier` (default 0.6)
 - Neither correct: 0 points
 - Total score = sum across all categories
 

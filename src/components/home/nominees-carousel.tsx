@@ -6,7 +6,9 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 /** Shape of one category slide — matches the Prisma select in getCategoriesWithNominees */
 type CarouselCategory = {
   name: string;
-  nominees: { name: string; subtitle: string | null }[];
+  /** Populated once a winner has been selected for this category; null otherwise. */
+  winnerId: string | null;
+  nominees: { id: string; name: string; subtitle: string | null }[];
 };
 
 interface NomineesCarouselProps {
@@ -110,9 +112,9 @@ export function NomineesCarousel({ categories }: NomineesCarouselProps) {
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
-      {/* Eyebrow label — mirrors the countdown section's label style */}
+      {/* Eyebrow label — switches to "winners" once a winner is recorded for this category */}
       <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-gold-200">
-        And the nominees are&hellip;
+        {current.winnerId ? "And the winners are\u2026" : "And the nominees are\u2026"}
       </p>
 
       {/* Slide content */}
@@ -127,21 +129,34 @@ export function NomineesCarousel({ categories }: NomineesCarouselProps) {
           {current.name}
         </h3>
 
-        {/* Nominee list */}
+        {/* Nominee list — winner row gets a gold shimmer and star badge */}
         <ul className="mt-2 flex flex-col gap-0.5">
-          {current.nominees.map((nominee) => (
-            <li
-              key={nominee.name}
-              className="text-sm text-foreground/80"
-            >
-              {nominee.name}
-              {nominee.subtitle && (
-                <span className="ml-1 text-muted-foreground">
-                  — {nominee.subtitle}
-                </span>
-              )}
-            </li>
-          ))}
+          {current.nominees.map((nominee) => {
+            const isWinner = nominee.id === current.winnerId;
+            return (
+              <li
+                key={nominee.id}
+                className={
+                  isWinner
+                    ? "animate-shimmer animate-glow-pulse flex items-baseline gap-1 text-sm font-semibold text-gold-400"
+                    : "text-sm text-foreground/80"
+                }
+              >
+                {/* Star badge visible only on the winning nominee */}
+                {isWinner && (
+                  <span aria-label="Winner" className="shrink-0 text-gold-400">
+                    ★
+                  </span>
+                )}
+                {nominee.name}
+                {nominee.subtitle && (
+                  <span className={isWinner ? "ml-1 text-gold-300/70" : "ml-1 text-muted-foreground"}>
+                    — {nominee.subtitle}
+                  </span>
+                )}
+              </li>
+            );
+          })}
         </ul>
       </div>
 
