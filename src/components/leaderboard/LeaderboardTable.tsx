@@ -259,8 +259,14 @@ export function LeaderboardTable({
                   </td>
                   <td className="px-4 py-3 text-center">
                     <span className="text-sm text-muted-foreground">
-                      {entry.correctFirstChoices + entry.correctRunnerUps} /{" "}
-                      {entry.breakdown.length}
+                      {entry.correctFirstChoices}
+                      {entry.correctRunnerUps > 0 && (
+                        <span className="text-muted-foreground/60">
+                          {" "}+{" "}{entry.correctRunnerUps}{" "}
+                          {entry.correctRunnerUps === 1 ? "runner-up" : "runner-ups"}
+                        </span>
+                      )}{" "}
+                      of {categories.length}
                     </span>
                   </td>
                   <td className="px-2 py-3 text-center">
