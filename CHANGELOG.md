@@ -9,11 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **results:** Tied category winners — admins and results managers can mark a category as tied by supplying an optional `tiedWinnerId` alongside `winnerId` in `POST /api/results`. Both nominees get `isWinner = true`; any prediction matching either winner scores full points (runner-up match scores multiplied points). Database migration `20260316164202_add_tied_winner` adds nullable `tiedWinnerId` to `CategoryResult` and `Category`. (#100)
 - **ui:** Home page carousel heading switches to "And the winners are…" per-category once a winner is recorded; categories without a winner continue to show "And the nominees are…"
 - **ui:** Winning nominee row highlighted with gold shimmer animation, glow-pulse, and ★ badge (decorative, `aria-hidden`)
 
 ### Changed
 
+- **scoring:** `calculateCategoryScore()` now accepts `tiedWinnerId: string | null`; OR-logic awards points when a prediction matches either tied winner. Non-tied categories behave identically to before.
+- **types:** `SetResultRequest` has optional `tiedWinnerId`; `CategoryResultView` and `ConflictDetail` carry `tiedWinnerId`/`tiedWinnerName`; new `INVALID_TIED_NOMINEE` error code.
+- **docs:** `SCHEMA.md` — `tiedWinnerId` fields documented in Category/Nominee/CategoryResult tables; scoring algorithm pseudocode updated with OR-logic; "Tied Categories" section with historical example added.
 - **docs:** ADR-8 updated to reflect polling-based live leaderboard (`LeaderboardAutoRefresh`, 15s interval, tab-visibility pause) — was incorrectly described as "no real-time features"
 - **docs:** Runner-up multiplier corrected to `0.6` (default) in `TESTING.md` and `USE_CASES.md` — was incorrectly documented as `0.5`
 - **docs:** `LeaderboardAutoRefresh` and `ResultsEntryForm` added to component tree in `ARCHITECTURE.md`
