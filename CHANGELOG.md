@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **leaderboard:** "Correct" column now shows `X + Y runner-up(s) of Z` — first-choice and runner-up correct picks broken out separately; Z reflects total pool categories (not just predicted ones). Ties count naturally since scoring already awards the same flags for either tied winner.
 - **scoring:** `calculateCategoryScore()` now accepts `tiedWinnerId: string | null`; OR-logic awards points when a prediction matches either tied winner. Non-tied categories behave identically to before.
 - **types:** `SetResultRequest` has optional `tiedWinnerId`; `CategoryResultView` and `ConflictDetail` carry `tiedWinnerId`/`tiedWinnerName`; new `INVALID_TIED_NOMINEE` error code.
 - **docs:** `SCHEMA.md` — `tiedWinnerId` fields documented in Category/Nominee/CategoryResult tables; scoring algorithm pseudocode updated with OR-logic; "Tied Categories" section with historical example added.
