@@ -70,7 +70,7 @@ export default async function LeaderboardPage({
   const categories = await getCategoriesWithNominees(pool.ceremonyYearId);
 
   // Fetch all predictions for the pool (visibility handled by getPredictionsByPool)
-  const { predictions, predictionsLocked, members } =
+  const { predictions, predictionsLocked, hasAnyResults, members } =
     await getPredictionsByPool(pool.id, userId);
 
   // Build a category lookup map — needed both pre- and post-lock for the simulator
@@ -133,8 +133,10 @@ export default async function LeaderboardPage({
   // Check if any winners have been announced
   const hasAnyWinners = categories.some((c) => c.winnerId !== null);
 
-  // If predictions aren't locked yet, show pre-results view
-  if (!predictionsLocked) {
+  // Show the full leaderboard when predictions are locked OR when results
+  // have started being announced. The pre-results view is only shown when
+  // predictions are still open AND no winners have been set yet.
+  if (!predictionsLocked && !hasAnyResults) {
     const currentMember = members.find((m) => m.userId === userId);
     const currentUserPredictionCount = predictions.length;
     return (

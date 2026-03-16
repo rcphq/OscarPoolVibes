@@ -64,6 +64,7 @@ export async function getPredictionsByPool(
   const pool = await prisma.pool.findUniqueOrThrow({
     where: { id: poolId },
     select: {
+      ceremonyYearId: true,
       ceremonyYear: {
         select: { predictionsLocked: true },
       },
@@ -71,6 +72,15 @@ export async function getPredictionsByPool(
   });
 
   const predictionsLocked = pool.ceremonyYear.predictionsLocked;
+
+  // Check if any results have been announced for this ceremony.
+  // When winners are being revealed, predictions should be visible to all
+  // members so the leaderboard can display scores in real time.
+  const hasAnyResults = predictionsLocked
+    ? true
+    : (await prisma.category.count({
+        where: { ceremonyYearId: pool.ceremonyYearId, winnerId: { not: null } },
+      })) > 0;
 
   // Get all active pool members
   const members = await prisma.poolMember.findMany({
@@ -84,11 +94,13 @@ export async function getPredictionsByPool(
     },
   });
 
-  // If predictions are locked, return everyone's predictions.
-  // Otherwise, only return the requesting user's own predictions.
-  const visibleMemberIds = predictionsLocked
-    ? members.map((m) => m.id)
-    : members.filter((m) => m.userId === requestingUserId).map((m) => m.id);
+  // If predictions are locked or results have started being announced,
+  // return everyone's predictions. Otherwise, only return the requesting
+  // user's own predictions (other picks are sealed until the ceremony).
+  const visibleMemberIds =
+    predictionsLocked || hasAnyResults
+      ? members.map((m) => m.id)
+      : members.filter((m) => m.userId === requestingUserId).map((m) => m.id);
 
   const predictions = await prisma.prediction.findMany({
     where: {
@@ -125,5 +137,5 @@ export async function getPredictionsByPool(
     ],
   });
 
-  return { predictions, predictionsLocked, members };
+  return { predictions, predictionsLocked, hasAnyResults, members };
 }

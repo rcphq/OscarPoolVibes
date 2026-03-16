@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 
-const { mockPoolMember, mockPrediction, mockPool } = vi.hoisted(() => ({
+const { mockPoolMember, mockPrediction, mockPool, mockCategory } = vi.hoisted(() => ({
   mockPoolMember: {
     findUnique: vi.fn(),
     findMany: vi.fn(),
@@ -12,6 +12,9 @@ const { mockPoolMember, mockPrediction, mockPool } = vi.hoisted(() => ({
   mockPool: {
     findUniqueOrThrow: vi.fn(),
   },
+  mockCategory: {
+    count: vi.fn(),
+  },
 }))
 
 vi.mock("@/lib/db/client", () => ({
@@ -19,6 +22,7 @@ vi.mock("@/lib/db/client", () => ({
     poolMember: mockPoolMember,
     prediction: mockPrediction,
     pool: mockPool,
+    category: mockCategory,
   },
 }))
 
@@ -88,10 +92,16 @@ describe("upsertPrediction", () => {
 })
 
 describe("getPredictionsByPool", () => {
-  const setupMocks = (locked: boolean, members: Array<{ id: string; userId: string }>) => {
+  const setupMocks = (
+    locked: boolean,
+    members: Array<{ id: string; userId: string }>,
+    resultCount = 0
+  ) => {
     mockPool.findUniqueOrThrow.mockResolvedValue({
+      ceremonyYearId: "cy-1",
       ceremonyYear: { predictionsLocked: locked },
     })
+    mockCategory.count.mockResolvedValue(resultCount)
     mockPoolMember.findMany.mockResolvedValue(
       members.map((m) => ({
         ...m,
@@ -156,6 +166,27 @@ describe("getPredictionsByPool", () => {
       expect.objectContaining({
         where: {
           poolMemberId: { in: [] },
+        },
+      })
+    )
+  })
+
+  it("returns all members predictions when unlocked but results exist", async () => {
+    const members = [
+      { id: "pm-1", userId: "user-1" },
+      { id: "pm-2", userId: "user-2" },
+    ]
+    setupMocks(false, members, 5) // 5 results set
+
+    const result = await getPredictionsByPool("pool-1", "user-1")
+
+    expect(result.predictionsLocked).toBe(false)
+    expect(result.hasAnyResults).toBe(true)
+    // Should query predictions for all member IDs since results are being announced
+    expect(mockPrediction.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          poolMemberId: { in: ["pm-1", "pm-2"] },
         },
       })
     )
