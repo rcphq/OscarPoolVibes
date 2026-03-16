@@ -9,6 +9,7 @@ const ERROR_STATUS_MAP = {
   CONFLICT: 409,
   UNAUTHORIZED: 403,
   INVALID_NOMINEE: 400,
+  INVALID_TIED_NOMINEE: 400,
   CATEGORY_NOT_FOUND: 404,
 } as const;
 
@@ -28,6 +29,8 @@ async function revalidateCeremonyPools(ceremonyYearId: string) {
 const setResultSchema = z.object({
   categoryId: z.string(),
   winnerId: z.string(),
+  /** Optional second winner for tied categories. Must differ from winnerId. */
+  tiedWinnerId: z.string().nullable().optional(),
   expectedVersion: z.number().int().nullable().optional(),
 });
 
@@ -81,7 +84,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { categoryId, winnerId, expectedVersion } = body;
+  const { categoryId, winnerId, tiedWinnerId, expectedVersion } = body;
 
   // Look up userId from session email
   const { prisma } = await import("@/lib/db/client");
@@ -105,6 +108,7 @@ export async function POST(request: NextRequest) {
     const result = await setResult(user.id, {
       categoryId,
       winnerId,
+      tiedWinnerId: tiedWinnerId ?? null,
       expectedVersion: expectedVersion ?? null,
     });
 

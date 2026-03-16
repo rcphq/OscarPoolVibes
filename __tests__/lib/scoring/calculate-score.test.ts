@@ -12,6 +12,7 @@ function makeInput(overrides: Partial<ScoringInput> = {}): ScoringInput {
     pointValue: 10,
     runnerUpMultiplier: 0.6,
     winnerId: "nominee-a",
+    tiedWinnerId: null,
     firstChoiceId: "nominee-a",
     runnerUpId: "nominee-b",
     ...overrides,
@@ -140,5 +141,86 @@ describe("calculateTotalScore", () => {
     ]
     const { total } = calculateTotalScore(categories)
     expect(total).toBe(18)
+  })
+})
+
+// ─── Tied Winner Tests ──────────────────────────────────────────────────────
+
+describe("calculateCategoryScore — tied categories", () => {
+  // A category where nominee-a and nominee-c share the award (tie)
+  const tieInput = (overrides: Partial<ScoringInput> = {}) =>
+    makeInput({ winnerId: "nominee-a", tiedWinnerId: "nominee-c", ...overrides })
+
+  it("awards full points when firstChoice matches the primary tied winner", () => {
+    const result = calculateCategoryScore(
+      tieInput({ firstChoiceId: "nominee-a", runnerUpId: "nominee-b" })
+    )
+    expect(result.points).toBe(10)
+    expect(result.isFirstChoiceCorrect).toBe(true)
+    expect(result.isRunnerUpCorrect).toBe(false)
+  })
+
+  it("awards full points when firstChoice matches the secondary tied winner", () => {
+    const result = calculateCategoryScore(
+      tieInput({ firstChoiceId: "nominee-c", runnerUpId: "nominee-b" })
+    )
+    expect(result.points).toBe(10)
+    expect(result.isFirstChoiceCorrect).toBe(true)
+    expect(result.isRunnerUpCorrect).toBe(false)
+  })
+
+  it("awards runner-up points when runnerUp matches the primary tied winner", () => {
+    const result = calculateCategoryScore(
+      tieInput({ firstChoiceId: "nominee-b", runnerUpId: "nominee-a" })
+    )
+    expect(result.points).toBe(6) // 10 * 0.6
+    expect(result.isFirstChoiceCorrect).toBe(false)
+    expect(result.isRunnerUpCorrect).toBe(true)
+  })
+
+  it("awards runner-up points when runnerUp matches the secondary tied winner", () => {
+    const result = calculateCategoryScore(
+      tieInput({ firstChoiceId: "nominee-b", runnerUpId: "nominee-c" })
+    )
+    expect(result.points).toBe(6)
+    expect(result.isFirstChoiceCorrect).toBe(false)
+    expect(result.isRunnerUpCorrect).toBe(true)
+  })
+
+  it("awards 0 points when neither choice matches either tied winner", () => {
+    const result = calculateCategoryScore(
+      tieInput({ firstChoiceId: "nominee-b", runnerUpId: "nominee-d" })
+    )
+    expect(result.points).toBe(0)
+    expect(result.isFirstChoiceCorrect).toBe(false)
+    expect(result.isRunnerUpCorrect).toBe(false)
+  })
+
+  it("tiedWinnerId: null behaves identically to a normal (non-tied) result", () => {
+    const tied = calculateCategoryScore(
+      makeInput({ winnerId: "nominee-a", tiedWinnerId: null, firstChoiceId: "nominee-a" })
+    )
+    const normal = calculateCategoryScore(
+      makeInput({ winnerId: "nominee-a", firstChoiceId: "nominee-a" })
+    )
+    expect(tied.points).toBe(normal.points)
+    expect(tied.isFirstChoiceCorrect).toBe(normal.isFirstChoiceCorrect)
+  })
+
+  it("awards 0 points when winnerId is null even if tiedWinnerId is set", () => {
+    // Edge case: should never happen in practice (can't have a tied winner without a primary)
+    // but the scoring function should handle it gracefully
+    const result = calculateCategoryScore(
+      makeInput({ winnerId: null, tiedWinnerId: "nominee-c", firstChoiceId: "nominee-c" })
+    )
+    expect(result.points).toBe(0)
+    expect(result.isFirstChoiceCorrect).toBe(false)
+  })
+
+  it("passes tiedWinnerId through in the result", () => {
+    const result = calculateCategoryScore(
+      tieInput({ firstChoiceId: "nominee-a" })
+    )
+    expect(result.tiedWinnerId).toBe("nominee-c")
   })
 })
