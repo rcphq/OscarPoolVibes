@@ -24,6 +24,7 @@ type CategoryWithNominees = {
 type ExistingResult = {
   categoryId: string;
   winnerId: string;
+  tiedWinnerId: string | null;
   version: number;
   setBy: { name: string | null };
   updatedAt: string;
@@ -137,6 +138,7 @@ export default async function ResultsEntryPage({
     select: {
       categoryId: true,
       winnerId: true,
+      tiedWinnerId: true,
       version: true,
       updatedAt: true,
       setBy: {
@@ -150,6 +152,7 @@ export default async function ResultsEntryPage({
   const existingResults: ExistingResult[] = categoryResults.map((r) => ({
     categoryId: r.categoryId,
     winnerId: r.winnerId,
+    tiedWinnerId: r.tiedWinnerId,
     version: r.version,
     setBy: { name: r.setBy.name },
     updatedAt: r.updatedAt.toISOString(),
