@@ -33,9 +33,11 @@ export default async function Home() {
 
   // Fetch categories+nominees for the active ceremony to power the carousel.
   // Falls back to an empty array if no active ceremony exists.
+  // Pass winnerId so the carousel can distinguish winner slides from nominee slides.
   const carouselCategories = activeCeremony
     ? (await getCategoriesWithNominees(activeCeremony.id)).map((cat) => ({
         name: cat.name,
+        winnerId: cat.winnerId,
         nominees: cat.nominees,
       }))
     : [];

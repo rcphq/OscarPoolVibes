@@ -54,6 +54,8 @@ __tests__/
 │   ├── pools/              # Pool component tests
 │   ├── predictions/        # Prediction form tests
 │   └── leaderboard/        # Leaderboard component tests
+│       ├── LeaderboardTable.test.tsx
+│       └── LeaderboardAutoRefresh.test.tsx  # Polling, fingerprint change detection, tab visibility pause
 ├── e2e/
 │   ├── auth.spec.ts        # Authentication flows
 │   ├── pools.spec.ts       # Pool creation, joining, management
@@ -78,7 +80,7 @@ The scoring algorithm is the heart of the app. Test every branch:
 | First choice correct | prediction.firstChoice == winner | Full `pointValue` |
 | Runner-up correct (first choice wrong) | prediction.runnerUp == winner, firstChoice != winner | `pointValue * runnerUpMultiplier` |
 | Neither correct | Both picks wrong | 0 points |
-| Runner-up multiplier = 0.5 (default) | 10-point category, runner-up hit | 5 points |
+| Runner-up multiplier = 0.6 (default) | 10-point category, runner-up hit | 6 points |
 | Runner-up multiplier = 0 (disabled) | Category with 0 multiplier | 0 points for runner-up |
 | Runner-up multiplier = 1.0 (full credit) | Category with 1.0 multiplier | Full points for runner-up |
 | Total score aggregation | Multiple categories, mixed hits | Sum of all category scores |
@@ -231,7 +233,7 @@ afterEach(async () => {
 1. Pool with 5 members, all predictions submitted
 2. Admin locks predictions
 3. Results Manager enters winners category by category
-4. After each winner: leaderboard updates on page refresh
+4. After each winner: leaderboard auto-updates within 15 seconds (no manual refresh needed)
 5. After all winners: verify final leaderboard scores match manual calculation
 6. Verify score breakdown per member per category
 ```
@@ -352,8 +354,8 @@ export const testCeremony = {
 }
 
 export const testCategories = [
-  { name: 'Best Picture', pointValue: 10, runnerUpMultiplier: 0.5, displayOrder: 1 },
-  { name: 'Best Director', pointValue: 8, runnerUpMultiplier: 0.5, displayOrder: 2 },
+  { name: 'Best Picture', pointValue: 180, runnerUpMultiplier: 0.6, displayOrder: 1 },
+  { name: 'Best Director', pointValue: 180, runnerUpMultiplier: 0.6, displayOrder: 2 },
   // ... all 23+ categories
 ]
 

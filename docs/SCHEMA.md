@@ -90,7 +90,7 @@ A nominated movie/person within a category. Stores enough info for display.
 | name | String | Name of the nominee (movie title or person name) |
 | subtitle | String? | Additional context (e.g., movie name for actor categories) |
 | imageUrl | String? | Poster or headshot |
-| isWinner | Boolean | Denormalized flag, set when winners are revealed. The **source of truth** for a category's winner is `Category.winnerId` (and `CategoryResult`). `isWinner` is a denormalized copy for query convenience (e.g., highlighting winners in nominee lists without joining to Category). Both fields are updated atomically in the `setResult()` transaction. |
+| isWinner | Boolean | Denormalized flag, set when winners are revealed. The **source of truth** for a category's winner is `Category.winnerId` (and `CategoryResult`). `isWinner` is a denormalized copy for query convenience (e.g., highlighting winners in nominee lists without joining to Category). Both fields are updated atomically in the `setResult()` transaction; cleared atomically in the `unsetResult()` transaction (all nominees in the category have `isWinner` reset to `false`). |
 | createdAt | DateTime | |
 
 **Unique constraint**: `(categoryId, name)`

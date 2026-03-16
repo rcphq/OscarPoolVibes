@@ -153,17 +153,24 @@ This document records key architectural choices for OscarPoolVibes and the reaso
 
 ---
 
-## ADR-8: No Real-Time Features (MVP)
+## ADR-8: Polling-Based Live Leaderboard (No WebSockets)
 
-**Decision**: The MVP will not include WebSocket or real-time updates. Leaderboard refreshes on page load.
+**Decision**: Use client-side polling (15s interval) for live leaderboard updates instead of WebSockets or SSE.
 
-**Context**: Real-time leaderboard updates during the ceremony would be nice but add significant complexity.
+**Context**: Real-time leaderboard updates during the ceremony are important UX — users shouldn't need to manually refresh to see new winners. However, persistent connections add significant complexity.
+
+**Implementation**: `LeaderboardAutoRefresh` (client component) polls `GET /api/results` every 15 seconds, compares a fingerprint of `categoryId:winnerId:version` tuples, and calls `router.refresh()` on change. Polling pauses when the tab is hidden (Page Visibility API) to reduce unnecessary requests.
 
 **Rationale**:
 - Vercel free tier doesn't natively support persistent WebSocket connections
-- The ceremony is a single evening — users can refresh the page
-- ISR with short revalidation (e.g., 30s) gives a near-real-time feel without WebSockets
-- Real-time can be added later (Vercel + Pusher/Ably free tier) if demand exists
+- 15s polling is imperceptible lag for Oscar night — winners are announced minutes apart
+- No external dependencies (Pusher, Ably, Supabase Realtime) — stays within free tier
+- Fingerprint-based change detection means `router.refresh()` is only called when something actually changed, avoiding unnecessary re-renders
+- Real-time via WebSockets can be added later if demand exists
+
+**Trade-offs**:
+- 15s lag between winner entry and leaderboard update (acceptable for this use case)
+- Polling only active when `predictionsLocked = true` (no polling on pre-lock leaderboard)
 
 ---
 
@@ -375,6 +382,8 @@ Layout (server)
 │   └── Client Components — forms, interactive UI
 │       ├── PredictionForm — pick first/runner-up per category
 │       ├── LeaderboardTable — sortable score table
+│       ├── LeaderboardAutoRefresh — invisible polling client component (15s, post-lock only)
+│       ├── ResultsEntryForm — results manager winner entry with conflict resolution
 │       └── PoolCard — pool summary with invite link
 └── Footer (server)
 ```
