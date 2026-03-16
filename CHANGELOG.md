@@ -5,6 +5,135 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1](https://github.com/rcphq/OscarPoolVibes/compare/oscar-pool-vibes-v0.1.0...oscar-pool-vibes-v0.1.1) (2026-03-16)
+
+
+### Features
+
+* **a11y:** add accessibility, SEO, and UX polish ([#28](https://github.com/rcphq/OscarPoolVibes/issues/28)) ([2281103](https://github.com/rcphq/OscarPoolVibes/commit/2281103ecb81b8b737b88c7b59d516e7bff68a40))
+* **auth:** add Auth.js v5, seed data, auth UI ([#7](https://github.com/rcphq/OscarPoolVibes/issues/7)) ([6c888b0](https://github.com/rcphq/OscarPoolVibes/commit/6c888b052fc2fc5fbce9276812a2e0ec8a8291ba))
+* **design:** add nominees carousel to home hero ([#89](https://github.com/rcphq/OscarPoolVibes/issues/89)) ([0155880](https://github.com/rcphq/OscarPoolVibes/commit/01558807b6ce70cc73032476b99d1d004b311f1e))
+* **design:** cinematic visuals, auto-lock predictions, and edit ceremony date ([#85](https://github.com/rcphq/OscarPoolVibes/issues/85)) ([224680b](https://github.com/rcphq/OscarPoolVibes/commit/224680b94750baf1fc196a70e5a847002d45e7b6))
+* **design:** cinematic visuals, auto-lock, edit ceremony date ([#85](https://github.com/rcphq/OscarPoolVibes/issues/85)) ([06cc363](https://github.com/rcphq/OscarPoolVibes/commit/06cc363a1959ba2a87f990fece4c19f25e3d6231))
+* **infra:** add PostHog analytics event tracking ([#27](https://github.com/rcphq/OscarPoolVibes/issues/27)) ([8a7730c](https://github.com/rcphq/OscarPoolVibes/commit/8a7730cd5e240bf1b33fd9fe913af458c100491e))
+* **infra:** scaffold Next.js 15, Prisma 7, shadcn/ui ([#3](https://github.com/rcphq/OscarPoolVibes/issues/3)) ([d928864](https://github.com/rcphq/OscarPoolVibes/commit/d92886440b7146a4302adf31966eccb152887d31))
+* **leaderboard:** auto-update leaderboard when results are set ([f58046a](https://github.com/rcphq/OscarPoolVibes/commit/f58046a52d65b2317001d8999256b344cf9bbdb7))
+* **leaderboard:** auto-update leaderboard when results are set ([ff137e5](https://github.com/rcphq/OscarPoolVibes/commit/ff137e5d6b1d1ee62871a07b37aadfe0203b4b90))
+* **leaderboard:** auto-update leaderboard when results are set ([#96](https://github.com/rcphq/OscarPoolVibes/issues/96)) ([65d7b1c](https://github.com/rcphq/OscarPoolVibes/commit/65d7b1c0c67855444c3a61f9e8ea6c0333626bc1))
+* **leaderboard:** auto-update leaderboard when results are set ([#96](https://github.com/rcphq/OscarPoolVibes/issues/96)) ([2851226](https://github.com/rcphq/OscarPoolVibes/commit/285122638cfba9688ede6f89603a6075b51401b6))
+* **leaderboard:** pre-results view with sealed stats ([#52](https://github.com/rcphq/OscarPoolVibes/issues/52)) ([33cb391](https://github.com/rcphq/OscarPoolVibes/commit/33cb391e5c525713c26877e917d56b93388ce8ba))
+* **leaderboard:** split correct picks display ([#104](https://github.com/rcphq/OscarPoolVibes/issues/104)) ([2d799ce](https://github.com/rcphq/OscarPoolVibes/commit/2d799ce7cd155f131eb721a391710f183dcc0c2f))
+* **leaderboard:** split correct picks display ([#104](https://github.com/rcphq/OscarPoolVibes/issues/104)) ([00f788d](https://github.com/rcphq/OscarPoolVibes/commit/00f788d546487f6cb81aacf74826e8f7a815d164))
+* **leaderboard:** What If? admin simulation feature ([#53](https://github.com/rcphq/OscarPoolVibes/issues/53)) ([ec28465](https://github.com/rcphq/OscarPoolVibes/commit/ec28465aafdcccdaa8c04c2b06dc48a2c608b18f))
+* **leaderboard:** What If? simulator available pre-lock ([#80](https://github.com/rcphq/OscarPoolVibes/issues/80)) ([90f9048](https://github.com/rcphq/OscarPoolVibes/commit/90f90489679b89f508d7db74bf0181f7fae04c89))
+* **pools:** add ballot completion status card with copy/share ([#62](https://github.com/rcphq/OscarPoolVibes/issues/62)) ([e8c8a59](https://github.com/rcphq/OscarPoolVibes/commit/e8c8a59af9ac7d3b5be2faf116db378dd969aad8))
+* **pools:** add demo pool, fix invite link, a11y/UX improvements ([#28](https://github.com/rcphq/OscarPoolVibes/issues/28)) ([090d5fc](https://github.com/rcphq/OscarPoolVibes/commit/090d5fc184abe2780cc6b314077f378a458e2d5b))
+* **pools:** add pool management, invites, settings ([#9](https://github.com/rcphq/OscarPoolVibes/issues/9)) ([b2b6233](https://github.com/rcphq/OscarPoolVibes/commit/b2b6233194a8190c56c04cb6ff90cb96be3afcc0))
+* **pools:** add predictions with form, summary, visibility ([#13](https://github.com/rcphq/OscarPoolVibes/issues/13)) ([e1d9aae](https://github.com/rcphq/OscarPoolVibes/commit/e1d9aaed8995af7539c5a4581337c85192c83475))
+* **pools:** invite sharing dialog + inline social buttons ([#50](https://github.com/rcphq/OscarPoolVibes/issues/50)) ([d626826](https://github.com/rcphq/OscarPoolVibes/commit/d62682612d821d8e529800386e3348cd00766d49))
+* **predictions:** odds toggle implementation ([dd02b23](https://github.com/rcphq/OscarPoolVibes/commit/dd02b233f9347cdd6e7e6ab1d819f5d4367d3a63))
+* **results:** add ability to clear a category winner entered in error ([1b85d89](https://github.com/rcphq/OscarPoolVibes/commit/1b85d89e64b392ba056693692e210bbf9710c7ed))
+* **results:** add Enter Results link to pool detail page ([#49](https://github.com/rcphq/OscarPoolVibes/issues/49)) ([f4518b2](https://github.com/rcphq/OscarPoolVibes/commit/f4518b23ca42ef2ac2c6fb2d2a6ced29d5ab4c42))
+* **results:** add permissions management UI ([#20](https://github.com/rcphq/OscarPoolVibes/issues/20)) ([40884ee](https://github.com/rcphq/OscarPoolVibes/commit/40884eed95af04a6b89f093069737b3fef101384))
+* **results:** add results entry, conflict resolution, admin ([#21](https://github.com/rcphq/OscarPoolVibes/issues/21)) ([3547041](https://github.com/rcphq/OscarPoolVibes/commit/3547041e7d3f04a0d880ff5270959b151f67d1ad))
+* **results:** add tie UI to results entry form ([d9ad66a](https://github.com/rcphq/OscarPoolVibes/commit/d9ad66ac36a14aa745be9f99b9bab000a0ef6c4d))
+* **results:** add tie UI to results entry form ([#100](https://github.com/rcphq/OscarPoolVibes/issues/100)) ([6f44cf0](https://github.com/rcphq/OscarPoolVibes/commit/6f44cf037eff1d80d3cd1df3cd47b363a24b451c))
+* **results:** support tied category winners ([1ce4b18](https://github.com/rcphq/OscarPoolVibes/commit/1ce4b183d056b49719f7b44f82ef874ec091b830))
+* **results:** support tied category winners ([#100](https://github.com/rcphq/OscarPoolVibes/issues/100)) ([41fed43](https://github.com/rcphq/OscarPoolVibes/commit/41fed4346650e7ef70524b69128e6c7efc45f01d))
+* **scoring:** add scoring engine, leaderboard, winner animation ([#16](https://github.com/rcphq/OscarPoolVibes/issues/16)) ([c4d19c6](https://github.com/rcphq/OscarPoolVibes/commit/c4d19c67cec100863828ad584e9d533ec2c8d7c8))
+* **scoring:** implement 4-tier point values with 0.6x runner-up ([#51](https://github.com/rcphq/OscarPoolVibes/issues/51)) ([e064b88](https://github.com/rcphq/OscarPoolVibes/commit/e064b88f9cdb93f41a5da3ec4773d8d5bd9e881e))
+* **scoring:** manual point-value overrides for admins ([#57](https://github.com/rcphq/OscarPoolVibes/issues/57)) ([13e7117](https://github.com/rcphq/OscarPoolVibes/commit/13e71178cd64a320e43c05c30389841d8eb4b650))
+* **scoring:** move Best Casting to Tier 3 and sort categories by tier ([9fe6ae5](https://github.com/rcphq/OscarPoolVibes/commit/9fe6ae545a519666bb5751ec4b316743fc17c390))
+* **seo:** add favicon, app icons, and web manifest ([#56](https://github.com/rcphq/OscarPoolVibes/issues/56)) ([361443f](https://github.com/rcphq/OscarPoolVibes/commit/361443f94e5e909e6d6b4edc859021fb379ae53b))
+* **ui:** add responsive ceremony countdown to site header ([#91](https://github.com/rcphq/OscarPoolVibes/issues/91)) ([1fc4742](https://github.com/rcphq/OscarPoolVibes/commit/1fc4742a16ced84f773ef2d37a324166ff65ed43))
+* **ui:** post-ceremony winners carousel ([#98](https://github.com/rcphq/OscarPoolVibes/issues/98)) ([c7a97b7](https://github.com/rcphq/OscarPoolVibes/commit/c7a97b73f948d25091d739ee54025c08050c08c2))
+* **ui:** serve locked 2026 Oscar odds from static snapshot ([24522fb](https://github.com/rcphq/OscarPoolVibes/commit/24522fb7c8fc073b3534e463d31f1d5062b9e30a))
+* **ui:** serve locked 2026 Oscar odds from static snapshot ([#87](https://github.com/rcphq/OscarPoolVibes/issues/87)) ([a73d9ac](https://github.com/rcphq/OscarPoolVibes/commit/a73d9ac25e3d25bb28df78470f1b9dd0ecfe30fd))
+* **ui:** winners carousel with per-category shimmer animation ([#98](https://github.com/rcphq/OscarPoolVibes/issues/98)) ([191ecaf](https://github.com/rcphq/OscarPoolVibes/commit/191ecafcba6162c5dc10bb3226227b144fec7159))
+
+
+### Bug Fixes
+
+* **a11y:** aria-hidden star badge in winners carousel ([#98](https://github.com/rcphq/OscarPoolVibes/issues/98)) ([bc993ac](https://github.com/rcphq/OscarPoolVibes/commit/bc993ac4ddc54787d1e31db4aabdcab2c7d51633))
+* **auth:** remove redundant signin layout redirect ([#46](https://github.com/rcphq/OscarPoolVibes/issues/46)) ([1c5c0b4](https://github.com/rcphq/OscarPoolVibes/commit/1c5c0b444abc14ad98493936ea0edfe9e7926e8e))
+* **auth:** security hardening and review fixes ([#54](https://github.com/rcphq/OscarPoolVibes/issues/54)) ([a9d5576](https://github.com/rcphq/OscarPoolVibes/commit/a9d5576cc2d167e14a4b6efde8b150e41064efd5))
+* **infra:** add HSTS and X-XSS-Protection security headers ([#39](https://github.com/rcphq/OscarPoolVibes/issues/39)) ([8fcf4f8](https://github.com/rcphq/OscarPoolVibes/commit/8fcf4f8deb0db0876ad64e72a031a973d6e1b455))
+* **infra:** add prisma generate to build script ([#26](https://github.com/rcphq/OscarPoolVibes/issues/26)) ([34f4abc](https://github.com/rcphq/OscarPoolVibes/commit/34f4abcd6db7843eb327d73fae1b64e659f5dfdf))
+* **infra:** demo, light mode, auth, security fixes ([#44](https://github.com/rcphq/OscarPoolVibes/issues/44)) ([e585c73](https://github.com/rcphq/OscarPoolVibes/commit/e585c73cfdd53e3b9b146c1d6ed9430378ae5362))
+* **infra:** lightweight middleware, fix ESLint config ([#26](https://github.com/rcphq/OscarPoolVibes/issues/26)) ([c5c646c](https://github.com/rcphq/OscarPoolVibes/commit/c5c646c9b291f8aaf890fb015b34d823edef0bed))
+* **infra:** Prisma 7, Neon adapter, header auth ([#26](https://github.com/rcphq/OscarPoolVibes/issues/26)) ([2d14081](https://github.com/rcphq/OscarPoolVibes/commit/2d14081c270b460b69cf29f3f2758ea6314ec590))
+* **infra:** remove earlyAccess, fix ESLint imports ([#26](https://github.com/rcphq/OscarPoolVibes/issues/26)) ([d20ff32](https://github.com/rcphq/OscarPoolVibes/commit/d20ff329921315278946eaba4bb8c41c8e8e581b))
+* **leaderboard:** revalidate leaderboard cache when results are set (#leaderboard-stale) ([6b93325](https://github.com/rcphq/OscarPoolVibes/commit/6b9332565a823011d561dd93e58aec2fe7962257))
+* **leaderboard:** revalidate leaderboard cache when results are set (#leaderboard-stale) ([9a35bc7](https://github.com/rcphq/OscarPoolVibes/commit/9a35bc79cc8f5ffa116cb5a0f1d819334e0bb96a))
+* **pools:** add hidden input for disabled accessType select ([#48](https://github.com/rcphq/OscarPoolVibes/issues/48)) ([d84e8e6](https://github.com/rcphq/OscarPoolVibes/commit/d84e8e6c737f82115bef4d4b72c512e77faceb32))
+* **pools:** harden PoolCompletionCard share and edge cases ([#62](https://github.com/rcphq/OscarPoolVibes/issues/62)) ([3a04615](https://github.com/rcphq/OscarPoolVibes/commit/3a04615759658ae744c39dec1039492fda1c06f0))
+* **pools:** invite link overflow and restore invite code display ([#55](https://github.com/rcphq/OscarPoolVibes/issues/55)) ([869b62b](https://github.com/rcphq/OscarPoolVibes/commit/869b62b7abb28ceb7a35517a191cb026e223f304))
+* **pools:** thread inviteCode through InviteShareDialog ([#50](https://github.com/rcphq/OscarPoolVibes/issues/50)) ([fe665d0](https://github.com/rcphq/OscarPoolVibes/commit/fe665d01e5a49b26a9276f8cd1efa5d7c27fa62f))
+* **pools:** use query parameter for invite link URL ([#9](https://github.com/rcphq/OscarPoolVibes/issues/9)) ([8a80db0](https://github.com/rcphq/OscarPoolVibes/commit/8a80db00d71f5d86fc962d049318c8dd773c38a3))
+* **results:** add dep array to ResultsPoller ref-sync effect ([#33](https://github.com/rcphq/OscarPoolVibes/issues/33)) ([bc261c4](https://github.com/rcphq/OscarPoolVibes/commit/bc261c4f02f6b3f08d16023ca97e5505b5c6b34d))
+* **results:** fix ConflictDialog focus-restore and close order ([#34](https://github.com/rcphq/OscarPoolVibes/issues/34)) ([e43d44d](https://github.com/rcphq/OscarPoolVibes/commit/e43d44d4508eba074d72308faffe10ecef12d284))
+* **results:** fix tiedWinnerId TypeScript build errors ([13b7a56](https://github.com/rcphq/OscarPoolVibes/commit/13b7a563b733b00df47b961a33259b684db398fa))
+* **results:** fix tiedWinnerId TypeScript errors ([#100](https://github.com/rcphq/OscarPoolVibes/issues/100)) ([e587519](https://github.com/rcphq/OscarPoolVibes/commit/e587519cb1e6c602dcde6ef4a6074a3787d184e3))
+* **results:** fix TypeScript errors breaking build ([b7c1091](https://github.com/rcphq/OscarPoolVibes/commit/b7c1091dacd7fb6f95eafe29d069a7202d35bc36))
+* **results:** fix TypeScript errors breaking build ([74a1d03](https://github.com/rcphq/OscarPoolVibes/commit/74a1d03cebf5d9fbe96d1c4389765377ff1a718c))
+* **scoring:** swap Best Sound and Best Original Score tier assignments ([d0f3791](https://github.com/rcphq/OscarPoolVibes/commit/d0f3791ec482875d67c5ef36ea5593322f6b6aa4))
+* **seo:** replace garbled em dash with hyphen in metadata titles ([#81](https://github.com/rcphq/OscarPoolVibes/issues/81)) ([527d6b7](https://github.com/rcphq/OscarPoolVibes/commit/527d6b7640838363506388b20b0997106e84b3f0))
+* **seo:** replace garbled em dash with hyphen in metadata titles ([#81](https://github.com/rcphq/OscarPoolVibes/issues/81)) ([d1dee28](https://github.com/rcphq/OscarPoolVibes/commit/d1dee28a40fbf03941c96b4565874fab0655ec78))
+* **ui:** 98th ceremony countdown and TBD! post-ceremony state ([#87](https://github.com/rcphq/OscarPoolVibes/issues/87)) ([b421897](https://github.com/rcphq/OscarPoolVibes/commit/b421897ea149e2a979a1c7775347b4f8c77925b4))
+* **ui:** address code review issues — a11y, perf, correctness ([#87](https://github.com/rcphq/OscarPoolVibes/issues/87)) ([ffb1547](https://github.com/rcphq/OscarPoolVibes/commit/ffb1547fea1b555bcb52ae340f2df1cdbff4b0c0))
+* **ui:** correct scoring skeleton tier row counts ([0ff2944](https://github.com/rcphq/OscarPoolVibes/commit/0ff294453820cd491a559304e9a0becf7a320116))
+* **ui:** show most recent active ceremony in countdown badge ([#87](https://github.com/rcphq/OscarPoolVibes/issues/87)) ([98ca23a](https://github.com/rcphq/OscarPoolVibes/commit/98ca23ac5731496c6199dc437b4dd704f2ada791))
+
+
+### Documentation
+
+* add design system, testing strategy, and pre-build fixes ([#1](https://github.com/rcphq/OscarPoolVibes/issues/1)) ([d5e54e9](https://github.com/rcphq/OscarPoolVibes/commit/d5e54e98706a08ac4432819848835c4ef18ff3f3))
+* add design system, testing strategy, and pre-build fixes ([#1](https://github.com/rcphq/OscarPoolVibes/issues/1)) ([4413e95](https://github.com/rcphq/OscarPoolVibes/commit/4413e95b1f8e5365ed9eba666a2fd42328a4f0f5))
+* **design:** add plan for moving Best Casting to Tier 3 and tier-based sort order ([915f158](https://github.com/rcphq/OscarPoolVibes/commit/915f158c35dfeb330f7e222a0f8860d59a758773))
+* **design:** add plan for moving Best Casting to Tier 3 and tier-based sort order ([973303a](https://github.com/rcphq/OscarPoolVibes/commit/973303a21aba20db6d5116f279c474c5dde5e7b0))
+* **design:** add plan to swap Best Sound and Best Original Score tiers ([0ba6d3d](https://github.com/rcphq/OscarPoolVibes/commit/0ba6d3d0d54a717f4a4249b68f205b5e21cce1d5))
+* **design:** add plan to swap Best Sound and Best Original Score tiers ([932fc73](https://github.com/rcphq/OscarPoolVibes/commit/932fc73e07071f79432a962b4d7ccc49b0b3283d))
+* **infra:** add v0.2.0 implementation plan ([#48](https://github.com/rcphq/OscarPoolVibes/issues/48)) ([88d1a75](https://github.com/rcphq/OscarPoolVibes/commit/88d1a75427c0388e312d904a5fff2af9e406a222))
+* **infra:** fix stale and missing code comments ([#57](https://github.com/rcphq/OscarPoolVibes/issues/57)) ([a046ff5](https://github.com/rcphq/OscarPoolVibes/commit/a046ff583b53171c9dd89e919f542651f40f2083))
+* **infra:** fix versions, add ADRs, exec plan ([#1](https://github.com/rcphq/OscarPoolVibes/issues/1)) ([a0a90d8](https://github.com/rcphq/OscarPoolVibes/commit/a0a90d8cbee05136dc94b83c0b5c110341c9eff4))
+* **infra:** mark all phases complete in execution plan ([#25](https://github.com/rcphq/OscarPoolVibes/issues/25)) ([cf4b5a4](https://github.com/rcphq/OscarPoolVibes/commit/cf4b5a477d480311db09c7315c13d7a702df0f83))
+* **infra:** merge duplicate ADR-19 into ADR-15, remove ADR-19 ([#61](https://github.com/rcphq/OscarPoolVibes/issues/61)) ([4f7e46e](https://github.com/rcphq/OscarPoolVibes/commit/4f7e46e4bbb13b0a914a21c050f80bdb24555f23))
+* **infra:** remove closed [#42](https://github.com/rcphq/OscarPoolVibes/issues/42) from open issues list ([#42](https://github.com/rcphq/OscarPoolVibes/issues/42)) ([86a20e1](https://github.com/rcphq/OscarPoolVibes/commit/86a20e16e63ef1ccd144851578838176e942fe80))
+* **infra:** update CHANGELOG and PLAN for bug-fix pass ([#25](https://github.com/rcphq/OscarPoolVibes/issues/25)) ([589fbf9](https://github.com/rcphq/OscarPoolVibes/commit/589fbf97fd186112d3b7c267f7523191b3f45213))
+* **infra:** update CHANGELOG for ballot completion card ([#62](https://github.com/rcphq/OscarPoolVibes/issues/62)) ([47536d7](https://github.com/rcphq/OscarPoolVibes/commit/47536d756e15b0615de2bf6bbc7226a1b3b70915))
+* **infra:** update CHANGELOG for What If? pre-lock ([#80](https://github.com/rcphq/OscarPoolVibes/issues/80)) ([98ad7f2](https://github.com/rcphq/OscarPoolVibes/commit/98ad7f2f677780ba7be40e1a87306f4c42d45f3f))
+* **infra:** update PLAN.md and SCHEMA.md post-v0.2.0 ([#25](https://github.com/rcphq/OscarPoolVibes/issues/25)) ([406ec20](https://github.com/rcphq/OscarPoolVibes/commit/406ec20aabdef6443a27ae6f98e8b9fe49cfcef7))
+* **results:** update CHANGELOG for tied category winners ([#100](https://github.com/rcphq/OscarPoolVibes/issues/100)) ([da512d2](https://github.com/rcphq/OscarPoolVibes/commit/da512d226b4d95ac9823395acab632191bafbf09))
+* **results:** update README, CHANGELOG, and bump to v0.3.0 ([342e862](https://github.com/rcphq/OscarPoolVibes/commit/342e862058a953519053fc2bab3c7b18e34611bb))
+* **ui:** add plan for "Never Tell Me the Odds" toggle ([0d2861c](https://github.com/rcphq/OscarPoolVibes/commit/0d2861ced25de23ff57f8248d485d31b9a9f4070))
+* **ui:** add plan for "Never Tell Me the Odds" toggle ([480c803](https://github.com/rcphq/OscarPoolVibes/commit/480c803ac4814ce1077141f109c291de8475579d))
+* Update README with Auth.js v5 env vars and design system ([#92](https://github.com/rcphq/OscarPoolVibes/issues/92)) ([2cfde46](https://github.com/rcphq/OscarPoolVibes/commit/2cfde4620802133af5a14d317ee4cc2034f95601))
+
+
+### Tests
+
+* **infra:** add integration tests, update docs ([#24](https://github.com/rcphq/OscarPoolVibes/issues/24)) ([9c0822f](https://github.com/rcphq/OscarPoolVibes/commit/9c0822ffc2a24f0f10c5dadd9201a70886342f59))
+* **leaderboard:** add component tests and review fixes ([#52](https://github.com/rcphq/OscarPoolVibes/issues/52)) ([00d506e](https://github.com/rcphq/OscarPoolVibes/commit/00d506ecefc9581b867a9e382ef3e89c56f1ef71))
+
+
+### Code Refactoring
+
+* **leaderboard:** extract category queries, fix tokens ([#52](https://github.com/rcphq/OscarPoolVibes/issues/52)) ([50e99a6](https://github.com/rcphq/OscarPoolVibes/commit/50e99a6a4a0b9acf7edc745b4a66e49366a2c2bc))
+
+
+### Maintenance
+
+* Bump version to v0.2.2 and update CHANGELOG ([#92](https://github.com/rcphq/OscarPoolVibes/issues/92)) ([7daf8f7](https://github.com/rcphq/OscarPoolVibes/commit/7daf8f7461ab8e0ba6728b3fa229f9b549649bc2))
+* **infra:** add CI workflow for PR gating ([#27](https://github.com/rcphq/OscarPoolVibes/issues/27)) ([3de88a5](https://github.com/rcphq/OscarPoolVibes/commit/3de88a5ba2f34744086fd6e4825d033454746f91))
+* **infra:** add proprietary license ([#27](https://github.com/rcphq/OscarPoolVibes/issues/27)) ([1f7dea5](https://github.com/rcphq/OscarPoolVibes/commit/1f7dea5e1042f9dbb974e0aff7ff4f325778c4fc))
+* **infra:** add release-please automation ([#27](https://github.com/rcphq/OscarPoolVibes/issues/27)) ([7d90ac8](https://github.com/rcphq/OscarPoolVibes/commit/7d90ac8336030554a255a121212e1103356b181d))
+* **infra:** bump version to 0.2.1 and promote changelog ([#87](https://github.com/rcphq/OscarPoolVibes/issues/87)) ([5c3d3a0](https://github.com/rcphq/OscarPoolVibes/commit/5c3d3a0770ae5a8f798dc5bc6cbdf85ea0c1ec82))
+* **infra:** pin typescript version to 5.9.3 ([8275714](https://github.com/rcphq/OscarPoolVibes/commit/82757148a9ac7f37626fa231fa1c96972fa1fcd2))
+* **infra:** release v0.1.3 ([#57](https://github.com/rcphq/OscarPoolVibes/issues/57)) ([34b40a3](https://github.com/rcphq/OscarPoolVibes/commit/34b40a3fa07cb6c81be8cde07e2515828c20b920))
+* **infra:** release v0.2.0 ([#87](https://github.com/rcphq/OscarPoolVibes/issues/87)) ([ac39fad](https://github.com/rcphq/OscarPoolVibes/commit/ac39fadac7d7a521f7ea073d8e3e4a29273377e3))
+* **infra:** update package-lock.json ([81314e0](https://github.com/rcphq/OscarPoolVibes/commit/81314e09005ad46860e8db6d043842b6ef97c384))
+* **infra:** update package-lock.json ([60e6fb6](https://github.com/rcphq/OscarPoolVibes/commit/60e6fb67f3750089bc32d48f0d43a3af39b3f95f))
+
 ## [Unreleased]
 
 ### Added
