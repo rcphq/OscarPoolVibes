@@ -25,9 +25,11 @@ const baseCategory = {
 
 const existingResult = {
   winnerId: NOMINEE_A,
+  tiedWinnerId: null,
   version: 1,
   updatedAt: new Date("2026-03-15T12:00:00Z"),
   winner: { name: "Film A" },
+  tiedWinner: null,
   setBy: { name: "Jane", email: "jane@test.com" },
 }
 
@@ -129,7 +131,7 @@ describe("unsetResult", () => {
     })
     expect(txFns.category.update).toHaveBeenCalledWith({
       where: { id: CATEGORY_ID },
-      data: { winnerId: null },
+      data: { winnerId: null, tiedWinnerId: null },
     })
   })
 

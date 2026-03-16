@@ -113,6 +113,7 @@ export default async function LeaderboardPage({
       pointValue: cat.pointValue,
       runnerUpMultiplier: cat.runnerUpMultiplier,
       winnerId: cat.winnerId,
+      tiedWinnerId: cat.tiedWinnerId,
       firstChoiceId: pred.firstChoice.id,
       runnerUpId: pred.runnerUp.id,
     });

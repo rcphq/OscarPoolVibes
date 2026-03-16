@@ -33,6 +33,7 @@ const mockEntries = [
         firstChoiceId: "nom-1",
         runnerUpId: "nom-2",
         winnerId: "nom-1",
+        tiedWinnerId: null,
         points: 10,
         isFirstChoiceCorrect: true,
         isRunnerUpCorrect: false,

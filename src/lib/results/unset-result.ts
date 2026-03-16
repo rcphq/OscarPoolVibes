@@ -51,6 +51,7 @@ export async function unsetResult(
       where: { categoryId },
       include: {
         winner: { select: { name: true } },
+        tiedWinner: { select: { name: true } },
         setBy: { select: { name: true, email: true } },
       },
     });
@@ -75,6 +76,8 @@ export async function unsetResult(
           currentResult: {
             winnerId: existing.winnerId,
             winnerName: existing.winner.name,
+            tiedWinnerId: existing.tiedWinnerId,
+            tiedWinnerName: existing.tiedWinner?.name ?? null,
             setByName: existing.setBy.name ?? "Unknown",
             setByEmail: existing.setBy.email,
             version: existing.version,
@@ -92,7 +95,7 @@ export async function unsetResult(
 
     await tx.category.update({
       where: { id: categoryId },
-      data: { winnerId: null },
+      data: { winnerId: null, tiedWinnerId: null },
     });
 
     // Delete the CategoryResult row

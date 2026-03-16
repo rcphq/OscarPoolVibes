@@ -12,6 +12,7 @@ function makePrediction(overrides: Partial<ScoringInput> = {}): ScoringInput {
     pointValue: 10,
     runnerUpMultiplier: 0.5,
     winnerId: "nominee-a",
+    tiedWinnerId: null,
     firstChoiceId: "nominee-a",
     runnerUpId: "nominee-b",
     ...overrides,
