@@ -14,6 +14,8 @@ export function Countdown({ targetDate }: { targetDate: Date }) {
   const [isPast, setIsPast] = useState(false);
 
   useEffect(() => {
+    let interval: ReturnType<typeof setInterval> | null = null;
+
     const tick = () => {
       const difference = targetDate.getTime() - new Date().getTime();
       if (difference > 0) {
@@ -26,15 +28,17 @@ export function Countdown({ targetDate }: { targetDate: Date }) {
       } else {
         setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
         setIsPast(true);
-        clearInterval(interval);
+        if (interval) clearInterval(interval);
       }
     };
 
     tick();
     setMounted(true);
-    const interval = setInterval(tick, 1000);
+    interval = setInterval(tick, 1000);
 
-    return () => clearInterval(interval);
+    return () => {
+      if (interval) clearInterval(interval);
+    };
   }, [targetDate]);
 
   if (!mounted) return null;

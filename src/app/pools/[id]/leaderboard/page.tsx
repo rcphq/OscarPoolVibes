@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
 import { ArrowLeft, Clock, Trophy } from "lucide-react";
@@ -12,6 +14,7 @@ import {
 } from "@/lib/scoring/calculate-leaderboard";
 import type { ScoringInput } from "@/lib/scoring/calculate-score";
 import { LeaderboardTable } from "@/components/leaderboard/LeaderboardTable";
+import { LeaderboardAutoRefresh } from "@/components/leaderboard/LeaderboardAutoRefresh";
 import { PreResultsLeaderboard } from "@/components/leaderboard/PreResultsLeaderboard";
 import { WhatIfSimulator } from "@/components/leaderboard/WhatIfSimulator";
 
@@ -194,6 +197,7 @@ export default async function LeaderboardPage({
 
   return (
     <main className="min-h-screen">
+      <LeaderboardAutoRefresh ceremonyYearId={pool.ceremonyYearId} />
       {/* Header Section */}
       <section className="bg-navy px-4 py-12 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-5xl">
