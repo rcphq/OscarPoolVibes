@@ -21,9 +21,11 @@ function makeCategory(overrides: Partial<{
   name: string
   results: Array<{
     winnerId: string
+    tiedWinnerId: string | null
     version: number
     updatedAt: Date
     winner: { name: string }
+    tiedWinner: { name: string } | null
     setBy: { name: string }
   }>
 }> = {}) {
@@ -56,22 +58,26 @@ describe("getResultsByCeremony", () => {
       categoryName: "Best Picture",
       winnerId: null,
       winnerName: null,
+      tiedWinnerId: null,
+      tiedWinnerName: null,
       setByName: null,
       version: 0,
       updatedAt: null,
     })
   })
 
-  it("returns winner details when result is set", async () => {
+  it("returns winner details when result is set (no tie)", async () => {
     const updatedAt = new Date("2026-03-10T20:00:00Z")
     mockPrisma.category.findMany.mockResolvedValue([
       makeCategory({
         results: [
           {
             winnerId: "nom-1",
+            tiedWinnerId: null,
             version: 2,
             updatedAt,
             winner: { name: "Oppenheimer" },
+            tiedWinner: null,
             setBy: { name: "Alice" },
           },
         ],
@@ -81,6 +87,8 @@ describe("getResultsByCeremony", () => {
     expect(result[0]).toMatchObject({
       winnerId: "nom-1",
       winnerName: "Oppenheimer",
+      tiedWinnerId: null,
+      tiedWinnerName: null,
       setByName: "Alice",
       version: 2,
       updatedAt: updatedAt.toISOString(),
@@ -127,16 +135,18 @@ describe("getResultByCategory", () => {
     })
   })
 
-  it("returns full result view when winner is set", async () => {
+  it("returns full result view when winner is set (no tie)", async () => {
     const updatedAt = new Date("2026-03-10T20:00:00Z")
     mockPrisma.category.findUnique.mockResolvedValue(
       makeCategory({
         results: [
           {
             winnerId: "nom-1",
+            tiedWinnerId: null,
             version: 1,
             updatedAt,
             winner: { name: "Best Film" },
+            tiedWinner: null,
             setBy: { name: "Bob" },
           },
         ],
@@ -146,8 +156,62 @@ describe("getResultByCategory", () => {
     expect(result).toMatchObject({
       winnerId: "nom-1",
       winnerName: "Best Film",
+      tiedWinnerId: null,
+      tiedWinnerName: null,
       setByName: "Bob",
       version: 1,
     })
+  })
+})
+
+// ─── Tied Winner Tests ──────────────────────────────────────────────────────
+
+describe("getResultsByCeremony — tied categories", () => {
+  it("returns tiedWinnerId and tiedWinnerName when result is a tie", async () => {
+    const updatedAt = new Date("2026-03-10T20:00:00Z")
+    mockPrisma.category.findMany.mockResolvedValue([
+      makeCategory({
+        results: [
+          {
+            winnerId: "nom-1",
+            tiedWinnerId: "nom-2",
+            version: 1,
+            updatedAt,
+            winner: { name: "Film One" },
+            tiedWinner: { name: "Film Two" },
+            setBy: { name: "Alice" },
+          },
+        ],
+      }),
+    ])
+    const result = await getResultsByCeremony(CEREMONY_ID)
+    expect(result[0]).toMatchObject({
+      winnerId: "nom-1",
+      winnerName: "Film One",
+      tiedWinnerId: "nom-2",
+      tiedWinnerName: "Film Two",
+    })
+  })
+
+  it("returns tiedWinnerId: null and tiedWinnerName: null for non-tied results", async () => {
+    const updatedAt = new Date("2026-03-10T20:00:00Z")
+    mockPrisma.category.findMany.mockResolvedValue([
+      makeCategory({
+        results: [
+          {
+            winnerId: "nom-1",
+            tiedWinnerId: null,
+            version: 1,
+            updatedAt,
+            winner: { name: "Film One" },
+            tiedWinner: null,
+            setBy: { name: "Alice" },
+          },
+        ],
+      }),
+    ])
+    const result = await getResultsByCeremony(CEREMONY_ID)
+    expect(result[0].tiedWinnerId).toBeNull()
+    expect(result[0].tiedWinnerName).toBeNull()
   })
 })

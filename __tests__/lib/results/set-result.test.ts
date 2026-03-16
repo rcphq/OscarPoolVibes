@@ -19,12 +19,15 @@ const NOMINEE_B = "nom-b"
 const CEREMONY_YEAR_ID = "cy-1"
 const USER_ID = "user-1"
 
+const NOMINEE_C = "nom-c"
+
 const baseCategory = {
   id: CATEGORY_ID,
   ceremonyYear: { id: CEREMONY_YEAR_ID },
   nominees: [
     { id: NOMINEE_A, name: "Film A" },
     { id: NOMINEE_B, name: "Film B" },
+    { id: NOMINEE_C, name: "Film C" },
   ],
 }
 
@@ -108,18 +111,24 @@ describe("setResult", () => {
       if (result.success) expect(result.version).toBe(1)
     })
 
-    it("creates CategoryResult with correct data", async () => {
+    it("creates CategoryResult with correct data (no tie)", async () => {
       await setResult(USER_ID, {
         categoryId: CATEGORY_ID,
         winnerId: NOMINEE_A,
         expectedVersion: null,
       })
       expect(txFns.categoryResult.create).toHaveBeenCalledWith({
-        data: { categoryId: CATEGORY_ID, winnerId: NOMINEE_A, setById: USER_ID, version: 1 },
+        data: {
+          categoryId: CATEGORY_ID,
+          winnerId: NOMINEE_A,
+          tiedWinnerId: null,
+          setById: USER_ID,
+          version: 1,
+        },
       })
     })
 
-    it("syncs winner to Category and Nominee", async () => {
+    it("syncs winner to Category and Nominee (no tie)", async () => {
       await setResult(USER_ID, {
         categoryId: CATEGORY_ID,
         winnerId: NOMINEE_A,
@@ -135,7 +144,7 @@ describe("setResult", () => {
       })
       expect(txFns.category.update).toHaveBeenCalledWith({
         where: { id: CATEGORY_ID },
-        data: { winnerId: NOMINEE_A },
+        data: { winnerId: NOMINEE_A, tiedWinnerId: null },
       })
     })
 
@@ -153,9 +162,11 @@ describe("setResult", () => {
   describe("updating existing result", () => {
     const existingResult = {
       winnerId: NOMINEE_A,
+      tiedWinnerId: null,
       version: 1,
       updatedAt: new Date(),
       winner: { name: "Film A" },
+      tiedWinner: null,
       setBy: { name: "Jane", email: "jane@test.com" },
     }
 
@@ -186,6 +197,108 @@ describe("setResult", () => {
           expect(result.error.currentResult.winnerId).toBe(NOMINEE_A)
           expect(result.error.currentResult.version).toBe(1)
         }
+      }
+    })
+  })
+})
+
+// ─── Tied Winner Tests ──────────────────────────────────────────────────────
+
+describe("setResult — tied categories", () => {
+  describe("tied nominee validation", () => {
+    it("returns INVALID_TIED_NOMINEE when tiedWinnerId equals winnerId", async () => {
+      const result = await setResult(USER_ID, {
+        categoryId: CATEGORY_ID,
+        winnerId: NOMINEE_A,
+        tiedWinnerId: NOMINEE_A, // same as winner
+        expectedVersion: null,
+      })
+      expect(result.success).toBe(false)
+      if (!result.success) expect(result.error.code).toBe("INVALID_TIED_NOMINEE")
+    })
+
+    it("returns INVALID_TIED_NOMINEE when tiedWinnerId does not belong to the category", async () => {
+      const result = await setResult(USER_ID, {
+        categoryId: CATEGORY_ID,
+        winnerId: NOMINEE_A,
+        tiedWinnerId: "nom-from-other-category",
+        expectedVersion: null,
+      })
+      expect(result.success).toBe(false)
+      if (!result.success) expect(result.error.code).toBe("INVALID_TIED_NOMINEE")
+    })
+  })
+
+  describe("creating a tied result", () => {
+    it("creates CategoryResult with both winner IDs", async () => {
+      await setResult(USER_ID, {
+        categoryId: CATEGORY_ID,
+        winnerId: NOMINEE_A,
+        tiedWinnerId: NOMINEE_C,
+        expectedVersion: null,
+      })
+      expect(txFns.categoryResult.create).toHaveBeenCalledWith({
+        data: {
+          categoryId: CATEGORY_ID,
+          winnerId: NOMINEE_A,
+          tiedWinnerId: NOMINEE_C,
+          setById: USER_ID,
+          version: 1,
+        },
+      })
+    })
+
+    it("sets isWinner=true on both tied nominees", async () => {
+      await setResult(USER_ID, {
+        categoryId: CATEGORY_ID,
+        winnerId: NOMINEE_A,
+        tiedWinnerId: NOMINEE_C,
+        expectedVersion: null,
+      })
+      expect(txFns.nominee.update).toHaveBeenCalledWith({
+        where: { id: NOMINEE_A },
+        data: { isWinner: true },
+      })
+      expect(txFns.nominee.update).toHaveBeenCalledWith({
+        where: { id: NOMINEE_C },
+        data: { isWinner: true },
+      })
+    })
+
+    it("syncs tiedWinnerId to Category", async () => {
+      await setResult(USER_ID, {
+        categoryId: CATEGORY_ID,
+        winnerId: NOMINEE_A,
+        tiedWinnerId: NOMINEE_C,
+        expectedVersion: null,
+      })
+      expect(txFns.category.update).toHaveBeenCalledWith({
+        where: { id: CATEGORY_ID },
+        data: { winnerId: NOMINEE_A, tiedWinnerId: NOMINEE_C },
+      })
+    })
+  })
+
+  describe("conflict response for an existing tied result", () => {
+    it("includes tiedWinnerId and tiedWinnerName in CONFLICT details", async () => {
+      txFns.categoryResult.findUnique.mockResolvedValue({
+        winnerId: NOMINEE_A,
+        tiedWinnerId: NOMINEE_C,
+        version: 2,
+        updatedAt: new Date(),
+        winner: { name: "Film A" },
+        tiedWinner: { name: "Film C" },
+        setBy: { name: "Jane", email: "jane@test.com" },
+      })
+      const result = await setResult(USER_ID, {
+        categoryId: CATEGORY_ID,
+        winnerId: NOMINEE_B,
+        expectedVersion: 1, // stale
+      })
+      expect(result.success).toBe(false)
+      if (!result.success && result.error.code === "CONFLICT") {
+        expect(result.error.currentResult.tiedWinnerId).toBe(NOMINEE_C)
+        expect(result.error.currentResult.tiedWinnerName).toBe("Film C")
       }
     })
   })

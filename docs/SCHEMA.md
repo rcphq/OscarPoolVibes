@@ -71,6 +71,7 @@ An award category within a ceremony year. Categories can differ between years (s
 | pointValue | Int | Points awarded for a correct first-choice pick |
 | runnerUpMultiplier | Float | Default 0.6 — multiplier applied to pointValue for runner-up hit |
 | winnerId | String? | FK → Nominee (set after winners announced) |
+| tiedWinnerId | String? | FK → Nominee — only set when the category results in a tie. When set, either winner (winnerId or tiedWinnerId) scores full points. Null for normal (non-tied) results. |
 | scoringLastChangedBy | String? | FK → User.id — userId of last admin/results-manager to override scoring |
 | createdAt | DateTime | |
 | updatedAt | DateTime | Auto-managed by Prisma (`@updatedAt`) |
@@ -90,7 +91,7 @@ A nominated movie/person within a category. Stores enough info for display.
 | name | String | Name of the nominee (movie title or person name) |
 | subtitle | String? | Additional context (e.g., movie name for actor categories) |
 | imageUrl | String? | Poster or headshot |
-| isWinner | Boolean | Denormalized flag, set when winners are revealed. The **source of truth** for a category's winner is `Category.winnerId` (and `CategoryResult`). `isWinner` is a denormalized copy for query convenience (e.g., highlighting winners in nominee lists without joining to Category). Both fields are updated atomically in the `setResult()` transaction; cleared atomically in the `unsetResult()` transaction (all nominees in the category have `isWinner` reset to `false`). |
+| isWinner | Boolean | Denormalized flag, set when winners are revealed. The **source of truth** for a category's winner is `Category.winnerId` (and `CategoryResult`). `isWinner` is a denormalized copy for query convenience (e.g., highlighting winners in nominee lists without joining to Category). Both fields are updated atomically in the `setResult()` transaction; cleared atomically in the `unsetResult()` transaction. For tied categories, **both** tied nominees have `isWinner = true`. |
 | createdAt | DateTime | |
 
 **Unique constraint**: `(categoryId, name)`
@@ -189,7 +190,8 @@ Tracks who set the winner for each category, with optimistic concurrency control
 |--------|------|-------|
 | id | String (cuid) | PK |
 | categoryId | String | FK → Category (unique — one result per category) |
-| winnerId | String | FK → Nominee (the winner) |
+| winnerId | String | FK → Nominee (the primary winner) |
+| tiedWinnerId | String? | FK → Nominee — only set for tied categories. When set, either winner scores full points. |
 | setById | String | FK → User (who set this result) |
 | version | Int | Optimistic lock counter — increment on each update |
 | createdAt | DateTime | |
@@ -199,13 +201,16 @@ Tracks who set the winner for each category, with optimistic concurrency control
 
 **Design note**: The `version` field enables optimistic concurrency control. When updating or clearing a result, the client sends the `version` it last saw. If the server's version differs, it means someone else updated the result in the meantime, and a conflict error is returned with details about who changed it and what they set. This prevents two authorized users from unknowingly overwriting each other's result entries.
 
-**Clearing results**: A result can be deleted via `DELETE /api/results` (with `expectedVersion` for conflict safety). This removes the `CategoryResult` row, clears `Category.winnerId`, and resets `Nominee.isWinner` — all atomically in a transaction. This is for correcting results entered in error. See `src/lib/results/unset-result.ts`.
+**Tied results**: When a category is a tie (rare — has happened historically), set both `winnerId` and `tiedWinnerId`. Both must be distinct nominees from the same category. Scoring treats them symmetrically — a prediction matching either tied winner earns the same points as a normal correct prediction. Both nominees have `Nominee.isWinner = true`.
+
+**Clearing results**: A result can be deleted via `DELETE /api/results` (with `expectedVersion` for conflict safety). This removes the `CategoryResult` row, clears `Category.winnerId` and `Category.tiedWinnerId`, and resets `Nominee.isWinner` — all atomically in a transaction. This is for correcting results entered in error. See `src/lib/results/unset-result.ts`.
 
 **Permission model**: Users with `ADMIN` or `RESULTS_MANAGER` role in *any* pool for the ceremony can set or clear results. Pool creators (ADMIN) can grant/revoke the `RESULTS_MANAGER` role to other pool members.
 
 **Cross-entity validation** (enforced in application logic):
 - `winnerId` must reference a Nominee where `nominee.categoryId == categoryResult.categoryId`
-- This is validated in `src/lib/results/set-result.ts` before the database write.
+- `tiedWinnerId` (when set) must also belong to the same category and differ from `winnerId`
+- These are validated in `src/lib/results/set-result.ts` before the database write.
 
 ## Scoring Algorithm
 
@@ -213,15 +218,30 @@ Computed at read time (not stored), keeping the DB simple:
 
 ```
 For each category:
-  if prediction.firstChoice == category.winner:
+  winner = category.winner  (or null if not yet announced)
+  tiedWinner = category.tiedWinner  (or null for non-tied categories)
+
+  firstChoiceWins = (prediction.firstChoice == winner)
+                 OR (tiedWinner != null AND prediction.firstChoice == tiedWinner)
+
+  runnerUpWins   = (prediction.runnerUp == winner)
+                OR (tiedWinner != null AND prediction.runnerUp == tiedWinner)
+
+  if firstChoiceWins:
     points += category.pointValue
-  else if prediction.runnerUp == category.winner:
+  else if runnerUpWins:
     points += Math.round(category.pointValue * category.runnerUpMultiplier)
 
 Total score = sum of points across all categories
 ```
 
 > `Math.round()` on the runner-up calculation prevents floating-point imprecision (e.g. `180 * 0.6 → 107.999…`) from producing non-integer leaderboard scores.
+
+### Tied Categories
+
+When a category results in a tie (e.g., two nominees share an award), both `Category.winnerId` and `Category.tiedWinnerId` are set. The scoring rule is symmetric: a prediction matching either tied winner earns the same points as a normal correct prediction. There is no partial credit or penalty for ties — either winner is a full win.
+
+**Example**: Best Costume Design 1968 was a tie. A player who predicted either winner as their first choice would receive 30 points (Tier 3). A player who predicted either tied winner as their runner-up would receive 18 points.
 
 Leaderboard = all pool members sorted by total score descending.
 
@@ -280,6 +300,7 @@ These constraints cannot be expressed in the Prisma schema and must be enforced 
 | `firstChoiceId != runnerUpId` | Prediction | Prediction save server action |
 | Nominee belongs to prediction's category | Prediction | Prediction save server action |
 | Winner belongs to result's category | CategoryResult | `src/lib/results/set-result.ts` |
+| Tied winner belongs to same category and differs from primary winner | CategoryResult | `src/lib/results/set-result.ts` |
 | Version match on result clear | CategoryResult | `src/lib/results/unset-result.ts` |
 | Pool access: INVITE_ONLY → OPEN only | Pool | Pool settings server action |
 | No predictions when `predictionsLocked = true` | Prediction | Prediction save server action |

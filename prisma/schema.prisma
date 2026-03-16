@@ -90,8 +90,10 @@ model Category {
   pointValue        Int    @default(10)
   runnerUpMultiplier Float  @default(0.6)
 
-  // The official winner — set via CategoryResult flow
-  winnerId String?
+  // The official winner — set via CategoryResult flow.
+  // For ties, both winnerId and tiedWinnerId are set; either match scores full points.
+  winnerId     String?
+  tiedWinnerId String? // Null for normal results; set only when the category is a tie
 
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
@@ -100,6 +102,7 @@ model Category {
 
   ceremonyYear CeremonyYear     @relation(fields: [ceremonyYearId], references: [id], onDelete: Cascade)
   winner       Nominee?         @relation("CategoryWinner", fields: [winnerId], references: [id])
+  tiedWinner   Nominee?         @relation("CategoryTiedWinner", fields: [tiedWinnerId], references: [id])
   nominees     Nominee[]        @relation("CategoryNominees")
   predictions  Prediction[]
   results      CategoryResult[]
@@ -114,14 +117,18 @@ model Nominee {
   name       String // Movie title or person name
   subtitle   String? // e.g., movie name for actor categories
   imageUrl   String?
-  isWinner   Boolean @default(false) // Denormalized flag
+  // Denormalized flag: true when this nominee is a winner (or tied winner) for their category.
+  // Kept in sync atomically by syncWinner() in set-result.ts.
+  isWinner   Boolean @default(false)
   createdAt  DateTime @default(now())
 
-  category            Category     @relation("CategoryNominees", fields: [categoryId], references: [id], onDelete: Cascade)
-  wonCategories       Category[]   @relation("CategoryWinner")
-  firstChoicePicks    Prediction[] @relation("FirstChoice")
-  runnerUpPicks       Prediction[] @relation("RunnerUp")
-  categoryResults     CategoryResult[]
+  category               Category         @relation("CategoryNominees", fields: [categoryId], references: [id], onDelete: Cascade)
+  wonCategories          Category[]       @relation("CategoryWinner")
+  tiedWonCategories      Category[]       @relation("CategoryTiedWinner")
+  firstChoicePicks       Prediction[]     @relation("FirstChoice")
+  runnerUpPicks          Prediction[]     @relation("RunnerUp")
+  categoryResults        CategoryResult[] @relation("CategoryResultWinner")
+  categoryResultsTied    CategoryResult[] @relation("CategoryResultTiedWinner")
 
   @@unique([categoryId, name])
 }
@@ -224,16 +231,21 @@ model Prediction {
 /// Tracks who set each category's winner, with optimistic concurrency control.
 /// Results are global per ceremony (not per-pool), but permissions to set
 /// results are granted at the pool level.
+///
+/// Ties: when a category results in a tie, both winnerId and tiedWinnerId are
+/// set. Either match scores full points. tiedWinnerId is null for normal results.
 model CategoryResult {
-  id         String   @id @default(cuid())
-  categoryId String   @unique // One result per category (global per ceremony)
-  winnerId   String
-  setById    String   // Who set this result
-  version    Int      @default(1) // Optimistic lock — increment on each update
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id           String   @id @default(cuid())
+  categoryId   String   @unique // One result per category (global per ceremony)
+  winnerId     String
+  tiedWinnerId String?  // Null for normal results; set only for tied categories
+  setById      String   // Who set this result
+  version      Int      @default(1) // Optimistic lock — increment on each update
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  winner   Nominee  @relation(fields: [winnerId], references: [id])
-  setBy    User     @relation("ResultSetBy", fields: [setById], references: [id])
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  winner     Nominee  @relation("CategoryResultWinner", fields: [winnerId], references: [id])
+  tiedWinner Nominee? @relation("CategoryResultTiedWinner", fields: [tiedWinnerId], references: [id])
+  setBy      User     @relation("ResultSetBy", fields: [setById], references: [id])
 }

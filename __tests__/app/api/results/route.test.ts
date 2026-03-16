@@ -197,6 +197,54 @@ describe("POST /api/results", () => {
     const res = await POST(req)
     expect(res.status).toBe(400)
   })
+
+  // ─── Tied winner tests ───────────────────────────────────────────────────────
+
+  it("returns 200 when tiedWinnerId is provided with a valid tied result", async () => {
+    const req = makeRequest("POST", "http://localhost/api/results", {
+      categoryId: "cat-1",
+      winnerId: "nom-1",
+      tiedWinnerId: "nom-2",
+      expectedVersion: null,
+    })
+    const res = await POST(req)
+    expect(res.status).toBe(200)
+    expect(mockSetResult).toHaveBeenCalledWith(
+      "user-1",
+      expect.objectContaining({
+        categoryId: "cat-1",
+        winnerId: "nom-1",
+        tiedWinnerId: "nom-2",
+      })
+    )
+  })
+
+  it("returns 400 on INVALID_TIED_NOMINEE", async () => {
+    mockSetResult.mockResolvedValue({
+      success: false,
+      error: { code: "INVALID_TIED_NOMINEE", message: "Tied nominee same as primary" },
+    })
+    const req = makeRequest("POST", "http://localhost/api/results", {
+      categoryId: "cat-1",
+      winnerId: "nom-1",
+      tiedWinnerId: "nom-1", // same — server returns INVALID_TIED_NOMINEE
+    })
+    const res = await POST(req)
+    expect(res.status).toBe(400)
+  })
+
+  it("passes tiedWinnerId: null when tiedWinnerId is omitted (normal result)", async () => {
+    const req = makeRequest("POST", "http://localhost/api/results", {
+      categoryId: "cat-1",
+      winnerId: "nom-1",
+      expectedVersion: null,
+    })
+    await POST(req)
+    expect(mockSetResult).toHaveBeenCalledWith(
+      "user-1",
+      expect.objectContaining({ tiedWinnerId: null })
+    )
+  })
 })
 
 describe("DELETE /api/results", () => {

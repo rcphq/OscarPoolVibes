@@ -3,7 +3,9 @@ import type { CategoryResultView } from "@/types/results";
 
 /**
  * Get all results for a ceremony year.
- * Returns every category with its winner (if set) and who set it.
+ * Returns every category with its winner(s) (if set) and who set it.
+ *
+ * Tied categories will have both tiedWinnerId and tiedWinnerName populated.
  */
 export async function getResultsByCeremony(
   ceremonyYearId: string
@@ -15,6 +17,7 @@ export async function getResultsByCeremony(
       results: {
         include: {
           winner: { select: { name: true } },
+          tiedWinner: { select: { name: true } },
           setBy: { select: { name: true } },
         },
       },
@@ -28,6 +31,8 @@ export async function getResultsByCeremony(
       categoryName: category.name,
       winnerId: result?.winnerId ?? null,
       winnerName: result?.winner.name ?? null,
+      tiedWinnerId: result?.tiedWinnerId ?? null,
+      tiedWinnerName: result?.tiedWinner?.name ?? null,
       setByName: result?.setBy.name ?? null,
       version: result?.version ?? 0,
       updatedAt: result?.updatedAt.toISOString() ?? null,
@@ -38,6 +43,8 @@ export async function getResultsByCeremony(
 /**
  * Get the result for a single category.
  * Includes full conflict-resolution detail (version, who set it, when).
+ *
+ * Tied categories will have both tiedWinnerId and tiedWinnerName populated.
  */
 export async function getResultByCategory(
   categoryId: string
@@ -48,6 +55,7 @@ export async function getResultByCategory(
       results: {
         include: {
           winner: { select: { name: true } },
+          tiedWinner: { select: { name: true } },
           setBy: { select: { name: true } },
         },
       },
@@ -64,6 +72,8 @@ export async function getResultByCategory(
     categoryName: category.name,
     winnerId: result?.winnerId ?? null,
     winnerName: result?.winner.name ?? null,
+    tiedWinnerId: result?.tiedWinnerId ?? null,
+    tiedWinnerName: result?.tiedWinner?.name ?? null,
     setByName: result?.setBy.name ?? null,
     version: result?.version ?? 0,
     updatedAt: result?.updatedAt.toISOString() ?? null,
