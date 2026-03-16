@@ -37,6 +37,7 @@ const makeLeaderboardInput = (userId: string, userName: string, categoryIds: str
     pointValue: 10,
     runnerUpMultiplier: 0.6,
     winnerId: null,
+    tiedWinnerId: null,
     firstChoiceId: `${catId}-nom-1`,
     runnerUpId: `${catId}-nom-2`,
   })),

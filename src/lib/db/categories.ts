@@ -10,6 +10,7 @@ export async function getCategoriesByCeremonyYear(ceremonyYearId: string) {
       pointValue: true,
       runnerUpMultiplier: true,
       winnerId: true,
+      tiedWinnerId: true,
       winner: {
         select: { id: true, name: true },
       },
@@ -28,6 +29,7 @@ export async function getCategoriesWithNominees(ceremonyYearId: string) {
       pointValue: true,
       runnerUpMultiplier: true,
       winnerId: true,
+      tiedWinnerId: true,
       winner: {
         select: { id: true, name: true },
       },

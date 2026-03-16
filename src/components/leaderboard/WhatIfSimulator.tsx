@@ -43,6 +43,7 @@ type WhatIfSimulatorProps = {
       pointValue: number;
       runnerUpMultiplier: number;
       winnerId: string | null;
+      tiedWinnerId: string | null;
       firstChoiceId: string;
       runnerUpId: string;
     }>;
