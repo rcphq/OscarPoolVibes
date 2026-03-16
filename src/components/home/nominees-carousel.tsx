@@ -142,9 +142,9 @@ export function NomineesCarousel({ categories }: NomineesCarouselProps) {
                     : "text-sm text-foreground/80"
                 }
               >
-                {/* Star badge visible only on the winning nominee */}
+                {/* Star badge — decorative; heading + gold colour already convey winner status */}
                 {isWinner && (
-                  <span aria-label="Winner" className="shrink-0 text-gold-400">
+                  <span aria-hidden="true" className="shrink-0 text-gold-400">
                     ★
                   </span>
                 )}

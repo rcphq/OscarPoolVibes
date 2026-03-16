@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **ui:** Home page carousel heading switches to "And the winners are…" per-category once a winner is recorded; categories without a winner continue to show "And the nominees are…"
+- **ui:** Winning nominee row highlighted with gold shimmer animation, glow-pulse, and ★ badge (decorative, `aria-hidden`)
+
+### Changed
+
+- **docs:** ADR-8 updated to reflect polling-based live leaderboard (`LeaderboardAutoRefresh`, 15s interval, tab-visibility pause) — was incorrectly described as "no real-time features"
+- **docs:** Runner-up multiplier corrected to `0.6` (default) in `TESTING.md` and `USE_CASES.md` — was incorrectly documented as `0.5`
+- **docs:** `LeaderboardAutoRefresh` and `ResultsEntryForm` added to component tree in `ARCHITECTURE.md`
+
+---
+
 ## [0.3.0] - 2026-03-15
 
 ### Added
