@@ -36,6 +36,7 @@ type CategoryWithNominees = {
 type ExistingResult = {
   categoryId: string;
   winnerId: string;
+  tiedWinnerId: string | null;
   version: number;
   setBy: { name: string | null };
   updatedAt: string;
@@ -55,41 +56,90 @@ export function ResultsEntryForm({
   categories,
   existingResults: initialResults,
 }: ResultsEntryFormProps) {
-  // Track the current results state (updated after successful API calls)
   const [results, setResults] = useState<Record<string, ExistingResult>>(
     () => {
       const map: Record<string, ExistingResult> = {};
+      for (const r of initialResults) map[r.categoryId] = r;
+      return map;
+    }
+  );
+
+  const [selections, setSelections] = useState<Record<string, string>>(() => {
+    const map: Record<string, string> = {};
+    for (const r of initialResults) map[r.categoryId] = r.winnerId;
+    return map;
+  });
+
+  const [tiedSelections, setTiedSelections] = useState<Record<string, string>>(
+    () => {
+      const map: Record<string, string> = {};
       for (const r of initialResults) {
-        map[r.categoryId] = r;
+        if (r.tiedWinnerId) map[r.categoryId] = r.tiedWinnerId;
       }
       return map;
     }
   );
 
-  // Track selected nominee per category (for the dropdown)
-  const [selections, setSelections] = useState<Record<string, string>>(() => {
-    const map: Record<string, string> = {};
+  const [isTie, setIsTie] = useState<Record<string, boolean>>(() => {
+    const map: Record<string, boolean> = {};
     for (const r of initialResults) {
-      map[r.categoryId] = r.winnerId;
+      if (r.tiedWinnerId) map[r.categoryId] = true;
     }
     return map;
   });
 
-  // Track loading/feedback state per category
   const [statuses, setStatuses] = useState<Record<string, CategoryStatus>>({});
 
   const decidedCount = Object.keys(results).length;
 
+  const clearFeedback = useCallback((categoryId: string) => {
+    setStatuses((prev) => ({
+      ...prev,
+      [categoryId]: { loading: false, feedback: null },
+    }));
+  }, []);
+
   const handleSelectionChange = useCallback(
     (categoryId: string, nomineeId: string) => {
       setSelections((prev) => ({ ...prev, [categoryId]: nomineeId }));
-      // Clear feedback when selection changes
-      setStatuses((prev) => ({
-        ...prev,
-        [categoryId]: { loading: false, feedback: null },
-      }));
+      // Clear tied selection if it now matches the new primary
+      setTiedSelections((prev) => {
+        if (prev[categoryId] === nomineeId) {
+          const next = { ...prev };
+          delete next[categoryId];
+          return next;
+        }
+        return prev;
+      });
+      clearFeedback(categoryId);
     },
-    []
+    [clearFeedback]
+  );
+
+  const handleTiedSelectionChange = useCallback(
+    (categoryId: string, nomineeId: string) => {
+      setTiedSelections((prev) => ({ ...prev, [categoryId]: nomineeId }));
+      clearFeedback(categoryId);
+    },
+    [clearFeedback]
+  );
+
+  const handleTieToggle = useCallback(
+    (categoryId: string) => {
+      setIsTie((prev) => {
+        const enabling = !prev[categoryId];
+        if (!enabling) {
+          setTiedSelections((ts) => {
+            const next = { ...ts };
+            delete next[categoryId];
+            return next;
+          });
+        }
+        return { ...prev, [categoryId]: enabling };
+      });
+      clearFeedback(categoryId);
+    },
+    [clearFeedback]
   );
 
   const handleSetWinner = useCallback(
@@ -97,10 +147,13 @@ export function ResultsEntryForm({
       const winnerId = selections[categoryId];
       if (!winnerId) return;
 
+      const tieActive = isTie[categoryId] ?? false;
+      const tiedWinnerId = tieActive ? (tiedSelections[categoryId] ?? null) : null;
+      if (tieActive && !tiedWinnerId) return;
+
       const existing = results[categoryId];
       const expectedVersion = existing ? existing.version : null;
 
-      // Set loading
       setStatuses((prev) => ({
         ...prev,
         [categoryId]: { loading: true, feedback: null },
@@ -110,40 +163,48 @@ export function ResultsEntryForm({
         const response = await fetch("/api/results", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ categoryId, winnerId, expectedVersion }),
+          body: JSON.stringify({
+            categoryId,
+            winnerId,
+            tiedWinnerId,
+            expectedVersion,
+          }),
         });
 
         const data = await response.json();
 
         if (response.ok && data.success) {
-          // Update local results state
           const category = categories.find((c) => c.id === categoryId);
           const nominee = category?.nominees.find((n) => n.id === winnerId);
+          const tiedNominee = tiedWinnerId
+            ? category?.nominees.find((n) => n.id === tiedWinnerId)
+            : null;
 
           setResults((prev) => ({
             ...prev,
             [categoryId]: {
               categoryId,
               winnerId,
+              tiedWinnerId,
               version: data.version,
               setBy: { name: "You" },
               updatedAt: new Date().toISOString(),
             },
           }));
 
+          const successMsg = tiedNominee
+            ? `Tie set: ${nominee?.name ?? "Unknown"} & ${tiedNominee.name}`
+            : `Winner set: ${nominee?.name ?? "Unknown"}`;
+
           setStatuses((prev) => ({
             ...prev,
             [categoryId]: {
               loading: false,
-              feedback: {
-                type: "success",
-                message: `Winner set: ${nominee?.name ?? "Unknown"}`,
-              },
+              feedback: { type: "success", message: successMsg },
             },
           }));
-          toast.success(`Winner set: ${nominee?.name ?? "Unknown"}`);
+          toast.success(successMsg);
         } else if (response.status === 409) {
-          // Conflict — update local state with server's current result
           const conflict = data.error?.currentResult;
           if (conflict) {
             setResults((prev) => ({
@@ -151,6 +212,7 @@ export function ResultsEntryForm({
               [categoryId]: {
                 categoryId,
                 winnerId: conflict.winnerId,
+                tiedWinnerId: conflict.tiedWinnerId ?? null,
                 version: conflict.version,
                 setBy: { name: conflict.setByName },
                 updatedAt:
@@ -159,12 +221,22 @@ export function ResultsEntryForm({
                     : new Date(conflict.updatedAt).toISOString(),
               },
             }));
-            setSelections((prev) => ({
-              ...prev,
-              [categoryId]: conflict.winnerId,
-            }));
+            setSelections((prev) => ({ ...prev, [categoryId]: conflict.winnerId }));
+            if (conflict.tiedWinnerId) {
+              setTiedSelections((prev) => ({
+                ...prev,
+                [categoryId]: conflict.tiedWinnerId,
+              }));
+              setIsTie((prev) => ({ ...prev, [categoryId]: true }));
+            } else {
+              setTiedSelections((prev) => {
+                const next = { ...prev };
+                delete next[categoryId];
+                return next;
+              });
+              setIsTie((prev) => ({ ...prev, [categoryId]: false }));
+            }
           }
-
           setStatuses((prev) => ({
             ...prev,
             [categoryId]: {
@@ -195,15 +267,12 @@ export function ResultsEntryForm({
           ...prev,
           [categoryId]: {
             loading: false,
-            feedback: {
-              type: "error",
-              message: "Network error. Please try again.",
-            },
+            feedback: { type: "error", message: "Network error. Please try again." },
           },
         }));
       }
     },
-    [selections, results, categories]
+    [selections, tiedSelections, isTie, results, categories]
   );
 
   const handleClearWinner = useCallback(
@@ -239,6 +308,12 @@ export function ResultsEntryForm({
             delete next[categoryId];
             return next;
           });
+          setTiedSelections((prev) => {
+            const next = { ...prev };
+            delete next[categoryId];
+            return next;
+          });
+          setIsTie((prev) => ({ ...prev, [categoryId]: false }));
           setStatuses((prev) => ({
             ...prev,
             [categoryId]: {
@@ -255,6 +330,7 @@ export function ResultsEntryForm({
               [categoryId]: {
                 categoryId,
                 winnerId: conflict.winnerId,
+                tiedWinnerId: conflict.tiedWinnerId ?? null,
                 version: conflict.version,
                 setBy: { name: conflict.setByName },
                 updatedAt:
@@ -263,10 +339,7 @@ export function ResultsEntryForm({
                     : new Date(conflict.updatedAt).toISOString(),
               },
             }));
-            setSelections((prev) => ({
-              ...prev,
-              [categoryId]: conflict.winnerId,
-            }));
+            setSelections((prev) => ({ ...prev, [categoryId]: conflict.winnerId }));
           }
           setStatuses((prev) => ({
             ...prev,
@@ -298,10 +371,7 @@ export function ResultsEntryForm({
           ...prev,
           [categoryId]: {
             loading: false,
-            feedback: {
-              type: "error",
-              message: "Network error. Please try again.",
-            },
+            feedback: { type: "error", message: "Network error. Please try again." },
           },
         }));
       }
@@ -325,18 +395,36 @@ export function ResultsEntryForm({
       {categories.map((category) => {
         const result = results[category.id];
         const selectedNomineeId = selections[category.id] ?? "";
+        const selectedTiedId = tiedSelections[category.id] ?? "";
+        const tieActive = isTie[category.id] ?? false;
         const status = statuses[category.id];
         const isLoading = status?.loading ?? false;
 
-        // Determine if selected value differs from current winner
+        const currentTiedWinnerId = result?.tiedWinnerId ?? null;
+        const selectedTiedOrNull = tieActive ? (selectedTiedId || null) : null;
+
         const hasChanged =
           selectedNomineeId !== "" &&
-          selectedNomineeId !== (result?.winnerId ?? "");
+          (selectedNomineeId !== (result?.winnerId ?? "") ||
+            selectedTiedOrNull !== currentTiedWinnerId);
 
-        // Find the current winner nominee for display
+        const canSubmit =
+          !isLoading &&
+          selectedNomineeId !== "" &&
+          hasChanged &&
+          (!tieActive || selectedTiedId !== "");
+
         const winnerNominee = result
           ? category.nominees.find((n) => n.id === result.winnerId)
           : null;
+        const tiedWinnerNominee = result?.tiedWinnerId
+          ? category.nominees.find((n) => n.id === result.tiedWinnerId)
+          : null;
+
+        // Tied dropdown excludes the primary selection
+        const tiedNomineeOptions = category.nominees.filter(
+          (n) => n.id !== selectedNomineeId
+        );
 
         return (
           <Card key={category.id} className="border-border/50">
@@ -353,7 +441,7 @@ export function ResultsEntryForm({
                 {result && (
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-gold-500/20 px-3 py-1 text-xs font-semibold text-gold-300">
                     <Trophy className="size-3" />
-                    Decided
+                    {result.tiedWinnerId ? "Tie" : "Decided"}
                   </span>
                 )}
               </div>
@@ -364,7 +452,7 @@ export function ResultsEntryForm({
               {result && winnerNominee ? (
                 <div className="rounded-lg border border-gold-500/30 bg-gold-500/10 px-4 py-3">
                   <div className="flex items-center justify-between">
-                    <div>
+                    <div className="space-y-1">
                       <div className="flex items-center gap-2">
                         <Trophy className="size-4 text-gold-400" />
                         <span className="font-semibold text-gold-300">
@@ -376,6 +464,20 @@ export function ResultsEntryForm({
                           </span>
                         )}
                       </div>
+                      {tiedWinnerNominee && (
+                        <div className="flex items-center gap-2">
+                          <Trophy className="size-4 text-gold-400" />
+                          <span className="font-semibold text-gold-300">
+                            {tiedWinnerNominee.name}
+                          </span>
+                          {tiedWinnerNominee.subtitle && (
+                            <span className="text-sm text-gold-400/70">
+                              &mdash; {tiedWinnerNominee.subtitle}
+                            </span>
+                          )}
+                          <span className="text-xs text-gold-400/60">(tie)</span>
+                        </div>
+                      )}
                       <p className="mt-1 text-xs text-muted-foreground">
                         Set by {result.setBy.name ?? "Unknown"} &middot;{" "}
                         {formatDate(result.updatedAt)}
@@ -400,63 +502,118 @@ export function ResultsEntryForm({
               )}
 
               {/* Winner selection */}
-              <div className="flex items-end gap-3">
-                <div className="flex-1 space-y-1.5">
-                  <label
-                    htmlFor={`winner-${category.id}`}
-                    className="text-sm font-medium text-muted-foreground"
-                  >
-                    {result ? "Change winner" : "Select winner"}
-                  </label>
-                  <Select
-                    value={selectedNomineeId}
-                    onValueChange={(value) =>
-                      handleSelectionChange(category.id, value)
-                    }
-                    disabled={isLoading}
-                  >
-                    <SelectTrigger
-                      id={`winner-${category.id}`}
-                      className="w-full"
+              <div className="space-y-3">
+                <div className="flex items-end gap-3">
+                  <div className="flex-1 space-y-1.5">
+                    <label
+                      htmlFor={`winner-${category.id}`}
+                      className="text-sm font-medium text-muted-foreground"
                     >
-                      <SelectValue placeholder="Select nominee..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {category.nominees.map((nominee) => (
-                        <SelectItem key={nominee.id} value={nominee.id}>
-                          <span>
-                            {nominee.name}
-                            {nominee.subtitle && (
-                              <span className="text-muted-foreground">
-                                {" "}
-                                &mdash; {nominee.subtitle}
-                              </span>
-                            )}
-                          </span>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                      {result ? "Change winner" : "Select winner"}
+                    </label>
+                    <Select
+                      value={selectedNomineeId}
+                      onValueChange={(value) =>
+                        handleSelectionChange(category.id, value)
+                      }
+                      disabled={isLoading}
+                    >
+                      <SelectTrigger
+                        id={`winner-${category.id}`}
+                        className="w-full"
+                      >
+                        <SelectValue placeholder="Select nominee..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {category.nominees.map((nominee) => (
+                          <SelectItem key={nominee.id} value={nominee.id}>
+                            <span>
+                              {nominee.name}
+                              {nominee.subtitle && (
+                                <span className="text-muted-foreground">
+                                  {" "}
+                                  &mdash; {nominee.subtitle}
+                                </span>
+                              )}
+                            </span>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <Button
+                    onClick={() => handleSetWinner(category.id)}
+                    disabled={!canSubmit}
+                    size="default"
+                    className="shrink-0"
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="size-4 animate-spin" />
+                        Setting...
+                      </>
+                    ) : (
+                      <>
+                        <Check className="size-4" />
+                        {tieActive ? "Set Tie" : "Set Winner"}
+                      </>
+                    )}
+                  </Button>
                 </div>
 
-                <Button
-                  onClick={() => handleSetWinner(category.id)}
-                  disabled={isLoading || !selectedNomineeId || !hasChanged}
-                  size="default"
-                  className="shrink-0"
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="size-4 animate-spin" />
-                      Setting...
-                    </>
-                  ) : (
-                    <>
-                      <Check className="size-4" />
-                      Set Winner
-                    </>
-                  )}
-                </Button>
+                {/* Tie toggle */}
+                <label className="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground">
+                  <input
+                    type="checkbox"
+                    checked={tieActive}
+                    onChange={() => handleTieToggle(category.id)}
+                    disabled={isLoading}
+                    className="size-4 rounded accent-gold-400"
+                  />
+                  This is a tie (two winners)
+                </label>
+
+                {/* Tied winner dropdown — shown when tie is active */}
+                {tieActive && (
+                  <div className="space-y-1.5">
+                    <label
+                      htmlFor={`tied-winner-${category.id}`}
+                      className="text-sm font-medium text-muted-foreground"
+                    >
+                      Tied with
+                    </label>
+                    <Select
+                      value={selectedTiedId}
+                      onValueChange={(value) =>
+                        handleTiedSelectionChange(category.id, value)
+                      }
+                      disabled={isLoading || !selectedNomineeId}
+                    >
+                      <SelectTrigger
+                        id={`tied-winner-${category.id}`}
+                        className="w-full"
+                      >
+                        <SelectValue placeholder="Select second winner..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {tiedNomineeOptions.map((nominee) => (
+                          <SelectItem key={nominee.id} value={nominee.id}>
+                            <span>
+                              {nominee.name}
+                              {nominee.subtitle && (
+                                <span className="text-muted-foreground">
+                                  {" "}
+                                  &mdash; {nominee.subtitle}
+                                </span>
+                              )}
+                            </span>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
               </div>
 
               {/* Per-category feedback */}
